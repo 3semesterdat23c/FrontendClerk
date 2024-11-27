@@ -16,3 +16,15 @@
     transform: translateY(-5px);
     transition: transform 0.2s;
 }
+
+/* Optional: Custom Modal Styling */
+.modal-content {
+    background-color: #f9f9f9;
+    border-radius: 10px;
+}
+.modal-header {
+    background-color: #007bff;
+    color: white;
+    border-bottom: 2px solid #0056b3;
+}
+
