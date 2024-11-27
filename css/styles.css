@@ -1,0 +1,18 @@
+/* styles.css */
+
+/* Adjust card image height */
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Customize card title font size */
+.card-title {
+    font-size: 1.5rem;
+}
+
+/* Add some hover effect to the cards */
+.card:hover {
+    transform: translateY(-5px);
+    transition: transform 0.2s;
+}

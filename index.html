@@ -3,24 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <title>Webshop SPA</title>
-    <!-- Include Bootstrap and Tailwind CSS if needed -->
+
+    <!-- Bootstrap CSS -->
+    <link
+            rel="stylesheet"
+            href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            integrity="sha384-LtrjvnR4+o6x5q8P1sOG6aJ6XjHJ49M0sWjZSWmZjK0rI3pK2C1mcaBXX3KMqc4z"
+            crossorigin="anonymous"
+    >
+
+    <!-- Custom CSS (optional) -->
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+
 <!-- Navigation Bar -->
-<nav>
-    <a href="#home" class="nav-link">Home</a>
-    <a href="#products" class="nav-link">Products</a>
-    <a href="#admin" class="nav-link">Admin</a>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Webshop SPA</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a href="#home" class="nav-link">Home</a>
+            </li>
+            <li class="nav-item">
+                <a href="#products" class="nav-link">Products</a>
+            </li>
+            <li class="nav-item">
+                <a href="#admin" class="nav-link">Admin</a>
+            </li>
+        </ul>
+    </div>
 </nav>
 
 <!-- Dynamic Content Area -->
 <div id="app">
     <!-- Content will be injected here -->
 </div>
-<div></div>
-<p>Hvad fanden</p>
 
 <!-- Main JavaScript File -->
 <script type="module" src="js/main.js"></script>
+
+<!-- Bootstrap JS and dependencies -->
+<script
+        src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXd4HIiF8FCAiY5jtMoNT7n6bw5j/w0jXrXefmbIxN6fbJ28cYj3qJ3YzXdy6AG"
+        crossorigin="anonymous"
+></script>
+<script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-kZnn8la0dB5+4Bjb3j+3vY2LDATKXgOm3uV5iCLJ+0PjXY6+KvF6uJvQFvG0bZwd"
+        crossorigin="anonymous"
+></script>
+
 </body>
 </html>
