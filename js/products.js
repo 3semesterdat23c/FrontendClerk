@@ -18,9 +18,9 @@ export function loadProducts() {
                     productsHTML += `
                         <div class="product-item card mb-3">
                             <div class="card-body">
-                                <h2 class="card-title">${product.productName}</h2>
-                                <p class="card-text">${product.productDescription}</p>
-                                <p class="card-text">Price: $${product.productPrice}</p>
+                                <h2 class="card-title">${product.name}</h2>
+                                <p class="card-text">${product.description}</p>
+                                <p class="card-text">Price: $${product.price}</p>
                                 <p class="card-text">In Stock: ${product.stockCount}</p>
                                 ${product.imageURL ? `<img src="${product.imageURL}" alt="${product.productName}" class="product-image"/>` : ''}
                             </div>
