@@ -1,106 +1,124 @@
-// products.js
-
 export function loadProducts(page = 0, size = 12) {
     const app = document.getElementById('app');
-    app.innerHTML = '<h1 class="text-center my-4">Loading products...</h1>';
+
+    // Clear previous content and show loading state
+    app.innerHTML = `
+        <div class="text-center my-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
 
     fetch(`http://localhost:8080/api/v1/products?page=${page}&size=${size}`)
         .then(response => {
             if (!response.ok) {
-                throw new Error(`Network response was not ok (${response.statusText})`);
+                throw new Error(`HTTP error! Status: ${response.status}`);
             }
             return response.json();
         })
-        .then(responseData => {
-            console.log('Fetched data:', responseData);
+        .then(renderProducts)
+        .catch(handleProductError);
+}
 
-            // Extract products and pagination info
-            const products = responseData.content;
-            const totalPages = responseData.totalPages;
-            const currentPage = responseData.number;
+function renderProducts(responseData) {
+    const { content: products, totalPages, number: currentPage } = responseData;
 
-            if (!Array.isArray(products)) {
-                throw new Error('Products data is not an array.');
-            }
+    if (!Array.isArray(products)) {
+        throw new Error('Invalid product data');
+    }
 
-            let productsHTML = `
-                <h1 class="text-center my-4">Our Products</h1>
-                <div class="container">
-                    <div class="row">
-            `;
-            products.forEach(product => {
-                productsHTML += `
-                    <div class="col-md-4 d-flex align-items-stretch">
-                        <div class="card mb-4 shadow-sm">
-                            ${product.imageURL ? `<img src="${product.imageURL}" class="card-img-top" alt="${product.name}">` : ''}
-                            <div class="card-body">
-                                <h5 class="card-title">${product.name}</h5>
-                                <p class="card-text"><strong>Price:</strong> $${product.price}</p>
-                                <p class="card-text"><strong>In Stock:</strong> ${product.stockCount}</p>
-                                <a href="#" class="btn btn-primary">Buy Now</a>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            productsHTML += `
-                    </div>
-                </div>
-            `;
+    const productsHTML = createProductsHTML(products, currentPage, totalPages);
 
-            // Add pagination controls
-            productsHTML += `
-                <nav aria-label="Page navigation example">
-                  <ul class="pagination justify-content-center">
-                    <li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
-                      <a class="page-link" href="#" id="prevPage">Previous</a>
-                    </li>
-            `;
+    const app = document.getElementById('app');
+    app.innerHTML = productsHTML;
 
-            // Page number links
-            for (let i = 0; i < totalPages; i++) {
-                productsHTML += `
-                    <li class="page-item ${currentPage === i ? 'active' : ''}">
-                        <a class="page-link" href="#" data-page="${i}">${i + 1}</a>
-                    </li>
-                `;
-            }
+    attachPaginationListeners(currentPage, totalPages);
+}
 
-            productsHTML += `
-                    <li class="page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}">
-                      <a class="page-link" href="#" id="nextPage">Next</a>
-                    </li>
-                  </ul>
-                </nav>
-            `;
+function createProductsHTML(products, currentPage, totalPages) {
+    let html = `
+        <h1 class="text-center my-4">Our Products</h1>
+        <div class="container">
+            <div class="row">
+                ${products.map(product => createProductCard(product)).join('')}
+            </div>
+        </div>
+        ${createPaginationHTML(currentPage, totalPages)}
+    `;
+    return html;
+}
 
-            app.innerHTML = productsHTML;
+function createProductCard(product) {
+    return `
+    <div class="col-md-4 mb-4">
+    <div class="card h-100">
+        <!-- Image -->
+        <img src="${product.imageURL}" class="card-img-top" alt="${product.name}">
+        <!-- Card Body -->
+        <div class="card-body">
+            <h5 class="card-title">${product.name}</h5>
+            <p class="card-text"><strong>Price:</strong> $${product.price}</p>
+            <p class="card-text"><strong>In Stock:</strong> ${product.stockCount}</p>
+            <a href="#" class="btn btn-primary mt-auto">Buy Now</a>
+        </div>
+    </div>
+</div>
+    `;
+}
 
-            // Add event listeners for pagination buttons
-            if (currentPage > 0) {
-                document.getElementById('prevPage').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    loadProducts(currentPage - 1, size);
-                });
-            }
-            if (currentPage < totalPages - 1) {
-                document.getElementById('nextPage').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    loadProducts(currentPage + 1, size);
-                });
-            }
+function createPaginationHTML(currentPage, totalPages) {
+    return `
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
+                <a class="page-link" href="#" id="prevPage">Previous</a>
+            </li>
+            ${[...Array(totalPages)].map((_, i) => `
+                <li class="page-item ${currentPage === i ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">${i + 1}</a>
+                </li>
+            `).join('')}
+            <li class="page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" id="nextPage">Next</a>
+            </li>
+        </ul>
+    </nav>
+    `;
+}
 
-            // Event listeners for page number links
-            document.querySelectorAll('.page-link[data-page]').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const page = parseInt(e.target.getAttribute('data-page'));
-                    loadProducts(page, size);
-                });
-            });
-        })
-        .catch(error => {
-            app.innerHTML = '<p class="text-danger text-center">Error loading products.</p>';
-            console.error('Fetch error:', error);
+function attachPaginationListeners(currentPage, totalPages) {
+    const size = 12; // Match your default page size
+
+    if (currentPage > 0) {
+        document.getElementById('prevPage')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            loadProducts(currentPage - 1, size);
         });
+    }
+
+    if (currentPage < totalPages - 1) {
+        document.getElementById('nextPage')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            loadProducts(currentPage + 1, size);
+        });
+    }
+
+    document.querySelectorAll('.page-link[data-page]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const page = parseInt(e.target.getAttribute('data-page'));
+            loadProducts(page, size);
+        });
+    });
+}
+
+function handleProductError(error) {
+    const app = document.getElementById('app');
+    app.innerHTML = `
+        <div class="alert alert-danger text-center" role="alert">
+            Failed to load products. ${error.message}
+        </div>
+    `;
+    console.error('Product fetch error:', error);
 }

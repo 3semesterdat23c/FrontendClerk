@@ -1,23 +1,31 @@
-/* styles.css */
+.card {
+    display: flex;
+    flex-direction: column;
+}
 
-/* Adjust card image height */
 .card-img-top {
-    height: 200px;
+    width: 100%;
+    height: 250px;
     object-fit: cover;
 }
 
-/* Customize card title font size */
+.card-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
 .card-title {
-    font-size: 1.5rem;
+    flex-shrink: 0;
 }
 
-/* Add some hover effect to the cards */
-.card:hover {
-    transform: translateY(-5px);
-    transition: transform 0.2s;
+.card-text {
+    flex-grow: 1;
 }
 
-/* Optional: Custom Modal Styling */
+.card-body .btn {
+    margin-top: auto;
+}
 .modal-content {
     background-color: #f9f9f9;
     border-radius: 10px;
@@ -27,4 +35,3 @@
     color: white;
     border-bottom: 2px solid #0056b3;
 }
-
