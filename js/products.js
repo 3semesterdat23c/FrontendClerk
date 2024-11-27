@@ -35,7 +35,6 @@ export function loadProducts(page = 0, size = 12) {
                             ${product.imageURL ? `<img src="${product.imageURL}" class="card-img-top" alt="${product.name}">` : ''}
                             <div class="card-body">
                                 <h5 class="card-title">${product.name}</h5>
-                                <p class="card-text">${product.description}</p>
                                 <p class="card-text"><strong>Price:</strong> $${product.price}</p>
                                 <p class="card-text"><strong>In Stock:</strong> ${product.stockCount}</p>
                                 <a href="#" class="btn btn-primary">Buy Now</a>
