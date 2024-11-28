@@ -3,9 +3,8 @@
 import { loadHome } from './home.js';
 import { loadProducts, loadProductDetails } from './products.js';
 import { loadAdmin } from './admin.js';
-import { loadmyAccount } from "./myAccount.js";
-import { injectModals } from './profile.js';
-import {uiDropdownDynamicChangerForLoginAndLogout} from "./profile.js";
+import { injectModals, uiDropdownDynamicChangerForLoginAndLogout } from './profile.js';
+
 
 // Function to parse hash and extract route and query parameters
 function parseHash(hash) {
@@ -38,9 +37,6 @@ function navigate() {
             break;
         case 'admin':
             loadAdmin();
-            break;
-        case 'myAccount':
-            loadmyAccount();
             break;
         default:
             loadHome();

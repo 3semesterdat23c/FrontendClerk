@@ -1,4 +1,5 @@
-export function registerModalTemplate() {
+
+function registerModalTemplate() {
     return `
     <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -35,7 +36,7 @@ export function registerModalTemplate() {
     </div>`;
 }
 
-export function loginModalTemplate() {
+function loginModalTemplate() {
     return `
     <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -64,7 +65,7 @@ export function loginModalTemplate() {
     </div>`;
 }
 
-export function logoutUser() {
+function logoutUser() {
     // Clear user data from localStorage
     localStorage.removeItem('user');
 
@@ -85,8 +86,18 @@ export function logoutUser() {
     alert('You have been logged out.');
 }
 
+function loadmyAccount() {
+    console.log('load my account function called');
+    const app = document.getElementById('app');
+    app.innerHTML = `
+        <h1>My account page</h1>
+        <p>Welcome to our webshop!</p>
+    `;
+}
 
-export function updateUIForLoggedInUser(userData) {
+
+
+function updateUIForLoggedInUser(userData) {
     const accountDropdownContainer = document.getElementById('accountDropdownContainer');
     if (accountDropdownContainer) {
         // Replace content with logged-in dropdown
@@ -96,15 +107,25 @@ export function updateUIForLoggedInUser(userData) {
                 <img src="images/Shadowman.jpg" alt="User" style="width: 30px; height: 30px;">
             </a>
             <div class="dropdown-menu" aria-labelledby="userDropdown">
+                <button class="dropdown-item" id="myAccountButton">My Account</button>
                 <button class="dropdown-item" id="logoutButton">Logout</button>
             </div>
         `;
 
-        // Attach logout functionality
         const logoutButton = document.getElementById('logoutButton');
         if (logoutButton) {
             logoutButton.addEventListener('click', () => {
                 logoutUser();
+            });
+        }
+
+
+        // Attach logout functionality
+        const myAccountButton = document.getElementById('myAccountButton');
+        if (myAccountButton) {
+            myAccountButton.addEventListener('click', () => {
+
+                loadmyAccount();
             });
         }
     }
@@ -132,7 +153,7 @@ export function uiDropdownDynamicChangerForLoginAndLogout(){
 
 
 
-export function attachRegisterFormListener() {
+function attachRegisterFormListener() {
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
@@ -154,7 +175,7 @@ export function attachRegisterFormListener() {
 
             try {
                 // Make the POST request to the /register endpoint
-                const response = await fetch('http://localhost:8080/register', {
+                const response = await fetch('http://localhost:8080/api/v1/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -181,7 +202,7 @@ export function attachRegisterFormListener() {
     }
 }
 
-export function attachLoginFormListener() {
+function attachLoginFormListener() {
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
@@ -204,7 +225,7 @@ export function attachLoginFormListener() {
 
             try {
                 // Make the POST request to the /login endpoint
-                const response = await fetch('http://localhost:8080/login', {
+                const response = await fetch('http://localhost:8080/api/v1/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

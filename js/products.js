@@ -1,5 +1,6 @@
 // products.js
 
+
 export function loadProducts(page = 0, size = 12) {
     const app = document.getElementById('app');
 
