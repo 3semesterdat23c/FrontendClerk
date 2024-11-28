@@ -1,3 +1,4 @@
+import {loadmyAccount} from "./myAccount.js";
 
 function registerModalTemplate() {
     return `
@@ -85,17 +86,6 @@ function logoutUser() {
 
     alert('You have been logged out.');
 }
-
-function loadmyAccount() {
-    console.log('load my account function called');
-    const app = document.getElementById('app');
-    app.innerHTML = `
-        <h1>My account page</h1>
-        <p>Welcome to our webshop!</p>
-    `;
-}
-
-
 
 function updateUIForLoggedInUser(userData) {
     const accountDropdownContainer = document.getElementById('accountDropdownContainer');
