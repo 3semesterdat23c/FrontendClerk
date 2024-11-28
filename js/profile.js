@@ -64,6 +64,74 @@ export function loginModalTemplate() {
     </div>`;
 }
 
+export function logoutUser() {
+    // Clear user data from localStorage
+    localStorage.removeItem('user');
+
+    // Reset dropdown content for logged-out state
+    const accountDropdownContainer = document.getElementById('accountDropdownContainer');
+    if (accountDropdownContainer) {
+        accountDropdownContainer.innerHTML = `
+            <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <img src="images/Shadowman.jpg" alt="Account" style="width: 30px; height: 30px;">
+            </a>
+            <div class="dropdown-menu" aria-labelledby="accountDropdown">
+                <button class="dropdown-item" data-toggle="modal" data-target="#loginModal">Login</button>
+                <button class="dropdown-item" data-toggle="modal" data-target="#registerModal">Register</button>
+            </div>
+        `;
+    }
+
+    alert('You have been logged out.');
+}
+
+
+export function updateUIForLoggedInUser(userData) {
+    const accountDropdownContainer = document.getElementById('accountDropdownContainer');
+    if (accountDropdownContainer) {
+        // Replace content with logged-in dropdown
+        accountDropdownContainer.innerHTML = `
+            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                ${userData}
+                <img src="images/Shadowman.jpg" alt="User" style="width: 30px; height: 30px;">
+            </a>
+            <div class="dropdown-menu" aria-labelledby="userDropdown">
+                <button class="dropdown-item" id="logoutButton">Logout</button>
+            </div>
+        `;
+
+        // Attach logout functionality
+        const logoutButton = document.getElementById('logoutButton');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', () => {
+                logoutUser();
+            });
+        }
+    }
+}
+
+
+export function uiDropdownDynamicChangerForLoginAndLogout(){
+    const user = JSON.parse(localStorage.getItem('user'));
+    const accountDropdownContainer = document.getElementById('accountDropdownContainer');
+
+    if (user && user.email) {
+        updateUIForLoggedInUser(user); // Show logged-in dropdown
+    } else if (accountDropdownContainer) {
+        accountDropdownContainer.innerHTML = `
+            <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <img src="images/Shadowman.jpg" alt="Account" style="width: 30px; height: 30px;">
+            </a>
+            <div class="dropdown-menu" aria-labelledby="accountDropdown">
+                <button class="dropdown-item" data-toggle="modal" data-target="#loginModal">Login</button>
+                <button class="dropdown-item" data-toggle="modal" data-target="#registerModal">Register</button>
+            </div>
+        `;
+    }
+}
+
+
+
 export function attachRegisterFormListener() {
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
@@ -127,7 +195,6 @@ export function attachLoginFormListener() {
             const password = document.getElementById('loginPassword').value;
 
             console.log('Email:', email);
-            console.log('Password:', password);
 
             // Construct the login data object
             const loginRequestDTO = {
@@ -145,15 +212,21 @@ export function attachLoginFormListener() {
                     body: JSON.stringify(loginRequestDTO),
                 });
 
-                // Handle the response
                 if (response.ok) {
-                    const message = await response.text(); // Read the response body
-                    alert('Login successful: ' + message); // Notify the user of successful login
-                    console.log('Login response:', message);
+                    const resData = await response.json(); // Parse JSON response
+                    console.log('Login response:', resData);
+
+                    // Save user data (e.g., email and token) in localStorage
+                    localStorage.setItem('user', JSON.stringify(resData));
+                    alert('Login successful! Welcome, ' + loginRequestDTO.email);
+
+                    // Update UI based on login state
+                    updateUIForLoggedInUser(loginRequestDTO.email);
+
                     $('#loginModal').modal('hide'); // Close the login modal
                 } else if (response.status === 401) {
                     const errorMessage = await response.text();
-                    alert('Invalid credentials: ' + errorMessage); // Notify the user about invalid credentials
+                    alert('Invalid credentials: ' + errorMessage); // Notify the user
                 } else {
                     const errorMessage = await response.text();
                     console.error('Unexpected response:', errorMessage);
@@ -168,6 +241,8 @@ export function attachLoginFormListener() {
         console.error('Login form not found');
     }
 }
+
+
 
 
 
