@@ -27,6 +27,18 @@
     margin-top: auto;
 }
 
+/* Optional: Adjust the shadow man icon size */
+.nav-item.dropdown img {
+    border-radius: 50%; /* Makes the icon circular */
+    cursor: pointer;
+}
+
+/* Optional: Add hover effects */
+.nav-item.dropdown .dropdown-menu {
+    transition: all 0.3s ease-in-out;
+}
+
+
 .modal-content {
     background-color: #f9f9f9;
     border-radius: 10px;
