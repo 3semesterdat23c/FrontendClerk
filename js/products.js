@@ -59,9 +59,9 @@ function renderProducts(responseData) {
     const app = document.getElementById('app');
     app.innerHTML = productsHTML;
 
-    attachPaginationListeners(currentPage, totalPages);
-    attachProductImageListeners(); // Attach event listeners to product images
+    attachActionListeners(); // Attach event listeners to product images and delete buttons
 }
+
 
 function createProductsHTML(products, currentPage, totalPages) {
     return `
@@ -87,12 +87,16 @@ function createProductCard(product) {
                     <h5 class="card-title">${product.name}</h5>
                     <p class="card-text"><strong>Price:</strong> $${product.price}</p>
                     <p class="card-text"><strong>In Stock:</strong> ${product.stockCount}</p>
-                    <a href="#" class="btn btn-primary mt-auto">Buy Now</a>
+                    <div class="mt-auto">
+                        <a href="#" class="btn btn-primary me-2">Buy Now</a>
+                        <button class="btn btn-danger delete-button" data-id="${product.productId}">Delete</button>
+                    </div>
                 </div>
             </div>
         </div>
     `;
 }
+
 
 function createPaginationHTML(currentPage, totalPages) {
     return `
@@ -119,7 +123,8 @@ function attachPaginationListeners(currentPage, totalPages) {
     // Pagination links already update the hash, which triggers navigation
 }
 
-function attachProductImageListeners() {
+function attachActionListeners() {
+    // Attach event listeners to product images
     document.querySelectorAll('.product-image').forEach(img => {
         img.addEventListener('click', (e) => {
             e.preventDefault();
@@ -131,7 +136,21 @@ function attachProductImageListeners() {
             }
         });
     });
+
+    // Attach event listeners to delete buttons
+    document.querySelectorAll('.delete-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            const productId = e.target.getAttribute('data-id');
+            if (productId) {
+                deleteProduct(productId);
+            } else {
+                console.error('Product ID is missing for deletion.');
+            }
+        });
+    });
 }
+
 
 function renderProductDetails(product) {
     const app = document.getElementById('app');
@@ -175,4 +194,39 @@ function handleProductError(error) {
         </div>
     `;
     console.error('Product fetch error:', error);
+}
+function deleteProduct(productId) {
+    // Confirm deletion with the user
+    const confirmation = confirm("Are you sure you want to delete this product?");
+    if (!confirmation) {
+        return; // Exit if the user cancels
+    }
+
+    // Show a loading indicator or disable the delete button (optional)
+    // You can enhance user experience by providing feedback here
+
+    fetch(`http://localhost:8080/api/v1/delete?id=${productId}`, {
+        method: 'DELETE',
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.text(); // Or response.json() if the response is JSON
+            } else if (response.status === 404) {
+                throw new Error('Product not found.');
+            } else {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+        })
+        .then(message => {
+            alert(message); // Inform the user of successful deletion
+            // Refresh the current page of products
+            // Extract the current page from the URL hash
+            const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
+            const currentPage = parseInt(urlParams.get('page')) || 0;
+            loadProducts(currentPage, 12);
+        })
+        .catch(error => {
+            alert(`Failed to delete product: ${error.message}`);
+            console.error('Delete product error:', error);
+        });
 }
