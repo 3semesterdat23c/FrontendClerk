@@ -69,6 +69,7 @@ function loginModalTemplate() {
 function logoutUser() {
     // Clear user data from localStorage
     localStorage.removeItem('user');
+    localStorage.clear();
 
     // Reset dropdown content for logged-out state
     const accountDropdownContainer = document.getElementById('accountDropdownContainer');

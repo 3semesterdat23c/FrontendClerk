@@ -2,8 +2,9 @@
 
 
 export function loadProducts(page = 0, size = 12) {
-    const app = document.getElementById('app');
-
+  //  console.log(tokenString)
+        console.log(isAdmin)
+    const app = document.getElementById('app')
     app.innerHTML = `
         <div class="text-center my-4">
             <div class="spinner-border text-primary" role="status">
@@ -25,7 +26,6 @@ export function loadProducts(page = 0, size = 12) {
 
 export function loadProductDetails(productId) {
     const app = document.getElementById('app');
-
     app.innerHTML = `
         <div class="text-center my-4">
             <div class="spinner-border text-primary" role="status">
