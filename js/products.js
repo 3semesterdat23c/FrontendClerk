@@ -1,5 +1,18 @@
-// products.js
+let isAdmin = false
+const token =localStorage.getItem('user');
+if (token){
+const jsonString = JSON.stringify(parseJwt(token));
+if (jsonString.includes('true')){
+    isAdmin=true}}
 
+function parseJwt (token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+}
 
 export function loadProducts(page = 0, size = 12) {
   //  console.log(tokenString)
@@ -78,6 +91,8 @@ function createProductsHTML(products, currentPage, totalPages) {
 
 function createProductCard(product) {
     console.log(product); // Inspect the product object for debugging
+
+
     return `
         <div class="col-md-4 mb-4">
             <div class="card h-100 d-flex flex-column">
