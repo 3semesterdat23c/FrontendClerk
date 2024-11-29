@@ -2,6 +2,7 @@
 
 import { loadmyAccount } from "./myAccount.js";
 
+// Register Modal Template
 function registerModalTemplate() {
     return `
     <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
@@ -13,7 +14,23 @@ function registerModalTemplate() {
                 </div>
                 <div class="modal-body">
                     <form id="registerForm">
-                        <!-- Form Fields -->
+                        <div class="mb-3">
+                            <label for="registerFirstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="registerFirstName" name="firstName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerLastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="registerLastName" name="lastName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="registerEmail" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="registerPassword" name="password" required>
+                        </div>
+                        <div id="registerError" class="alert alert-danger d-none" role="alert"></div>
                         <button type="submit" class="btn btn-primary">Register</button>
                     </form>
                 </div>
@@ -22,6 +39,7 @@ function registerModalTemplate() {
     </div>`;
 }
 
+// Login Modal Template
 function loginModalTemplate() {
     return `
     <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
@@ -33,7 +51,15 @@ function loginModalTemplate() {
                 </div>
                 <div class="modal-body">
                     <form id="loginForm">
-                        <!-- Form Fields -->
+                        <div class="mb-3">
+                            <label for="loginEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="loginEmail" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loginPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" name="password" required>
+                        </div>
+                        <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
                         <button type="submit" class="btn btn-primary">Login</button>
                     </form>
                 </div>
@@ -42,12 +68,14 @@ function loginModalTemplate() {
     </div>`;
 }
 
+// Logout Function
 function logoutUser() {
     localStorage.removeItem('user');
     updateDropdownForLoggedOutState();
     alert('You have been logged out.');
 }
 
+// Update Dropdown for Logged-Out State
 function updateDropdownForLoggedOutState() {
     const accountDropdownContainer = document.getElementById('accountDropdownContainer');
     if (accountDropdownContainer) {
@@ -63,6 +91,7 @@ function updateDropdownForLoggedOutState() {
     }
 }
 
+// Update Dropdown for Logged-In State
 function updateUIForLoggedInUser(userData) {
     const accountDropdownContainer = document.getElementById('accountDropdownContainer');
     if (accountDropdownContainer) {
@@ -83,6 +112,7 @@ function updateUIForLoggedInUser(userData) {
     }
 }
 
+// Dynamic Dropdown Changer
 export function uiDropdownDynamicChangerForLoginAndLogout() {
     const user = JSON.parse(localStorage.getItem('user'));
     if (user && user.email) {
@@ -92,6 +122,7 @@ export function uiDropdownDynamicChangerForLoginAndLogout() {
     }
 }
 
+// Register Form Listener
 function attachRegisterFormListener() {
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
@@ -99,15 +130,15 @@ function attachRegisterFormListener() {
             e.preventDefault();
 
             // Collect input values
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const firstName = document.getElementById('registerFirstName').value;
+            const lastName = document.getElementById('registerLastName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
 
             const userRequestDTO = { firstName, lastName, email, password };
 
             try {
-                const response = await fetch('http://localhost:8080/api/v1/users/register', {
+                const response = await fetch('http://localhost:8080/api/v1/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(userRequestDTO),
@@ -132,6 +163,7 @@ function attachRegisterFormListener() {
     }
 }
 
+// Login Form Listener
 function attachLoginFormListener() {
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
@@ -145,7 +177,7 @@ function attachLoginFormListener() {
             const loginRequestDTO = { email, password };
 
             try {
-                const response = await fetch('http://localhost:8080/api/v1/users/login', {
+                const response = await fetch('http://localhost:8080/api/v1/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(loginRequestDTO),
@@ -175,6 +207,7 @@ function attachLoginFormListener() {
     }
 }
 
+// Inject Modals into the DOM
 export function injectModals() {
     const bodyElement = document.body;
 
