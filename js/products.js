@@ -162,19 +162,37 @@ function createProductCard(product) {
 }
 
 function createPaginationHTML(currentPage, totalPages) {
+    const maxVisiblePages = 7;
+    let startPage = Math.max(0, currentPage - 3);
+    let endPage = Math.min(totalPages - 1, currentPage + 3);
+
+    // Adjust the range to always display exactly 7 pages
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        if (startPage === 0) {
+            endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
+        } else if (endPage === totalPages - 1) {
+            startPage = Math.max(0, endPage - maxVisiblePages + 1);
+        }
+    }
+
+    let pages = [];
+    for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+    }
+
     return `
         <nav aria-label="Page navigation">
             <ul class="pagination justify-content-center">
                 <li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
-                    <a class="page-link" href="#products?page=${currentPage - 1}" id="prevPage">Previous</a>
+                    <a class="page-link" href="#products?page=0" id="firstPage">First</a>
                 </li>
-                ${[...Array(totalPages)].map((_, i) => `
+                ${pages.map(i => `
                     <li class="page-item ${currentPage === i ? 'active' : ''}">
                         <a class="page-link" href="#products?page=${i}" data-page="${i}">${i + 1}</a>
                     </li>
                 `).join('')}
                 <li class="page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}">
-                    <a class="page-link" href="#products?page=${currentPage + 1}" id="nextPage">Next</a>
+                    <a class="page-link" href="#products?page=${totalPages - 1}" id="lastPage">Last</a>
                 </li>
             </ul>
         </nav>
