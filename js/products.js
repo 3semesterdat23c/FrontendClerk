@@ -1,51 +1,51 @@
 // products.js
 
-// Function to create the Update Product Modal HTML
-function createUpdateProductModal() {
+// Function to create a generic Product Modal (used for both Create and Update)
+function createProductModal() {
     const modalHTML = `
-        <div class="modal fade" id="updateProductModal" tabindex="-1" aria-labelledby="updateProductModalLabel" aria-hidden="true">
+        <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
             <div class="modal-dialog">
-                <form id="updateProductForm">
+                <form id="productForm">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="updateProductModalLabel">Update Product</h5>
+                            <h5 class="modal-title" id="productModalLabel">Create Product</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <input type="hidden" id="updateProductId" name="id">
+                            <input type="hidden" id="productId" name="id">
                             <div class="mb-3">
-                                <label for="updateProductName" class="form-label">Name</label>
-                                <input type="text" class="form-control" id="updateProductName" name="name" required>
+                                <label for="productName" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="productName" name="name" required>
                             </div>
                             <div class="mb-3">
-                                <label for="updateProductDescription" class="form-label">Description</label>
-                                <textarea class="form-control" id="updateProductDescription" name="description" rows="3" required></textarea>
+                                <label for="productDescription" class="form-label">Description</label>
+                                <textarea class="form-control" id="productDescription" name="description" rows="3" required></textarea>
                             </div>
                             <div class="mb-3">
-                                <label for="updateProductPrice" class="form-label">Price</label>
-                                <input type="number" step="0.01" class="form-control" id="updateProductPrice" name="price" required>
+                                <label for="productPrice" class="form-label">Price</label>
+                                <input type="number" step="0.01" class="form-control" id="productPrice" name="price" required>
                             </div>
                             <div class="mb-3">
-                                <label for="updateProductStock" class="form-label">Stock Count</label>
-                                <input type="number" class="form-control" id="updateProductStock" name="stockCount" required>
+                                <label for="productStock" class="form-label">Stock Count</label>
+                                <input type="number" class="form-control" id="productStock" name="stockCount" required>
                             </div>
                             <div class="mb-3">
-                                <label for="updateProductCategory" class="form-label">Category</label>
-                                <input type="text" class="form-control" id="updateProductCategory" name="category" required>
+                                <label for="productCategory" class="form-label">Category</label>
+                                <input type="text" class="form-control" id="productCategory" name="category" required>
                             </div>
                             <div class="mb-3">
-                                <label for="updateProductDiscount" class="form-label">Discount Percentage</label>
-                                <input type="number" step="0.01" class="form-control" id="updateProductDiscount" name="discount" required>
+                                <label for="productDiscount" class="form-label">Discount Percentage</label>
+                                <input type="number" step="0.01" class="form-control" id="productDiscount" name="discount" required>
                             </div>
                             <div class="mb-3">
-                                <label for="updateProductImages" class="form-label">Images (comma-separated URLs)</label>
-                                <input type="text" class="form-control" id="updateProductImages" name="images" required>
+                                <label for="productImages" class="form-label">Images (comma-separated URLs)</label>
+                                <input type="text" class="form-control" id="productImages" name="images" required>
                             </div>
-                            <div id="updateProductError" class="alert alert-danger d-none" role="alert"></div>
+                            <div id="productError" class="alert alert-danger d-none" role="alert"></div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Update Product</button>
+                            <button type="submit" class="btn btn-primary" id="productSubmitButton">Create Product</button>
                         </div>
                     </div>
                 </form>
@@ -55,9 +55,9 @@ function createUpdateProductModal() {
     return modalHTML;
 }
 
-// Immediately Invoked Function Expression (IIFE) to initialize and append the modal
-(function initializeUpdateProductModal() {
-    const modalHTML = createUpdateProductModal();
+// Append the Product Modal to the body
+(function initializeProductModal() {
+    const modalHTML = createProductModal();
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 })();
 
@@ -130,6 +130,10 @@ function createProductsHTML(products, currentPage, totalPages) {
     return `
         <h1 class="text-center my-4">Our Products</h1>
         <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div></div>
+                <button class="btn btn-success" id="createProductButton">Add New Product</button>
+            </div>
             <div class="row">
                 ${products.map(product => createProductCard(product)).join('')}
             </div>
@@ -214,48 +218,78 @@ function attachActionListeners() {
             e.preventDefault();
             const productId = e.target.getAttribute('data-id');
             if (productId) {
-                openUpdateModal(productId);
+                openProductModal('update', productId);
             } else {
                 console.error('Product ID is missing for update.');
             }
         });
     });
-}
 
-function openUpdateModal(productId) {
-    // Fetch the latest product data
-    fetch(`http://localhost:8080/api/v1/products/${productId}`)
-        .then(response => {
-            if (!response.ok) {
-                if (response.status === 404) {
-                    throw new Error('Product not found.');
-                }
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(product => {
-            populateUpdateModal(product);
-            showModal('updateProductModal');
-        })
-        .catch(error => {
-            alert(`Failed to load product for update: ${error.message}`);
-            console.error('Fetch product for update error:', error);
+    // Attach event listener to the "Create Product" button
+    const createProductButton = document.getElementById('createProductButton');
+    if (createProductButton) {
+        createProductButton.addEventListener('click', () => {
+            openProductModal('create');
         });
+    }
 }
 
-function populateUpdateModal(product) {
-    document.getElementById('updateProductId').value = product.productId;
-    document.getElementById('updateProductName').value = product.name;
-    document.getElementById('updateProductDescription').value = product.description;
-    document.getElementById('updateProductPrice').value = product.price;
-    document.getElementById('updateProductStock').value = product.stockCount;
-    document.getElementById('updateProductCategory').value = product.category || '';
-    document.getElementById('updateProductDiscount').value = product.discount || 0;
-    document.getElementById('updateProductImages').value = product.images ? product.images : '';
+function openProductModal(mode, productId = null) {
+    const modalTitle = document.getElementById('productModalLabel');
+    const submitButton = document.getElementById('productSubmitButton');
+
+    if (mode === 'create') {
+        // Set modal for creation
+        modalTitle.textContent = 'Create Product';
+        submitButton.textContent = 'Create Product';
+        submitButton.classList.remove('btn-warning');
+        submitButton.classList.add('btn-primary');
+
+        // Clear all form fields
+        document.getElementById('productForm').reset();
+        document.getElementById('productId').value = '';
+    } else if (mode === 'update' && productId) {
+        // Set modal for update
+        modalTitle.textContent = 'Update Product';
+        submitButton.textContent = 'Update Product';
+        submitButton.classList.remove('btn-primary');
+        submitButton.classList.add('btn-warning');
+
+        // Fetch product data and populate the form
+        fetch(`http://localhost:8080/api/v1/products/${productId}`)
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('Product not found.');
+                    }
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(product => {
+                populateProductModal(product);
+            })
+            .catch(error => {
+                alert(`Failed to load product for update: ${error.message}`);
+                console.error('Fetch product for update error:', error);
+            });
+    }
+
+    showModal('productModal');
+}
+
+function populateProductModal(product) {
+    document.getElementById('productId').value = product.productId;
+    document.getElementById('productName').value = product.name;
+    document.getElementById('productDescription').value = product.description;
+    document.getElementById('productPrice').value = product.price;
+    document.getElementById('productStock').value = product.stockCount;
+    document.getElementById('productCategory').value = product.categories ? Array.from(product.categories).map(cat => cat.categoryName).join(', ') : '';
+    document.getElementById('productDiscount').value = product.discount || 0;
+    document.getElementById('productImages').value = product.images ? product.images.join(', ') : '';
 
     // Hide previous errors
-    const errorDiv = document.getElementById('updateProductError');
+    const errorDiv = document.getElementById('productError');
     errorDiv.classList.add('d-none');
     errorDiv.innerText = '';
 }
@@ -286,7 +320,7 @@ function createProductDetailsHTML(product) {
             <a href="#products?page=0" id="backButton" class="btn btn-secondary mb-3">Back to Products</a>
             <div class="row">
                 <div class="col-md-6">
-                    ${product.images ? `<img src="${product.images}" class="img-fluid" alt="${product.name}">` : ''}
+                    ${product.images && product.images.length > 0 ? `<img src="${product.images[0]}" class="img-fluid" alt="${product.name}">` : ''}
                 </div>
                 <div class="col-md-6">
                     <h2>${product.name}</h2>
@@ -322,6 +356,9 @@ function deleteProduct(productId) {
 
     fetch(`http://localhost:8080/api/v1/products/${productId}/delete`, {
         method: 'DELETE',
+        // headers: {
+        //     'Authorization': `Bearer ${yourAuthToken}` // Include if authentication is required
+        // },
     })
         .then(response => {
             if (response.ok) {
@@ -346,63 +383,74 @@ function deleteProduct(productId) {
         });
 }
 
-// **New Functions for Update Functionality**
+// **New Functions for Create and Update Functionality**
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Handle the update form submission
-    const updateForm = document.getElementById('updateProductForm');
-    if (updateForm) {
-        updateForm.addEventListener('submit', (e) => {
+    // Handle the product form submission
+    const productForm = document.getElementById('productForm');
+    if (productForm) {
+        productForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            submitUpdateForm();
+            submitProductForm();
         });
     }
 });
 
-function submitUpdateForm() {
-    const productId = document.getElementById('updateProductId').value;
-    const name = document.getElementById('updateProductName').value.trim();
-    const description = document.getElementById('updateProductDescription').value.trim();
-    const price = parseFloat(document.getElementById('updateProductPrice').value);
-    const stockCount = parseInt(document.getElementById('updateProductStock').value, 10);
-    const category = document.getElementById('updateProductCategory').value.trim();
-    const discount = parseFloat(document.getElementById('updateProductDiscount').value);
-    const imagesInput = document.getElementById('updateProductImages').value.trim();
+function submitProductForm() {
+    const productId = document.getElementById('productId').value;
+    const name = document.getElementById('productName').value.trim();
+    const description = document.getElementById('productDescription').value.trim();
+    const price = parseFloat(document.getElementById('productPrice').value);
+    const stockCount = parseInt(document.getElementById('productStock').value, 10);
+    const category = document.getElementById('productCategory').value.trim();
+    const discount = parseFloat(document.getElementById('productDiscount').value);
+    const imagesInput = document.getElementById('productImages').value.trim();
 
     // Basic Validation
     if (!name || !description || isNaN(price) || isNaN(stockCount) || !category || isNaN(discount)) {
-        showUpdateError('Please fill in all required fields correctly.');
+        showProductError('Please fill in all required fields correctly.');
         return;
     }
 
     // Parse images into an array
     const images = imagesInput ? imagesInput.split(',').map(url => url.trim()) : [];
 
-    const updatedProduct = {
-        title: name, // Map to title
+    // Determine if it's a create or update operation
+    const isUpdate = Boolean(productId);
+
+    // Construct the product payload
+    const productPayload = {
+        title: name, // Assuming ProductRequestDTO has a 'title' field
         description: description,
         price: price,
-        stock: stockCount, // Map to stock
+        stock: stockCount, // Assuming 'stock' corresponds to 'stockCount'
         category: category,
-        discountPercentage: discount,
+        discountPercentage: discount, // Assuming 'discountPercentage' corresponds to 'discount'
         images: images
     };
 
+    // Determine the endpoint and HTTP method
+    const endpoint = isUpdate ? `http://localhost:8080/api/v1/products/${productId}/update` : `http://localhost:8080/api/v1/products/create`;
+    const method = isUpdate ? 'PUT' : 'POST';
 
     // Optional: Show loading state
-    const updateButton = document.querySelector('#updateProductForm button[type="submit"]');
-    updateButton.disabled = true;
-    updateButton.innerHTML = `
+    const submitButton = document.getElementById('productSubmitButton');
+    submitButton.disabled = true;
+    submitButton.innerHTML = isUpdate ? `
         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         Updating...
+    ` : `
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Creating...
     `;
 
-    fetch(`http://localhost:8080/api/v1/products/${productId}/update`, {
-        method: 'PUT',
+    fetch(endpoint, {
+        method: method,
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            // 'Authorization': `Bearer ${yourAuthToken}` // Include if authentication is required
         },
-        body: JSON.stringify(updatedProduct)
+        body: JSON.stringify(productPayload)
     })
         .then(response => {
             if (!response.ok) {
@@ -412,28 +460,28 @@ function submitUpdateForm() {
             }
             return response.json();
         })
-        .then(updatedProduct => {
-            alert('Product updated successfully!');
+        .then(product => {
+            alert(isUpdate ? 'Product updated successfully!' : 'Product created successfully!');
             // Close the modal
-            const modalElement = document.getElementById('updateProductModal');
+            const modalElement = document.getElementById('productModal');
             const modalInstance = bootstrap.Modal.getInstance(modalElement);
             modalInstance.hide();
             // Refresh the products list or update the specific product card
             refreshProducts();
         })
         .catch(error => {
-            showUpdateError(`Failed to update product: ${error.message}`);
-            console.error('Update product error:', error);
+            showProductError(`Failed to ${isUpdate ? 'update' : 'create'} product: ${error.message}`);
+            console.error(`${isUpdate ? 'Update' : 'Create'} product error:`, error);
         })
         .finally(() => {
-            // Reset the update button
-            updateButton.disabled = false;
-            updateButton.innerHTML = 'Update Product';
+            // Reset the submit button
+            submitButton.disabled = false;
+            submitButton.innerHTML = isUpdate ? 'Update Product' : 'Create Product';
         });
 }
 
-function showUpdateError(message) {
-    const errorDiv = document.getElementById('updateProductError');
+function showProductError(message) {
+    const errorDiv = document.getElementById('productError');
     errorDiv.innerText = message;
     errorDiv.classList.remove('d-none');
 }
