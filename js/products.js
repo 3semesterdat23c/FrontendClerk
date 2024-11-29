@@ -320,7 +320,7 @@ function deleteProduct(productId) {
     // Show a loading indicator or disable the delete button (optional)
     // You can enhance user experience by providing feedback here
 
-    fetch(`http://localhost:8080/api/v1/${productId}/delete`, {
+    fetch(`http://localhost:8080/api/v1/products/${productId}/delete`, {
         method: 'DELETE',
     })
         .then(response => {
@@ -396,7 +396,7 @@ function submitUpdateForm() {
         Updating...
     `;
 
-    fetch(`http://localhost:8080/api/v1/${productId}/update`, {
+    fetch(`http://localhost:8080/api/v1/products/${productId}/update`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'
