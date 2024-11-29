@@ -143,13 +143,10 @@ function createProductCard(product) {
     return `
         <div class="col-md-4 mb-4">
             <div class="card h-100 d-flex flex-column">
-              ${product.imageURL ? `
-    <img src="${product.imageURL}" class="card-img-top product-image" alt="${product.name}" data-id="${product.productId}">
-` : ''}
-          
-
-              
-             <div class="card-body d-flex flex-column">
+                ${product.images && product.images.length > 0 ? `
+                    <img src="${product.images[0]}" class="card-img-top product-image" alt="${product.name}" data-id="${product.productId}">
+                ` : ''}
+                <div class="card-body d-flex flex-column">
                     <h5 class="card-title">${product.name}</h5>
                     <p class="card-text"><strong>Price:</strong> $${product.price}</p>
                     <p class="card-text"><strong>In Stock:</strong> ${product.stockCount}</p>
@@ -255,7 +252,7 @@ function populateUpdateModal(product) {
     document.getElementById('updateProductStock').value = product.stockCount;
     document.getElementById('updateProductCategory').value = product.category || '';
     document.getElementById('updateProductDiscount').value = product.discount || 0;
-    document.getElementById('updateProductImages').value = product.images ? product.URL.join(', ') : '';
+    document.getElementById('updateProductImages').value = product.images ? product.images : '';
 
     // Hide previous errors
     const errorDiv = document.getElementById('updateProductError');
@@ -289,7 +286,7 @@ function createProductDetailsHTML(product) {
             <a href="#products?page=0" id="backButton" class="btn btn-secondary mb-3">Back to Products</a>
             <div class="row">
                 <div class="col-md-6">
-                    ${product.imageURL ? `<img src="${product.imageURL}" class="img-fluid" alt="${product.name}">` : ''}
+                    ${product.images ? `<img src="${product.images}" class="img-fluid" alt="${product.name}">` : ''}
                 </div>
                 <div class="col-md-6">
                     <h2>${product.name}</h2>
