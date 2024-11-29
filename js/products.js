@@ -379,14 +379,15 @@ function submitUpdateForm() {
     const images = imagesInput ? imagesInput.split(',').map(url => url.trim()) : [];
 
     const updatedProduct = {
-        name: name,
+        title: name, // Map to title
         description: description,
         price: price,
-        stockCount: stockCount,
+        stock: stockCount, // Map to stock
         category: category,
-        discount: discount,
+        discountPercentage: discount,
         images: images
     };
+
 
     // Optional: Show loading state
     const updateButton = document.querySelector('#updateProductForm button[type="submit"]');
