@@ -1,5 +1,18 @@
-// products.js
+let isAdmin = false
+const token =localStorage.getItem('user');
+if (token){
+const jsonString = JSON.stringify(parseJwt(token));
+if (jsonString.includes('true')){
+    isAdmin=true}}
 
+function parseJwt (token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+}
 // Function to create a generic Product Modal (used for both Create and Update)
 function createProductModal() {
     const modalHTML = `
@@ -63,8 +76,9 @@ function createProductModal() {
 
 // Function to load products with pagination
 export function loadProducts(page = 0, size = 12) {
-    const app = document.getElementById('app');
-
+  //  console.log(tokenString)
+        console.log(isAdmin)
+    const app = document.getElementById('app')
     app.innerHTML = `
         <div class="text-center my-4">
             <div class="spinner-border text-primary" role="status">
@@ -84,7 +98,6 @@ export function loadProducts(page = 0, size = 12) {
         .catch(handleProductError);
 }
 
-// Function to load product details
 export function loadProductDetails(productId) {
     const app = document.getElementById('app');
 
@@ -96,8 +109,7 @@ export function loadProductDetails(productId) {
         </div>
     `;
 
-    // Updated Fetch URL using Path Variable
-    fetch(`http://localhost:8080/api/v1/products/${productId}`)
+    fetch(`http://localhost:8080/api/v1/product?id=${productId}`)
         .then(response => {
             if (!response.ok) {
                 if (response.status === 404) {
@@ -125,6 +137,7 @@ function renderProducts(responseData) {
 
     attachActionListeners(); // Attach event listeners to product images, delete, and update buttons
 }
+
 
 function createProductsHTML(products, currentPage, totalPages) {
     return `
@@ -361,7 +374,6 @@ function handleProductError(error) {
     `;
     console.error('Product fetch error:', error);
 }
-
 function deleteProduct(productId) {
     // Confirm deletion with the user
     const confirmation = confirm("Are you sure you want to delete this product?");
