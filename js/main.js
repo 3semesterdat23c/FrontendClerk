@@ -2,7 +2,6 @@
 
 import { loadHome } from './home.js';
 import { loadProducts, loadProductDetails } from './products.js';
-import { loadAdmin } from './admin.js';
 import { injectModals, uiDropdownDynamicChangerForLoginAndLogout } from './profile.js';
 
 
@@ -34,9 +33,6 @@ function navigate() {
                 console.error('Product ID is missing in the URL.');
                 loadProducts(); // Fallback to product list
             }
-            break;
-        case 'admin':
-            loadAdmin();
             break;
         default:
             loadHome();
