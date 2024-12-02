@@ -60,11 +60,8 @@ function createProductModal() {
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 })();
 
-// Function to load products with pagination
-export function loadProducts(page = 0, size = 12) {
-  //  console.log(tokenString)
-        console.log(checkAdmin())
-    const app = document.getElementById('app')
+export function loadProducts(page = 0, size = 12, sortOrder = 'asc') {
+    const app = document.getElementById('app');
     app.innerHTML = `
         <div class="text-center my-4">
             <div class="spinner-border text-primary" role="status">
@@ -73,16 +70,21 @@ export function loadProducts(page = 0, size = 12) {
         </div>
     `;
 
-    fetch(`http://localhost:8080/api/v1/products?page=${page}&size=${size}`)
+    const endpoint = `http://localhost:8080/api/v1/products?page=${page}&size=${size}&sort=price,${sortOrder}`;
+
+    fetch(endpoint)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             return response.json();
         })
-        .then(renderProducts)
+        .then(data => {
+            renderProducts(data, page, sortOrder);
+        })
         .catch(handleProductError);
 }
+
 
 export function loadProductDetails(productId) {
     const app = document.getElementById('app');
@@ -108,40 +110,43 @@ export function loadProductDetails(productId) {
         .then(renderProductDetails)
         .catch(handleProductError);
 }
-
-function renderProducts(responseData) {
-    const { content: products, totalPages, number: currentPage } = responseData;
+function renderProducts(responseData, currentPage, sortOrder) {
+    const { content: products, totalPages } = responseData;
 
     if (!Array.isArray(products)) {
         throw new Error('Invalid product data');
     }
 
-    const productsHTML = createProductsHTML(products, currentPage, totalPages);
+    const productsHTML = createProductsHTML(products, currentPage, totalPages, sortOrder);
 
     const app = document.getElementById('app');
     app.innerHTML = productsHTML;
 
-    attachActionListeners(); // Attach event listeners to product images, delete, and update buttons
+    attachActionListeners(); // Attach event listeners to products
 }
 
 
-function createProductsHTML(products, currentPage, totalPages) {
+function createProductsHTML(products, currentPage, totalPages, sortOrder = 'asc') {
     return `
         <h1 class="text-center my-4">Our Products</h1>
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <div></div>
-                ${checkAdmin() ? `
-                        <button class="btn btn-success" id="createProductButton">Add New Product</button>
-                            ` : ''}
+                <div>
+                    <select id="sortPriceFilter" class="form-select d-inline-block w-auto me-2">
+                        <option value="asc" ${sortOrder === 'asc' ? 'selected' : ''}>Price: Low to High</option>
+                        <option value="desc" ${sortOrder === 'desc' ? 'selected' : ''}>Price: High to Low</option>
+                    </select>
+                    <button class="btn btn-primary" id="applySortButton">Sort</button>
+                </div>
             </div>
             <div class="row">
                 ${products.map(product => createProductCard(product)).join('')}
             </div>
         </div>
-        ${createPaginationHTML(currentPage, totalPages)}
+        ${createPaginationHTML(currentPage, totalPages, sortOrder)}
     `;
 }
+
 
 function createProductCard(product) {
     const stockStatus = getStockStatus(product.stockCount);
@@ -174,13 +179,11 @@ function createProductCard(product) {
     `;
 }
 
-
-function createPaginationHTML(currentPage, totalPages) {
+function createPaginationHTML(currentPage, totalPages, sortOrder) {
     const maxVisiblePages = 7;
     let startPage = Math.max(0, currentPage - 3);
     let endPage = Math.min(totalPages - 1, currentPage + 3);
 
-    // Adjust the range to always display exactly 7 pages
     if (endPage - startPage + 1 < maxVisiblePages) {
         if (startPage === 0) {
             endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
@@ -198,15 +201,15 @@ function createPaginationHTML(currentPage, totalPages) {
         <nav aria-label="Page navigation">
             <ul class="pagination justify-content-center">
                 <li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
-                    <a class="page-link" href="#products?page=0" id="firstPage">First</a>
+                    <a class="page-link" href="#products?page=0&sort=${sortOrder}" data-page="0" data-sort="${sortOrder}">First</a>
                 </li>
                 ${pages.map(i => `
                     <li class="page-item ${currentPage === i ? 'active' : ''}">
-                        <a class="page-link" href="#products?page=${i}" data-page="${i}">${i + 1}</a>
+                        <a class="page-link" href="#products?page=${i}&sort=${sortOrder}" data-page="${i}" data-sort="${sortOrder}">${i + 1}</a>
                     </li>
                 `).join('')}
                 <li class="page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}">
-                    <a class="page-link" href="#products?page=${totalPages - 1}" id="lastPage">Last</a>
+                    <a class="page-link" href="#products?page=${totalPages - 1}&sort=${sortOrder}" data-page="${totalPages - 1}" data-sort="${sortOrder}">Last</a>
                 </li>
             </ul>
         </nav>
@@ -530,5 +533,28 @@ function getStockStatus(stockCount) {
         return {color: '#DAA520', message: 'Low stock'};
     } else {
         return {color: 'green', message: 'In stock (5+)'};
+    }
+}
+
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'applySortButton') {
+        const sortOrder = document.getElementById('sortPriceFilter').value;
+        window.location.hash = `#products?page=0&sort=${sortOrder}`;
+        loadProducts(0, 12, sortOrder); // Reload products with selected sort order
+    }
+
+    if (e.target.classList.contains('page-link')) {
+        e.preventDefault();
+        const page = parseInt(e.target.getAttribute('data-page'));
+        const sortOrder = e.target.getAttribute('data-sort');
+        loadProducts(page, 12, sortOrder);
+    }
+});
+
+
+function syncSortDropdown(sortOrder) {
+    const sortDropdown = document.getElementById('sortPriceFilter');
+    if (sortDropdown) {
+        sortDropdown.value = sortOrder;
     }
 }
