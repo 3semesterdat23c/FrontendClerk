@@ -94,12 +94,12 @@ function updateDropdownForLoggedOutState() {
 }
 
 // Update Dropdown for Logged-In State
-function updateUIForLoggedInUser(userData) {
+function updateUIForLoggedInUser(mail) {
     const accountDropdownContainer = document.getElementById('accountDropdownContainer');
     if (accountDropdownContainer) {
         accountDropdownContainer.innerHTML = `
             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                ${userData.email}
+                ${mail}
                 <img src="images/Shadowman.jpg" alt="User" style="width: 30px; height: 30px;">
             </a>
             <ul class="dropdown-menu" aria-labelledby="userDropdown">
@@ -193,7 +193,8 @@ function attachLoginFormListener() {
                     const resData = await response.json();
                     localStorage.setItem('user', JSON.stringify(resData));
                     alert('Login successful! Welcome, ' + loginRequestDTO.email);
-                    updateUIForLoggedInUser(resData);
+                    const mail = loginRequestDTO.email
+                    updateUIForLoggedInUser(mail);
 
                     const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
                     loginModal.hide();
