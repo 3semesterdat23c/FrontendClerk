@@ -1,18 +1,4 @@
-let isAdmin = false
-const token =localStorage.getItem('user');
-if (token){
-const jsonString = JSON.stringify(parseJwt(token));
-if (jsonString.includes('true')){
-    isAdmin=true}}
-
-function parseJwt (token) {
-    var base64Url = token.split('.')[1];
-    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-    return JSON.parse(jsonPayload);
-}
+import { checkAdmin } from './admin.js';
 // Function to create a generic Product Modal (used for both Create and Update)
 function createProductModal() {
     const modalHTML = `
@@ -77,7 +63,7 @@ function createProductModal() {
 // Function to load products with pagination
 export function loadProducts(page = 0, size = 12) {
   //  console.log(tokenString)
-        console.log(isAdmin)
+        console.log(checkAdmin())
     const app = document.getElementById('app')
     app.innerHTML = `
         <div class="text-center my-4">
@@ -145,7 +131,9 @@ function createProductsHTML(products, currentPage, totalPages) {
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div></div>
-                <button class="btn btn-success" id="createProductButton">Add New Product</button>
+                ${checkAdmin() ? `
+                        <button class="btn btn-success" id="createProductButton">Add New Product</button>
+                            ` : ''}
             </div>
             <div class="row">
                 ${products.map(product => createProductCard(product)).join('')}
@@ -175,8 +163,10 @@ function createProductCard(product) {
                     </p>
                     <div class="mt-auto">
                         <a href="#" class="btn btn-primary me-2">Buy Now</a>
+                        ${checkAdmin() ? `
                         <button class="btn btn-warning update-button me-2" data-id="${product.productId}">Update</button>
                         <button class="btn btn-danger delete-button" data-id="${product.productId}">Delete</button>
+                            ` : ''}
                     </div>
                 </div>
             </div>
