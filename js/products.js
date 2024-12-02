@@ -109,7 +109,7 @@ export function loadProductDetails(productId) {
         </div>
     `;
 
-    fetch(`http://localhost:8080/api/v1/product?id=${productId}`)
+    fetch(`http://localhost:8080/api/v1/products/${productId}`)
         .then(response => {
             if (!response.ok) {
                 if (response.status === 404) {
