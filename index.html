@@ -4,23 +4,17 @@
     <meta charset="UTF-8">
     <title>Webshop SPA</title>
 
-    <!-- Bootstrap CSS -->
-    <link
-            rel="stylesheet"
-            href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-            integrity="sha384-LtrjvnR4+o6x5q8P1sOG6aJ6XjHJ49M0sWjZSWmZjK0rI3pK2C1mcaBXX3KMqc4z"
-            crossorigin="anonymous"
-    >
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Custom CSS (optional) -->
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-
 <!-- Navigation Bar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="#">Webshop SPA</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -35,29 +29,22 @@
             <li class="nav-item">
                 <a href="#admin" class="nav-link">Admin</a>
             </li>
+            <!-- Account Dropdown -->
+            <li class="nav-item dropdown" id="accountDropdownContainer">
+                <!-- Dynamic content will be injected here -->
+            </li>
         </ul>
     </div>
 </nav>
 
 <!-- Dynamic Content Area -->
-<div id="app">
-    <!-- Content will be injected here -->
-</div>
+<div id="app" class="container"></div>
+
+<!-- Bootstrap 5 Bundle JS (includes Popper.js 2.x) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Main JavaScript File -->
 <script type="module" src="js/main.js"></script>
-
-<!-- Bootstrap JS and dependencies -->
-<script
-        src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-        integrity="sha384-DfXd4HIiF8FCAiY5jtMoNT7n6bw5j/w0jXrXefmbIxN6fbJ28cYj3qJ3YzXdy6AG"
-        crossorigin="anonymous"
-></script>
-<script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-kZnn8la0dB5+4Bjb3j+3vY2LDATKXgOm3uV5iCLJ+0PjXY6+KvF6uJvQFvG0bZwd"
-        crossorigin="anonymous"
-></script>
 
 </body>
 </html>
