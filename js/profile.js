@@ -1,34 +1,36 @@
-import {loadmyAccount} from "./myAccount.js";
+// profile.js
 
+import { loadmyAccount } from "./myAccount.js";
+
+// Register Modal Template
 function registerModalTemplate() {
     return `
-    <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="registerModalLabel">Register</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 id="registerModalLabel" class="modal-title">Register</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="registerForm">
-                        <div class="form-group">
-                            <label for="firstName">First Name</label>
-                            <input type="text" class="form-control" id="firstName" placeholder="Enter your first name" required>
+                        <div class="mb-3">
+                            <label for="registerFirstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="registerFirstName" name="firstName" required>
                         </div>
-                        <div class="form-group">
-                            <label for="lastName">Last Name</label>
-                            <input type="text" class="form-control" id="lastName" placeholder="Enter your last name" required>
+                        <div class="mb-3">
+                            <label for="registerLastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="registerLastName" name="lastName" required>
                         </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" class="form-control" id="email" placeholder="Enter your email" required>
+                        <div class="mb-3">
+                            <label for="registerEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="registerEmail" name="email" required>
                         </div>
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" class="form-control" id="password" placeholder="Enter your password" required>
+                        <div class="mb-3">
+                            <label for="registerPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="registerPassword" name="password" required>
                         </div>
+                        <div id="registerError" class="alert alert-danger d-none" role="alert"></div>
                         <button type="submit" class="btn btn-primary">Register</button>
                     </form>
                 </div>
@@ -37,27 +39,27 @@ function registerModalTemplate() {
     </div>`;
 }
 
+// Login Modal Template
 function loginModalTemplate() {
     return `
-    <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="loginModalLabel">Login</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 id="loginModalLabel" class="modal-title">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="loginForm">
-                        <div class="form-group">
-                            <label for="loginEmail">Email</label>
-                            <input type="email" class="form-control" id="loginEmail" placeholder="Enter your email" required>
+                        <div class="mb-3">
+                            <label for="loginEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="loginEmail" name="email" required>
                         </div>
-                        <div class="form-group">
-                            <label for="loginPassword">Password</label>
-                            <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" required>
+                        <div class="mb-3">
+                            <label for="loginPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" name="password" required>
                         </div>
+                        <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
                         <button type="submit" class="btn btn-primary">Login</button>
                     </form>
                 </div>
@@ -66,122 +68,90 @@ function loginModalTemplate() {
     </div>`;
 }
 
+// Logout Function
 function logoutUser() {
-    // Clear user data from localStorage
     localStorage.removeItem('user');
-    localStorage.clear();
-
-    // Reset dropdown content for logged-out state
-    const accountDropdownContainer = document.getElementById('accountDropdownContainer');
-    if (accountDropdownContainer) {
-        accountDropdownContainer.innerHTML = `
-            <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <img src="images/Shadowman.jpg" alt="Account" style="width: 30px; height: 30px;">
-            </a>
-            <div class="dropdown-menu" aria-labelledby="accountDropdown">
-                <button class="dropdown-item" data-toggle="modal" data-target="#loginModal">Login</button>
-                <button class="dropdown-item" data-toggle="modal" data-target="#registerModal">Register</button>
-            </div>
-        `;
-    }
-
+    updateDropdownForLoggedOutState();
     alert('You have been logged out.');
 }
 
+// Update Dropdown for Logged-Out State
+function updateDropdownForLoggedOutState() {
+    const accountDropdownContainer = document.getElementById('accountDropdownContainer');
+    if (accountDropdownContainer) {
+        accountDropdownContainer.innerHTML = `
+            <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="images/Shadowman.jpg" alt="Account" style="width: 30px; height: 30px;">
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="accountDropdown">
+                <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button></li>
+                <li><button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#registerModal">Register</button></li>
+            </ul>
+        `;
+    }
+}
+
+// Update Dropdown for Logged-In State
 function updateUIForLoggedInUser(userData) {
     const accountDropdownContainer = document.getElementById('accountDropdownContainer');
     if (accountDropdownContainer) {
-        // Replace content with logged-in dropdown
         accountDropdownContainer.innerHTML = `
-            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                ${userData}
+            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                ${userData.email}
                 <img src="images/Shadowman.jpg" alt="User" style="width: 30px; height: 30px;">
             </a>
-            <div class="dropdown-menu" aria-labelledby="userDropdown">
-                <button class="dropdown-item" id="myAccountButton">My Account</button>
-                <button class="dropdown-item" id="logoutButton">Logout</button>
-            </div>
+            <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                <li><button class="dropdown-item" id="myAccountButton">My Account</button></li>
+                <li><button class="dropdown-item" id="logoutButton">Logout</button></li>
+            </ul>
         `;
 
-        const logoutButton = document.getElementById('logoutButton');
-        if (logoutButton) {
-            logoutButton.addEventListener('click', () => {
-                logoutUser();
-            });
-        }
-
-
-        // Attach logout functionality
-        const myAccountButton = document.getElementById('myAccountButton');
-        if (myAccountButton) {
-            myAccountButton.addEventListener('click', () => {
-
-                loadmyAccount();
-            });
-        }
+        // Attach event listeners
+        document.getElementById('logoutButton')?.addEventListener('click', logoutUser);
+        document.getElementById('myAccountButton')?.addEventListener('click', loadmyAccount);
     }
 }
 
-
-export function uiDropdownDynamicChangerForLoginAndLogout(){
+// Dynamic Dropdown Changer
+export function uiDropdownDynamicChangerForLoginAndLogout() {
     const user = JSON.parse(localStorage.getItem('user'));
-    const accountDropdownContainer = document.getElementById('accountDropdownContainer');
-
     if (user && user.email) {
-        updateUIForLoggedInUser(user); // Show logged-in dropdown
-    } else if (accountDropdownContainer) {
-        accountDropdownContainer.innerHTML = `
-            <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <img src="images/Shadowman.jpg" alt="Account" style="width: 30px; height: 30px;">
-            </a>
-            <div class="dropdown-menu" aria-labelledby="accountDropdown">
-                <button class="dropdown-item" data-toggle="modal" data-target="#loginModal">Login</button>
-                <button class="dropdown-item" data-toggle="modal" data-target="#registerModal">Register</button>
-            </div>
-        `;
+        updateUIForLoggedInUser(user);
+    } else {
+        updateDropdownForLoggedOutState();
     }
 }
 
-
-
+// Register Form Listener
 function attachRegisterFormListener() {
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Prevent default form submission
+            e.preventDefault();
 
             // Collect input values
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const firstName = document.getElementById('registerFirstName').value;
+            const lastName = document.getElementById('registerLastName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
 
-            // Construct the user data object
-            const userRequestDTO = {
-                email: email,
-                firstName: firstName,
-                lastName: lastName,
-                password: password,
-            };
+            const userRequestDTO = { firstName, lastName, email, password };
 
             try {
-                // Make the POST request to the /register endpoint
-                const response = await fetch('http://localhost:8080/api/v1/register', {
+                const response = await fetch('http://localhost:8080/api/v1/users/register', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(userRequestDTO),
                 });
 
-                // Handle the response
                 if (response.ok) {
-                    const message = await response.text(); // Read the response body
-                    alert(message); // Notify the user
-                    $('#registerModal').modal('hide'); // Close the modal
+                    const message = await response.text();
+                    alert(message);
+                    const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+                    registerModal.hide();
                 } else if (response.status === 409) {
                     const errorMessage = await response.text();
-                    alert(errorMessage); // Notify the user about the conflict
+                    alert(errorMessage);
                 } else {
                     throw new Error('Unexpected response from the server');
                 }
@@ -193,52 +163,37 @@ function attachRegisterFormListener() {
     }
 }
 
+// Login Form Listener
 function attachLoginFormListener() {
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Prevent default form submission
-
-            // Debugging
-            console.log('Login form submitted');
+            e.preventDefault();
 
             // Collect input values
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
 
-            console.log('Email:', email);
-
-            // Construct the login data object
-            const loginRequestDTO = {
-                email: email,
-                password: password,
-            };
+            const loginRequestDTO = { email, password };
 
             try {
-                // Make the POST request to the /login endpoint
-                const response = await fetch('http://localhost:8080/api/v1/login', {
+                const response = await fetch('http://localhost:8080/api/v1/users/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(loginRequestDTO),
                 });
 
                 if (response.ok) {
-                    const resData = await response.json(); // Parse JSON response
-                    console.log('Login response:', resData);
-
-                    // Save user data (e.g., email and token) in localStorage
+                    const resData = await response.json();
                     localStorage.setItem('user', JSON.stringify(resData));
                     alert('Login successful! Welcome, ' + loginRequestDTO.email);
+                    updateUIForLoggedInUser(resData);
 
-                    // Update UI based on login state
-                    updateUIForLoggedInUser(loginRequestDTO.email);
-
-                    $('#loginModal').modal('hide'); // Close the login modal
+                    const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+                    loginModal.hide();
                 } else if (response.status === 401) {
                     const errorMessage = await response.text();
-                    alert('Invalid credentials: ' + errorMessage); // Notify the user
+                    alert('Invalid credentials: ' + errorMessage);
                 } else {
                     const errorMessage = await response.text();
                     console.error('Unexpected response:', errorMessage);
@@ -249,15 +204,10 @@ function attachLoginFormListener() {
                 alert('An error occurred while logging in. Please try again later.');
             }
         });
-    } else {
-        console.error('Login form not found');
     }
 }
 
-
-
-
-
+// Inject Modals into the DOM
 export function injectModals() {
     const bodyElement = document.body;
 
@@ -275,5 +225,3 @@ export function injectModals() {
     attachRegisterFormListener();
     attachLoginFormListener();
 }
-
-
