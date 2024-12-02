@@ -1,6 +1,7 @@
 // profile.js
 
 import { loadmyAccount } from "./myAccount.js";
+import { checkAdmin, searchNextAdmin } from "./admin.js";
 
 // Register Modal Template
 function registerModalTemplate() {
@@ -71,6 +72,7 @@ function loginModalTemplate() {
 // Logout Function
 function logoutUser() {
     localStorage.removeItem('user');
+    localStorage.clear();
     updateDropdownForLoggedOutState();
     alert('You have been logged out.');
 }
@@ -102,6 +104,9 @@ function updateUIForLoggedInUser(userData) {
             </a>
             <ul class="dropdown-menu" aria-labelledby="userDropdown">
                 <li><button class="dropdown-item" id="myAccountButton">My Account</button></li>
+                ${checkAdmin() ? `
+                        <li><button class="dropdown-item" id="searchNextAdmin">Make a user admin</button></li>
+                            ` : ''}
                 <li><button class="dropdown-item" id="logoutButton">Logout</button></li>
             </ul>
         `;
@@ -109,6 +114,7 @@ function updateUIForLoggedInUser(userData) {
         // Attach event listeners
         document.getElementById('logoutButton')?.addEventListener('click', logoutUser);
         document.getElementById('myAccountButton')?.addEventListener('click', loadmyAccount);
+        document.getElementById('searchNextAdmin')?.addEventListener('click', searchNextAdmin);
     }
 }
 
