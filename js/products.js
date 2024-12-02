@@ -156,7 +156,8 @@ function createProductsHTML(products, currentPage, totalPages) {
 }
 
 function createProductCard(product) {
-    console.log(product); // Inspect the product object for debugging
+    const stockStatus = getStockStatus(product.stockCount);
+
     return `
         <div class="col-md-4 mb-4">
             <div class="card h-100 d-flex flex-column">
@@ -166,7 +167,12 @@ function createProductCard(product) {
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">${product.name}</h5>
                     <p class="card-text"><strong>Price:</strong> $${product.price}</p>
-                    <p class="card-text"><strong>In Stock:</strong> ${product.stockCount}</p>
+                    <p class="card-text">
+                        <strong>Stock Status:</strong> 
+                        <span style="color: ${stockStatus.color}; font-weight: bold;">
+                            ${stockStatus.message}
+                        </span>
+                    </p>
                     <div class="mt-auto">
                         <a href="#" class="btn btn-primary me-2">Buy Now</a>
                         <button class="btn btn-warning update-button me-2" data-id="${product.productId}">Update</button>
@@ -177,6 +183,7 @@ function createProductCard(product) {
         </div>
     `;
 }
+
 
 function createPaginationHTML(currentPage, totalPages) {
     const maxVisiblePages = 7;
@@ -522,4 +529,16 @@ function refreshProducts() {
     const params = new URLSearchParams(hash.split('?')[1]);
     const currentPage = parseInt(params.get('page')) || 0;
     loadProducts(currentPage, 12);
+}
+
+
+
+function getStockStatus(stockCount) {
+    if (stockCount === 0) {
+        return {color: 'red', message: 'Out of stock'};
+    } else if (stockCount > 0 && stockCount < 5) {
+        return {color: '#DAA520', message: 'Low stock'};
+    } else {
+        return {color: 'green', message: 'In stock (5+)'};
+    }
 }
