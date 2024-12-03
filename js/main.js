@@ -10,11 +10,16 @@ import { setupSearchBar } from './search.js';
 
 
 // Function to parse hash and extract route and query parameters
+
 function parseHash(hash) {
     const [route, queryString] = hash.split('?');
     const params = new URLSearchParams(queryString);
     return { route, params };
 }
+
+export function navigateToProducts(){
+const page = parseInt(('page')) || 0;
+loadProducts(page);}
 
 // Function to handle navigation
 function navigate() {

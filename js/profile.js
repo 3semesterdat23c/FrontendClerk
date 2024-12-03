@@ -2,6 +2,7 @@
 
 import { loadmyAccount } from "./myAccount.js";
 import { checkAdmin, searchNextAdmin } from "./admin.js";
+import { navigateToProducts } from "./main.js";
 
 // Register Modal Template
 function registerModalTemplate() {
@@ -75,6 +76,7 @@ function logoutUser() {
     localStorage.clear();
     updateDropdownForLoggedOutState();
     alert('You have been logged out.');
+    reroute()
 }
 
 // Update Dropdown for Logged-Out State
@@ -200,6 +202,8 @@ function attachLoginFormListener() {
 
                     const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
                     loginModal.hide();
+                    reroute();
+
                 } else if (response.status === 401) {
                     const errorMessage = await response.text();
                     alert('Invalid credentials: ' + errorMessage);
@@ -234,3 +238,8 @@ export function injectModals() {
     attachRegisterFormListener();
     attachLoginFormListener();
 }
+
+function reroute() {
+    navigateToProducts()
+}
+
