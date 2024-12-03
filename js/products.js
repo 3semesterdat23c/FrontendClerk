@@ -361,9 +361,23 @@ function showModal(modalId) {
     modal.show();
 }
 
-function renderProductDetails(product) {
+async function renderProductDetails(product) {
     const app = document.getElementById('app');
-    const productDetailsHTML = createProductDetailsHTML(product);
+
+    let relatedProducts = [];
+    try {
+        // Fetch related products from the backend
+        const response = await fetch(`http://localhost:8080/api/v1/products?category=${product.category.categoryName}`);
+        if (response.ok) {
+            relatedProducts = await response.json();
+        } else {
+            console.error('Failed to fetch related products:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error fetching related products:', error);
+    }
+
+    const productDetailsHTML = createProductDetailsHTML(product, relatedProducts);
     app.innerHTML = productDetailsHTML;
 
     const backButton = document.getElementById('backButton');
@@ -375,7 +389,7 @@ function renderProductDetails(product) {
     }
 }
 
-function createProductDetailsHTML(product) {
+function createProductDetailsHTML(product, relatedProducts) {
     return `
         <div class="container my-4">
             <a href="#products?page=0" id="backButton" class="btn btn-secondary mb-3">Back to Products</a>
@@ -390,6 +404,23 @@ function createProductDetailsHTML(product) {
                     <p><strong>Description:</strong> ${product.description || 'No description available.'}</p>
                     <a href="#" class="btn btn-primary">Buy Now</a>
                 </div>
+                <div class="mt-4">
+                <h3>Related Products</h3>
+                <div class="row">
+                    ${relatedProducts.content.map(p => `
+                        <div class="col-md-3">
+                            <div class="card mb-3">
+                                ${p.images && p.images.length > 0 ? `<img src="${p.images[0]}" class="card-img-top" alt="${p.name}">` : ''}
+                                <div class="card-body">
+                                    <h5 class="card-title">${p.name}</h5>
+                                    <p class="card-text">$${p.price}</p>
+                                    <a href="#product?id=${p.productId}" class="btn btn-secondary">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
             </div>
         </div>
     `;
