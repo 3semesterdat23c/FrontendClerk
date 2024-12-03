@@ -17,7 +17,7 @@ export function loadmyAccount() {
         });
 
     function displayUserForm(user, id) {
-        const app = document.getElementById('app'); // Assuming the main container has the ID 'app'.
+        const app = document.getElementById('app'); // Assuming the main container has the ID 'app'
 
         // Create the form dynamically
         app.innerHTML = `
@@ -32,23 +32,32 @@ export function loadmyAccount() {
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" value="${user.userEmail}" />
 
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" value="12345"/>
-
             <button type="button" id="save-button">Save Changes</button>
         </form>
         <p id="form-message"></p>
+        
+         <h3>Edit Your Password</h3>
+        <form id="password-edit-form">
+      
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" value="12345"/>
+
+            <button type="button" id="save-button-password">Save Changes</button>
+        </form>
+        <p id="form-message-password"></p>
     `;
+
 
         // Add a save button listener
         const saveButton = document.getElementById('save-button');
+        const saveButtonPassword = document.getElementById('save-button-password');
         const formMessage = document.getElementById('form-message');
+        const formMessagePassword = document.getElementById('form-message-password');
         saveButton.addEventListener('click', () => {
             const updatedUser = {
                 firstName: document.getElementById('firstName').value,
                 lastName: document.getElementById('lastName').value,
                 email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
             };
 
             // Call an API to update the user (if implemented)
@@ -71,6 +80,29 @@ export function loadmyAccount() {
                     formMessage.textContent = 'An error occurred while updating the user.';
                 });
         });
-    }
-}
+
+            saveButtonPassword.addEventListener('click', () => {
+                const updatedUser = {
+                    password: document.getElementById('password').value,
+                };
+            fetch(`http://localhost:8080/api/v1/users/${id}/updatepassword`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedUser),
+            })
+                .then(response => {
+                    if (response.ok) {
+                        formMessagePassword.textContent = 'Password updated successfully!';
+                    } else {
+                        throw new Error('Failed to update user.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating user:', error);
+                    formMessage.textContent = 'An error occurred while updating the user.';
+                });
+        });
+}}
 
