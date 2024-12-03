@@ -370,12 +370,21 @@ async function renderProductDetails(product) {
         const response = await fetch(`http://localhost:8080/api/v1/products?category=${product.category.categoryName}`);
         if (response.ok) {
             relatedProducts = await response.json();
+            console.log('Fetched related products:', relatedProducts); // Log to inspect the data
         } else {
             console.error('Failed to fetch related products:', response.statusText);
         }
     } catch (error) {
         console.error('Error fetching related products:', error);
     }
+
+    // Ensure relatedProducts is always an array
+    if (!Array.isArray(relatedProducts.content)) {
+        relatedProducts.content = [];
+    }
+
+    // Exclude the current product from the related products list
+    relatedProducts.content = relatedProducts.content.filter(p => p.productId !== product.productId);
 
     const productDetailsHTML = createProductDetailsHTML(product, relatedProducts);
     app.innerHTML = productDetailsHTML;
@@ -384,12 +393,14 @@ async function renderProductDetails(product) {
     if (backButton) {
         backButton.addEventListener('click', (e) => {
             e.preventDefault();
-            window.history.back(); // Navigate to the previous hash
+            window.history.back(); // Navigate to the previous page
         });
     }
 }
 
 function createProductDetailsHTML(product, relatedProducts) {
+    const relatedProductContent = Array.isArray(relatedProducts.content) ? relatedProducts.content : [];
+
     return `
         <div class="container my-4">
             <a href="#products?page=0" id="backButton" class="btn btn-secondary mb-3">Back to Products</a>
@@ -405,22 +416,22 @@ function createProductDetailsHTML(product, relatedProducts) {
                     <a href="#" class="btn btn-primary">Buy Now</a>
                 </div>
                 <div class="mt-4">
-                <h3>Related Products</h3>
-                <div class="row">
-                    ${relatedProducts.content.map(p => `
-                        <div class="col-md-3">
-                            <div class="card mb-3">
-                                ${p.images && p.images.length > 0 ? `<img src="${p.images[0]}" class="card-img-top" alt="${p.name}">` : ''}
-                                <div class="card-body">
-                                    <h5 class="card-title">${p.name}</h5>
-                                    <p class="card-text">$${p.price}</p>
-                                    <a href="#product?id=${p.productId}" class="btn btn-secondary">View Details</a>
+                    <h3>Related Products</h3>
+                    <div class="row">
+                        ${relatedProductContent.map(p => `
+                            <div class="col-md-3">
+                                <div class="card mb-3">
+                                    ${p.images && p.images.length > 0 ? `<img src="${p.images[0]}" class="card-img-top" alt="${p.name}">` : ''}
+                                    <div class="card-body">
+                                        <h5 class="card-title">${p.name}</h5>
+                                        <p class="card-text">$${p.price}</p>
+                                        <a href="#product?id=${p.productId}" class="btn btn-secondary">View Details</a>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `).join('')}
+                        `).join('')}
+                    </div>
                 </div>
-            </div>
             </div>
         </div>
     `;
