@@ -13,6 +13,7 @@ function parseJwt (token) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
     return JSON.parse(jsonPayload);
+
 }
 function makeAdmin(email){
     fetch(`http://localhost:8080/api/v1/users/${email}/setadmin`, {
