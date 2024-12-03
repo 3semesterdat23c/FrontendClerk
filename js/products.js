@@ -1,4 +1,6 @@
 import { checkAdmin } from './admin.js';
+import { addToCart } from './cart.js';
+
 // Function to create a generic Product Modal (used for both Create and Update)
 function createProductModal() {
     const modalHTML = `
@@ -87,8 +89,7 @@ export function loadProducts(page = 0, size = 12, sortOrder = 'asc') {
             renderProducts(data, page, sortOrder);
         })
         .catch(handleProductError);
-}
-
+       }
 
 export function loadProductDetails(productId) {
     const app = document.getElementById('app');
@@ -135,6 +136,10 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder = 'asc'
         <h1 class="text-center my-4">Our Products</h1>
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-3">
+               <div></div>
+                ${checkAdmin() ? `
+                        <button class="btn btn-success" id="createProductButton">Add New Product</button>
+                            ` : ''}
                 <div>
                     <select id="sortPriceFilter" class="form-select d-inline-block w-auto me-2">
                         <option value="asc" ${sortOrder === 'asc' ? 'selected' : ''}>Price: Low to High</option>
@@ -143,14 +148,13 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder = 'asc'
                     <button class="btn btn-primary" id="applySortButton">Sort</button>
                 </div>
             </div>
-            <div class="row">
+            <div id="product-container" class="row">
                 ${products.map(product => createProductCard(product)).join('')}
             </div>
         </div>
         ${createPaginationHTML(currentPage, totalPages, sortOrder)}
     `;
 }
-
 
 function createProductCard(product) {
     const stockStatus = getStockStatus(product.stockCount);
@@ -171,7 +175,7 @@ function createProductCard(product) {
                         </span>
                     </p>
                     <div class="mt-auto">
-                        <a href="#" class="btn btn-primary me-2">Buy Now</a>
+<a href="#" class="btn btn-primary me-2 add-to-cart-button" data-product-id="${product.productId}">Buy Now</a>
                         ${checkAdmin() ? `
                         <button class="btn btn-warning update-button me-2" data-id="${product.productId}">Update</button>
                         <button class="btn btn-danger delete-button" data-id="${product.productId}">Delete</button>
@@ -267,6 +271,17 @@ function attachActionListeners() {
             openProductModal('create');
         });
     }
+
+    const productContainer = document.getElementById('product-container');
+
+    // Event delegation for "Buy Now" buttons
+    productContainer.addEventListener('click', function (event) {
+        if (event.target && event.target.classList.contains('add-to-cart-button')) {
+            event.preventDefault();
+            const productId = event.target.getAttribute('data-product-id');
+            addToCart(productId);
+        }
+    });
 }
 
 function openProductModal(mode, productId = null) {
