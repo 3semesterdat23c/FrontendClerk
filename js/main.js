@@ -4,6 +4,9 @@ import { loadHome } from './home.js';
 import { loadProducts, loadProductDetails } from './products.js';
 import { injectModals, uiDropdownDynamicChangerForLoginAndLogout } from './profile.js';
 import { loadCart } from './cart.js';
+import { setupSearchBar } from './search.js';
+
+
 
 
 // Function to parse hash and extract route and query parameters
@@ -47,6 +50,7 @@ function navigate() {
 document.addEventListener('DOMContentLoaded', () => {
     injectModals(); // Inject modals on page load
     uiDropdownDynamicChangerForLoginAndLogout();
+    setupSearchBar();
     navigate(); // Load the initial route
     window.addEventListener('hashchange', navigate); // Listen for hash changes
 });

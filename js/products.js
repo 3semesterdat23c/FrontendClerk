@@ -66,7 +66,7 @@ function createProductModal() {
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 })();
 
-export function loadProducts(page = 0, size = 12, sortOrder = 'asc') {
+export function loadProducts(page = 0, size = 12, sortOrder = 'asc', lowStock = false, outOfStock = false) {
     const app = document.getElementById('app');
     app.innerHTML = `
         <div class="text-center my-4">
@@ -76,8 +76,7 @@ export function loadProducts(page = 0, size = 12, sortOrder = 'asc') {
         </div>
     `;
 
-    const endpoint = `http://localhost:8080/api/v1/products?page=${page}&size=${size}&sort=price,${sortOrder}`;
-
+    const endpoint = `http://localhost:8080/api/v1/products?page=${page}&size=${size}&sort=price,${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}`;
     fetch(endpoint)
         .then(response => {
             if (!response.ok) {
@@ -85,11 +84,85 @@ export function loadProducts(page = 0, size = 12, sortOrder = 'asc') {
             }
             return response.json();
         })
-        .then(data => {
-            renderProducts(data, page, sortOrder);
-        })
+        .then(data => renderProducts(data, { page, sortOrder, lowStock, outOfStock }))
         .catch(handleProductError);
-       }
+}
+
+function createEditStockModal() {
+    const modalHTML = `
+        <div class="modal fade" id="editStockModal" tabindex="-1" aria-labelledby="editStockModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editStockModalLabel">Edit Stock</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editStockForm">
+                            <div class="mb-3">
+                                <label for="newStockCount" class="form-label">New Stock Count</label>
+                                <input type="number" class="form-control" id="newStockCount" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+// Initialize the modal on page load
+(function initializeEditStockModal() {
+    createEditStockModal();
+})();
+
+function openEditStockModal(productId, currentStock) {
+    const modal = new bootstrap.Modal(document.getElementById('editStockModal'));
+    const newStockInput = document.getElementById('newStockCount');
+    newStockInput.value = currentStock; // Pre-fill with the current stock count
+
+    const form = document.getElementById('editStockForm');
+    form.onsubmit = (e) => {
+        e.preventDefault();
+        const newStock = parseInt(newStockInput.value, 10);
+
+        if (isNaN(newStock) || newStock < 0) {
+            alert('Please enter a valid stock count.');
+            return;
+        }
+
+        updateStock(productId, newStock, modal);
+    };
+
+    modal.show();
+}
+
+function updateStock(productId, newStock, modal) {
+    fetch(`http://localhost:8080/api/v1/products/${productId}/update/stock`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newStock)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to update stock.');
+            }
+            return response.json();
+        })
+        .then(updatedProduct => {
+            alert('Stock updated successfully!');
+            modal.hide();
+            refreshProducts(); // Reload products to reflect the updated stock
+        })
+        .catch(error => {
+            alert(`Error updating stock: ${error.message}`);
+            console.error('Stock update error:', error);
+        });
+}
+
+
 
 export function loadProductDetails(productId) {
     const app = document.getElementById('app');
@@ -115,31 +188,35 @@ export function loadProductDetails(productId) {
         .then(renderProductDetails)
         .catch(handleProductError);
 }
-function renderProducts(responseData, currentPage, sortOrder) {
-    const { content: products, totalPages } = responseData;
+
+function renderProducts(responseData, filters) {
+    const { content: products, totalPages, number: currentPage } = responseData;
 
     if (!Array.isArray(products)) {
         throw new Error('Invalid product data');
     }
 
-    const productsHTML = createProductsHTML(products, currentPage, totalPages, sortOrder);
+    const productsHTML = createProductsHTML(products, currentPage, totalPages, filters.sortOrder, filters.lowStock, filters.outOfStock);
 
     const app = document.getElementById('app');
     app.innerHTML = productsHTML;
 
-    attachActionListeners(); // Attach event listeners to products
+    attachActionListeners(filters); // Attach event listeners with filters
 }
 
-
-function createProductsHTML(products, currentPage, totalPages, sortOrder = 'asc') {
+function createProductsHTML(products, currentPage, totalPages, sortOrder, lowStock, outOfStock) {
     return `
         <h1 class="text-center my-4">Our Products</h1>
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-3">
-               <div></div>
-                ${checkAdmin() ? `
-                        <button class="btn btn-success" id="createProductButton">Add New Product</button>
-                            ` : ''}
+                <div>
+                
+                    <input type="checkbox" id="lowStockFilter" class="form-check-input" ${lowStock ? 'checked' : ''}>
+                     <label for="lowStockFilter" class="form-check-label">Low Stock</label>
+                    <input type="checkbox" id="outOfStockFilter" class="form-check-input ms-3" ${outOfStock ? 'checked' : ''}>
+                    <label for="outOfStockFilter" class="form-check-label">Out of Stock</label>
+                </div>
+                ${checkAdmin() ? `<button class="btn btn-success" id="createProductButton">Add New Product</button>` : ''}
                 <div>
                     <select id="sortPriceFilter" class="form-select d-inline-block w-auto me-2">
                         <option value="asc" ${sortOrder === 'asc' ? 'selected' : ''}>Price: Low to High</option>
@@ -152,7 +229,7 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder = 'asc'
                 ${products.map(product => createProductCard(product)).join('')}
             </div>
         </div>
-        ${createPaginationHTML(currentPage, totalPages, sortOrder)}
+        ${createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock)}
     `;
 }
 
@@ -173,9 +250,13 @@ function createProductCard(product) {
                         <span style="color: ${stockStatus.color}; font-weight: bold;">
                             ${stockStatus.message}
                         </span>
+                        ${checkAdmin() ? `
+        <button class="btn btn-sm btn-link edit-stock-button" data-id="${product.productId}"
+                data-stock="${product.stockCount}">Edit</button>
+    `: ''}
                     </p>
                     <div class="mt-auto">
-<a href="#" class="btn btn-primary me-2 add-to-cart-button" data-product-id="${product.productId}">Buy Now</a>
+                        <a href="#" class="btn btn-primary me-2 add-to-cart-button" data-product-id="${product.productId}">Buy Now</a>
                         ${checkAdmin() ? `
                         <button class="btn btn-warning update-button me-2" data-id="${product.productId}">Update</button>
                         <button class="btn btn-danger delete-button" data-id="${product.productId}">Delete</button>
@@ -187,7 +268,8 @@ function createProductCard(product) {
     `;
 }
 
-function createPaginationHTML(currentPage, totalPages, sortOrder) {
+
+function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock) {
     const maxVisiblePages = 7;
     let startPage = Math.max(0, currentPage - 3);
     let endPage = Math.min(totalPages - 1, currentPage + 3);
@@ -209,22 +291,59 @@ function createPaginationHTML(currentPage, totalPages, sortOrder) {
         <nav aria-label="Page navigation">
             <ul class="pagination justify-content-center">
                 <li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
-                    <a class="page-link" href="#products?page=0&sort=${sortOrder}" data-page="0" data-sort="${sortOrder}">First</a>
+                    <a class="page-link" href="#products?page=0&sort=${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}" data-page="0" data-sort="${sortOrder}" data-low-stock="${lowStock}" data-out-of-stock="${outOfStock}">First</a>
                 </li>
                 ${pages.map(i => `
                     <li class="page-item ${currentPage === i ? 'active' : ''}">
-                        <a class="page-link" href="#products?page=${i}&sort=${sortOrder}" data-page="${i}" data-sort="${sortOrder}">${i + 1}</a>
+                        <a class="page-link" href="#products?page=${i}&sort=${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}" data-page="${i}" data-sort="${sortOrder}" data-low-stock="${lowStock}" data-out-of-stock="${outOfStock}">${i + 1}</a>
                     </li>
                 `).join('')}
                 <li class="page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}">
-                    <a class="page-link" href="#products?page=${totalPages - 1}&sort=${sortOrder}" data-page="${totalPages - 1}" data-sort="${sortOrder}">Last</a>
+                    <a class="page-link" href="#products?page=${totalPages - 1}&sort=${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}" data-page="${totalPages - 1}" data-sort="${sortOrder}" data-low-stock="${lowStock}" data-out-of-stock="${outOfStock}">Last</a>
                 </li>
             </ul>
         </nav>
     `;
 }
 
-function attachActionListeners() {
+
+
+function attachActionListeners(filters) {
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('page-link')) {
+            e.preventDefault();
+            const page = parseInt(e.target.getAttribute('data-page'));
+            const sortOrder = e.target.getAttribute('data-sort');
+            const lowStock = e.target.getAttribute('data-low-stock') === 'true';
+            const outOfStock = e.target.getAttribute('data-out-of-stock') === 'true';
+            loadProducts(page, 12, sortOrder, lowStock, outOfStock);
+        }
+    });
+
+    document.querySelectorAll('.edit-stock-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            const productId = button.getAttribute('data-id');
+            const currentStock = button.getAttribute('data-stock');
+            openEditStockModal(productId, currentStock);
+        });
+    });
+
+
+    // Attach event listener for "Low Stock" checkbox
+    document.getElementById('lowStockFilter').addEventListener('change', () => {
+        const lowStock = document.getElementById('lowStockFilter').checked;
+        const updatedFilters = { ...filters, lowStock }; // Update filters
+        loadProducts(0, 12, updatedFilters.sortOrder, updatedFilters.lowStock, updatedFilters.outOfStock);
+    });
+
+    // Attach event listener for "Out of Stock" checkbox
+    document.getElementById('outOfStockFilter').addEventListener('change', () => {
+        const outOfStock = document.getElementById('outOfStockFilter').checked;
+        const updatedFilters = { ...filters, outOfStock }; // Update filters
+        loadProducts(0, 12, updatedFilters.sortOrder, updatedFilters.lowStock, updatedFilters.outOfStock);
+    });
+
     // Attach event listeners to product images
     document.querySelectorAll('.product-image').forEach(img => {
         img.addEventListener('click', (e) => {
@@ -242,7 +361,7 @@ function attachActionListeners() {
     document.querySelectorAll('.delete-button').forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
-            const productId = e.target.getAttribute('data-id');
+            const productId = button.getAttribute('data-id');
             if (productId) {
                 deleteProduct(productId);
             } else {
@@ -255,7 +374,7 @@ function attachActionListeners() {
     document.querySelectorAll('.update-button').forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
-            const productId = e.target.getAttribute('data-id');
+            const productId = button.getAttribute('data-id');
             if (productId) {
                 openProductModal('update', productId);
             } else {
@@ -272,16 +391,38 @@ function attachActionListeners() {
         });
     }
 
+    // Event delegation for "Buy Now" buttons in the product container
     const productContainer = document.getElementById('product-container');
+    if (productContainer) {
+        productContainer.addEventListener('click', function (event) {
+            if (event.target && event.target.classList.contains('add-to-cart-button')) {
+                event.preventDefault();
+                const productId = event.target.getAttribute('data-product-id');
+                addToCart(productId);
+            }
+        });
+    }
+}
 
-    // Event delegation for "Buy Now" buttons
-    productContainer.addEventListener('click', function (event) {
-        if (event.target && event.target.classList.contains('add-to-cart-button')) {
-            event.preventDefault();
-            const productId = event.target.getAttribute('data-product-id');
-            addToCart(productId);
-        }
-    });
+
+function createProductDetailsHTML(product) {
+    return `
+        <div class="container my-4">
+            <a href="#products?page=0" id="backButton" class="btn btn-secondary mb-3">Back to Products</a>
+            <div class="row">
+                <div class="col-md-6">
+                    ${product.images && product.images.length > 0 ? `<img src="${product.images[0]}" class="img-fluid" alt="${product.name}">` : ''}
+                </div>
+                <div class="col-md-6">
+                    <h2>${product.name}</h2>
+                    <p><strong>Price:</strong> $${product.price}</p>
+                    <p><strong>In Stock:</strong> ${product.stockCount}</p>
+                    <p><strong>Description:</strong> ${product.description || 'No description available.'}</p>
+                    <a href="#" class="btn btn-primary">Buy Now</a>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function openProductModal(mode, productId = null) {
