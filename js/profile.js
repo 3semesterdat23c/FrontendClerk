@@ -192,6 +192,8 @@ function attachLoginFormListener() {
                 if (response.ok) {
                     const resData = await response.json();
                     localStorage.setItem('user', JSON.stringify(resData));
+                    localStorage.setItem('token', resData.token);
+
                     alert('Login successful! Welcome, ' + loginRequestDTO.email);
                     const mail = loginRequestDTO.email
                     updateUIForLoggedInUser(mail);

@@ -3,6 +3,7 @@
 import { loadHome } from './home.js';
 import { loadProducts, loadProductDetails } from './products.js';
 import { injectModals, uiDropdownDynamicChangerForLoginAndLogout } from './profile.js';
+import { loadCart } from './cart.js';
 
 
 // Function to parse hash and extract route and query parameters
@@ -33,6 +34,10 @@ function navigate() {
                 console.error('Product ID is missing in the URL.');
                 loadProducts(); // Fallback to product list
             }
+            break;
+
+        case 'cart':
+            loadCart();
             break;
         default:
             loadHome();
