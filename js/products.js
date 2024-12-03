@@ -35,6 +35,10 @@ function createProductModal() {
                                 <input type="text" class="form-control" id="productCategory" name="category" required>
                             </div>
                             <div class="mb-3">
+                                <label for="productTags" class="form-label">Tags (comma-separated)</label>
+                                <input type="text" class="form-control" id="productTags" name="tags">
+                            </div>
+                            <div class="mb-3">
                                 <label for="productDiscount" class="form-label">Discount Percentage</label>
                                 <input type="number" step="0.01" class="form-control" id="productDiscount" name="discount" required>
                             </div>
@@ -325,14 +329,25 @@ function openProductModal(mode, productId = null) {
 }
 
 function populateProductModal(product) {
+    console.log(product);
     document.getElementById('productId').value = product.productId;
     document.getElementById('productName').value = product.name;
     document.getElementById('productDescription').value = product.description;
     document.getElementById('productPrice').value = product.price;
     document.getElementById('productStock').value = product.stockCount;
-    document.getElementById('productCategory').value = product.categories ? Array.from(product.categories).map(cat => cat.categoryName).join(', ') : '';
+    document.getElementById('productCategory').value = product.category.categoryName;
     document.getElementById('productDiscount').value = product.discount || 0;
     document.getElementById('productImages').value = product.images ? product.images.join(', ') : '';
+
+    // Handle tags
+    const tagInput = document.getElementById('productTags');
+    if (product.tags && product.tags.length > 0) {
+        // If the product has tags, display them as a comma-separated list
+        tagInput.value = product.tags.map(tag => tag.tagName).join(', ');
+    } else {
+        // If no tags exist, clear the field
+        tagInput.value = '';
+    }
 
     // Hide previous errors
     const errorDiv = document.getElementById('productError');
@@ -450,6 +465,7 @@ function submitProductForm() {
     const category = document.getElementById('productCategory').value.trim();
     const discount = parseFloat(document.getElementById('productDiscount').value);
     const imagesInput = document.getElementById('productImages').value.trim();
+    const tagsInput = document.getElementById('productTags').value.trim();  // Get the tags input
 
     // Basic Validation
     if (!name || !description || isNaN(price) || isNaN(stockCount) || !category || isNaN(discount)) {
@@ -459,6 +475,9 @@ function submitProductForm() {
 
     // Parse images into an array
     const images = imagesInput ? imagesInput.split(',').map(url => url.trim()) : [];
+
+    // Parse tags into an array (comma-separated)
+    const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()) : [];
 
     // Determine if it's a create or update operation
     const isUpdate = Boolean(productId);
@@ -471,7 +490,8 @@ function submitProductForm() {
         stock: stockCount, // Assuming 'stock' corresponds to 'stockCount'
         category: category,
         discountPercentage: discount, // Assuming 'discountPercentage' corresponds to 'discount'
-        images: images
+        images: images,
+        tags: tags  // Add tags to the payload
     };
 
     // Determine the endpoint and HTTP method
