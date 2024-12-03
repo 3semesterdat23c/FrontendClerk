@@ -3,7 +3,6 @@ import {parseJwt} from "./admin.js";
 export function loadmyAccount() {
     const token = localStorage.getItem('user');
     const string = parseJwt(token)
-    console.log(string)
     const email = string["sub"]
     fetch(`http://localhost:8080/api/v1/users/${email}/user`) // Fetch user information
         .then(response => response.json())
