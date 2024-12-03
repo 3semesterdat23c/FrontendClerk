@@ -400,6 +400,14 @@ async function renderProductDetails(product) {
 
 function createProductDetailsHTML(product, relatedProducts) {
     const relatedProductContent = Array.isArray(relatedProducts.content) ? relatedProducts.content : [];
+    const itemsPerSlide = 4; // Number of items per slide in the carousel
+    const totalSlides = Math.ceil(relatedProductContent.length / itemsPerSlide);
+
+    // Function to group related products into sets of 4 for each slide
+    const groupedItems = [];
+    for (let i = 0; i < totalSlides; i++) {
+        groupedItems.push(relatedProductContent.slice(i * itemsPerSlide, (i + 1) * itemsPerSlide));
+    }
 
     return `
         <div class="container my-4">
@@ -417,19 +425,35 @@ function createProductDetailsHTML(product, relatedProducts) {
                 </div>
                 <div class="mt-4">
                     <h3>Related Products</h3>
-                    <div class="row">
-                        ${relatedProductContent.map(p => `
-                            <div class="col-md-3">
-                                <div class="card mb-3">
-                                    ${p.images && p.images.length > 0 ? `<img src="${p.images[0]}" class="card-img-top" alt="${p.name}">` : ''}
-                                    <div class="card-body">
-                                        <h5 class="card-title">${p.name}</h5>
-                                        <p class="card-text">$${p.price}</p>
-                                        <a href="#product?id=${p.productId}" class="btn btn-secondary">View Details</a>
+                    <div id="relatedProductsCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            ${groupedItems.map((group, index) => `
+                                <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                    <div class="row">
+                                        ${group.map(p => `
+                                            <div class="col-md-3">
+                                                <div class="card mb-3">
+                                                    ${p.images && p.images.length > 0 ? `<img src="${p.images[0]}" class="card-img-top" alt="${p.name}">` : ''}
+                                                    <div class="card-body">
+                                                        <h5 class="card-title">${p.name}</h5>
+                                                        <p class="card-text">$${p.price}</p>
+                                                        <a href="#product?id=${p.productId}" class="btn btn-secondary">View Details</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `).join('')}
                                     </div>
                                 </div>
-                            </div>
-                        `).join('')}
+                            `).join('')}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#relatedProductsCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#relatedProductsCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
                     </div>
                 </div>
             </div>
