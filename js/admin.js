@@ -46,7 +46,6 @@ export function searchNextAdmin() {
     button.addEventListener('click', () => {
         const email = emailInput.value;
         // ... (existing code)
-        console.log(email);
         if (!email) {
             resultMessage.textContent = 'Please enter a valid email.';
             return;
@@ -74,8 +73,6 @@ export function searchNextAdmin() {
 function showModal(user) {
     const modal = document.createElement('div');
     modal.classList.add('modal');
-    console.log(user.firstName)
-    console.log(user.email)
     modal.innerHTML = `
     <div class="modal-content">
       <p>Are you sure you want to make the following user an admin?</p>
