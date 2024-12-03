@@ -147,7 +147,7 @@ function attachRemoveFromCartListeners() {
 export async function removeFromCart(productId) {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:8080/api/v1/order/cart', {
+        const response = await fetch('http://localhost:8080/api/v1/order/delete', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
