@@ -48,3 +48,36 @@
     color: white;
     border-bottom: 2px solid #0056b3;
 }
+
+#relatedProductsCarousel .carousel-inner .carousel-item {
+    padding: 10px;
+}
+
+#relatedProductsCarousel .carousel-item .card {
+    height: 100%;
+}
+
+#relatedProductsCarousel {
+    position: relative;
+}
+
+#relatedProductsCarousel .carousel-control-prev,
+#relatedProductsCarousel .carousel-control-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+#relatedProductsCarousel .carousel-control-prev {
+    left: -40px; /* Move the previous button outside */
+}
+
+#relatedProductsCarousel .carousel-control-next {
+    right: -40px; /* Move the next button outside */
+}
+
+#relatedProductsCarousel .carousel-control-prev-icon,
+#relatedProductsCarousel .carousel-control-next-icon {
+    background-color: #000; /* Adjust the color of the arrows for visibility */
+}
