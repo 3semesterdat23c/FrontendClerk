@@ -404,27 +404,6 @@ function attachActionListeners(filters) {
     }
 }
 
-
-function createProductDetailsHTML(product) {
-    return `
-        <div class="container my-4">
-            <a href="#products?page=0" id="backButton" class="btn btn-secondary mb-3">Back to Products</a>
-            <div class="row">
-                <div class="col-md-6">
-                    ${product.images && product.images.length > 0 ? `<img src="${product.images[0]}" class="img-fluid" alt="${product.name}">` : ''}
-                </div>
-                <div class="col-md-6">
-                    <h2>${product.name}</h2>
-                    <p><strong>Price:</strong> $${product.price}</p>
-                    <p><strong>In Stock:</strong> ${product.stockCount}</p>
-                    <p><strong>Description:</strong> ${product.description || 'No description available.'}</p>
-                    <a href="#" class="btn btn-primary">Buy Now</a>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
 function openProductModal(mode, productId = null) {
     const modalTitle = document.getElementById('productModalLabel');
     const submitButton = document.getElementById('productSubmitButton');
