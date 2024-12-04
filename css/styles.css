@@ -40,27 +40,29 @@
 
 .navbar {
     padding: 10px 20px;
+    margin: 0 auto;
 }
 
 .navbar-nav .nav-link img {
-    margin-left: 10px;
+
+
+}
+
+
+.search-bar {
+    position: absolute;
+    margin-left: 30%;
+    padding: 10px;
+    font-size: 16px;
+    width: 600px;
 }
 
 
 .fixed-element {
-    position: fixed;
+    margin-left: 80%;
     top: 20px;
     right: 80px;
 }
-
-.search-bar {
-    padding: 10px;
-    font-size: 16px;
-    width: 600px;
-    align-items: center
-}
-
-
 
 .modal-content {
     background-color: #f9f9f9;
