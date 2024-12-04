@@ -77,11 +77,6 @@ function logoutUser() {
     alert('You have been logged out.');
     reroute();
 
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.reset();
-    }
-
 }
 
 // Update Dropdown for Logged-Out State
@@ -159,6 +154,7 @@ function attachRegisterFormListener() {
                     alert(message);
                     const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
                     registerModal.hide();
+                    registerForm.reset();
                 } else if (response.status === 409) {
                     const errorMessage = await response.text();
                     alert(errorMessage);
@@ -170,7 +166,7 @@ function attachRegisterFormListener() {
                 alert('An error occurred while registering. Please try again later.');
             }
         });
-    }
+        }
 }
 
 // Login Form Listener
@@ -204,6 +200,7 @@ function attachLoginFormListener() {
 
                     const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
                     loginModal.hide();
+                    loginForm.reset();
                     reroute();
 
                 } else if (response.status === 401) {
