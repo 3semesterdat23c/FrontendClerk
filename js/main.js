@@ -28,7 +28,7 @@ function navigate() {
 
     switch (route) {
         case 'home':
-            loadHome();
+            loadProducts();
             break;
         case 'products':
             const page = parseInt(params.get('page')) || 0;
