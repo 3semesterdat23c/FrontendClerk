@@ -36,18 +36,14 @@
 /* Optional: Add hover effects */
 .nav-item.dropdown .dropdown-menu {
     transition: all 0.3s ease-in-out;
+    left: -150%;
+    margin-top: 20%;
 }
 
 .navbar {
     padding: 10px 20px;
     margin: 0 auto;
 }
-
-.navbar-nav .nav-link img {
-
-
-}
-
 
 .search-bar {
     position: absolute;
@@ -59,7 +55,7 @@
 
 
 .fixed-element {
-    margin-left: 70%;
+    margin-left: 60%;
     top: 20px;
     right: 80px;
 }
