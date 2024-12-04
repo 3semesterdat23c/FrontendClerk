@@ -151,7 +151,7 @@ function attachRegisterFormListener() {
 
                 if (response.ok) {
                     const message = await response.text();
-                    alert(message);
+                    alert("Your account has been created!");
                     const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
                     registerModal.hide();
                     registerForm.reset();
