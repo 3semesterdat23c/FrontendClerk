@@ -27,7 +27,7 @@ function createProductModal() {
                                 <input type="number" step="0.01" class="form-control" id="productPrice" name="price" required>
                             </div>
                              <div class="mb-3">
-                                <label for="productDiscountPrice" class="form-label">Price</label>
+                                <label for="productDiscountPrice" class="form-label">Discount Price</label>
                                 <input type="number" step="0.01" class="form-control" id="productDiscountPrice" name="discountPrice" required>
                             </div>
                   
@@ -544,11 +544,11 @@ function createProductDetailsHTML(product, relatedProducts) {
     }
 
     // Function to format the price
-    function formatPrice(price, discountedPrice) {
-        const isDiscounted = price !== discountedPrice;
+    function formatPrice(price, discountPrice) {
+        const isDiscounted = price !== discountPrice;
         return isDiscounted ? `
             <span style="text-decoration: line-through; color: red;">$${price}</span>
-            <span style="font-weight: bold; color: green;"> $${discountedPrice}</span>
+            <span style="font-weight: bold; color: green;"> $${discountPrice}</span>
         ` : `<span>$${price}</span>`;
     }
 
@@ -557,11 +557,11 @@ function createProductDetailsHTML(product, relatedProducts) {
         <a href="#products?page=0" id="backButton" class="btn btn-secondary mb-3">Back to Products</a>
         <div class="row">
             <div class="col-md-6">
-                ${product.images && product.images.length > 0 ? `<img src="${product.images[0]}" class="img-fluid" alt="${product.name}">` : ''}
+                ${product.images && product.images.length > 0 ? `<img src="${product.images[0]}" class="img-fluid" alt="${product.title}">` : ''}
             </div>
             <div class="col-md-6">
                 <h2>${product.name}</h2>
-                <p><strong>Price:</strong> ${formatPrice(product.price, product.discountedPrice)}</p>
+                <p><strong>Price:</strong> ${formatPrice(product.price, product.discountPrice)}</p>
                 <p><strong>In Stock:</strong> ${product.stockCount}</p>
                 <p><strong>Description:</strong> ${product.description || 'No description available.'}</p>
                 <a href="#" class="btn btn-primary">Buy Now</a>
@@ -579,7 +579,7 @@ function createProductDetailsHTML(product, relatedProducts) {
                                                 ${p.images && p.images.length > 0 ? `<img src="${p.images[0]}" class="card-img-top" alt="${p.name}">` : ''}
                                                 <div class="card-body">
                                                     <h5 class="card-title">${p.title}</h5>
-                                                    <p class="card-text">${formatPrice(p.price, p.discountedPrice)}</p>
+                                                    <p class="card-text">${formatPrice(p.price, p.discountPrice)}</p>
                                                     <a href="#product?id=${p.productId}" class="btn btn-secondary">View Details</a>
                                                 </div>
                                             </div>
