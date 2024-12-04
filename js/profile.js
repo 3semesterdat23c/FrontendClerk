@@ -75,7 +75,13 @@ function logoutUser() {
     localStorage.clear();
     updateDropdownForLoggedOutState();
     alert('You have been logged out.');
-    reroute()
+    reroute();
+
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.reset();
+    }
+
 }
 
 // Update Dropdown for Logged-Out State
