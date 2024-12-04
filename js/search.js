@@ -1,4 +1,5 @@
-import { loadProducts } from './products.js'; // Assuming you have a function to render products
+import { createProductCard } from "./products.js";
+import { attachActionListeners } from "./products.js";
 
 // Handle dynamic search
 function setupSearchBar() {
@@ -33,10 +34,10 @@ function performSearch(query) {
         </div>
     `;
 
-    // API endpoint for search (adjust according to your backend)
+    // API endpoint for search with explicit pagination
     const endpoint = query
-        ? `http://localhost:8080/api/v1/products?search=${encodeURIComponent(query)}`
-        : `http://localhost:8080/api/v1/products`;
+        ? `http://localhost:8080/api/v1/products?search=${encodeURIComponent(query)}&page=0&size=100` // Adjust size if necessary
+        : `http://localhost:8080/api/v1/products?page=0&size=1000`;
 
     // Fetch and render products
     fetch(endpoint)
@@ -82,24 +83,9 @@ function renderFilteredProducts(data) {
             ${productsHTML}
         </div>
     `;
-}
 
-// Reuse your existing function to create product cards
-function createProductCard(product) {
-    return `
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                ${product.images && product.images.length > 0 ? `
-                    <img src="${product.images[0]}" class="card-img-top" alt="${product.name}">
-                ` : ''}
-                <div class="card-body">
-                    <h5 class="card-title">${product.name}</h5>
-                    <p class="card-text"><strong>Price:</strong> $${product.price}</p>
-                    <p class="card-text"><strong>Stock:</strong> ${product.stockCount}</p>
-                </div>
-            </div>
-        </div>
-    `;
+    // Attach event listeners to the updated DOM elements
+    attachActionListeners();
 }
 
 // Initialize the search bar on page load
