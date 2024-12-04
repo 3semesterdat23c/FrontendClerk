@@ -234,17 +234,18 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
     `;
 }
 
-export function createProductCard(product) { {
+export function createProductCard(product) {
+    {
 
-    console.log(product)
+        console.log(product)
 
-    const stockStatus = getStockStatus(product.stockCount);
+        const stockStatus = getStockStatus(product.stockCount);
 
-    // Calculate discounted price and original price
-    const hasDiscount = product.discount > 0;
-    const originalPrice = hasDiscount ? product.price / (1 - product.discount / 100) : product.price;
+        // Calculate discounted price and original price
+        const hasDiscount = product.discount > 0;
+        const originalPrice = hasDiscount ? product.price / (1 - product.discount / 100) : product.price;
 
-    return `
+        return `
         <div class="col-md-4 mb-4">
             <div class="card h-100 d-flex flex-column">
                 ${product.images && product.images.length > 0 ? `
@@ -270,7 +271,7 @@ export function createProductCard(product) { {
                         ${checkAdmin() ? `
         <button class="btn btn-sm btn-link edit-stock-button" data-id="${product.productId}"
                 data-stock="${product.stockCount}">Edit</button>
-    `: ''}
+    ` : ''}
                     </p>
                    <div class="mt-auto">
                         <a href="#" class="btn btn-primary me-2 add-to-cart-button" data-product-id="${product.productId}">Buy Now</a>
@@ -283,28 +284,29 @@ export function createProductCard(product) { {
             </div>
         </div>
     `;
+    }
 }
 
 
-function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock) {
-    const maxVisiblePages = 7;
-    let startPage = Math.max(0, currentPage - 3);
-    let endPage = Math.min(totalPages - 1, currentPage + 3);
+    function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock) {
+        const maxVisiblePages = 7;
+        let startPage = Math.max(0, currentPage - 3);
+        let endPage = Math.min(totalPages - 1, currentPage + 3);
 
-    if (endPage - startPage + 1 < maxVisiblePages) {
-        if (startPage === 0) {
-            endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
-        } else if (endPage === totalPages - 1) {
-            startPage = Math.max(0, endPage - maxVisiblePages + 1);
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            if (startPage === 0) {
+                endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
+            } else if (endPage === totalPages - 1) {
+                startPage = Math.max(0, endPage - maxVisiblePages + 1);
+            }
         }
-    }
 
-    let pages = [];
-    for (let i = startPage; i <= endPage; i++) {
-        pages.push(i);
-    }
+        let pages = [];
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(i);
+        }
 
-    return `
+        return `
         <nav aria-label="Page navigation">
             <ul class="pagination justify-content-center">
                 <li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
@@ -321,33 +323,33 @@ function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outO
             </ul>
         </nav>
     `;
-}
+    }
 
-function attachFilterActionListeners(filters) {
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('page-link')) {
-            e.preventDefault();
-            const page = parseInt(e.target.getAttribute('data-page'));
-            const sortOrder = e.target.getAttribute('data-sort');
-            const lowStock = e.target.getAttribute('data-low-stock') === 'true';
-            const outOfStock = e.target.getAttribute('data-out-of-stock') === 'true';
-            loadProducts(page, 12, sortOrder, lowStock, outOfStock);
-        }
-    });
+    function attachFilterActionListeners(filters) {
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('page-link')) {
+                e.preventDefault();
+                const page = parseInt(e.target.getAttribute('data-page'));
+                const sortOrder = e.target.getAttribute('data-sort');
+                const lowStock = e.target.getAttribute('data-low-stock') === 'true';
+                const outOfStock = e.target.getAttribute('data-out-of-stock') === 'true';
+                loadProducts(page, 12, sortOrder, lowStock, outOfStock);
+            }
+        });
 
-    // Attach event listener for "Low Stock" checkbox
-    document.getElementById('lowStockFilter').addEventListener('change', () => {
-        const lowStock = document.getElementById('lowStockFilter').checked;
-        const updatedFilters = {...filters, lowStock}; // Update filters
-        loadProducts(0, 12, updatedFilters.sortOrder, updatedFilters.lowStock, updatedFilters.outOfStock);
-    });
+        // Attach event listener for "Low Stock" checkbox
+        document.getElementById('lowStockFilter').addEventListener('change', () => {
+            const lowStock = document.getElementById('lowStockFilter').checked;
+            const updatedFilters = {...filters, lowStock}; // Update filters
+            loadProducts(0, 12, updatedFilters.sortOrder, updatedFilters.lowStock, updatedFilters.outOfStock);
+        });
 
-    // Attach event listener for "Out of Stock" checkbox
-    document.getElementById('outOfStockFilter').addEventListener('change', () => {
-        const outOfStock = document.getElementById('outOfStockFilter').checked;
-        const updatedFilters = {...filters, outOfStock}; // Update filters
-        loadProducts(0, 12, updatedFilters.sortOrder, updatedFilters.lowStock, updatedFilters.outOfStock);
-    });
+        // Attach event listener for "Out of Stock" checkbox
+        document.getElementById('outOfStockFilter').addEventListener('change', () => {
+            const outOfStock = document.getElementById('outOfStockFilter').checked;
+            const updatedFilters = {...filters, outOfStock}; // Update filters
+            loadProducts(0, 12, updatedFilters.sortOrder, updatedFilters.lowStock, updatedFilters.outOfStock);
+        });
     }
 
     // Attach event listeners to product images
@@ -415,9 +417,6 @@ function attachFilterActionListeners(filters) {
     }
 
 
-
-
-
     function openProductModal(mode, productId = null) {
         const modalTitle = document.getElementById('productModalLabel');
         const submitButton = document.getElementById('productSubmitButton');
@@ -467,7 +466,7 @@ function attachFilterActionListeners(filters) {
         document.getElementById('productId').value = product.productId;
         document.getElementById('productName').value = product.name;
         document.getElementById('productDescription').value = product.description;
-        document.getElementById('productPrice').value = product.price;
+        document.getElementById('productPrice').value = product.price / 100 * (100 + product.discount);
         document.getElementById('productStock').value = product.stockCount;
         document.getElementById('productCategory').value = product.category.categoryName;
         document.getElementById('productDiscount').value = product.discount || 0;
