@@ -234,7 +234,14 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
 }
 
 function createProductCard(product) {
+
+    console.log(product)
+
     const stockStatus = getStockStatus(product.stockCount);
+
+    // Calculate discounted price and original price
+    const hasDiscount = product.discount > 0;
+    const originalPrice = hasDiscount ? product.price / (1 - product.discount / 100) : product.price;
 
     return `
         <div class="col-md-4 mb-4">
@@ -244,7 +251,16 @@ function createProductCard(product) {
                 ` : ''}
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">${product.name}</h5>
-                    <p class="card-text"><strong>Price:</strong> $${product.price}</p>
+                    <p class="card-text">
+                        <strong>Price:</strong> 
+                        ${hasDiscount ? `
+                            <span style="text-decoration: line-through; color: red;">$${originalPrice.toFixed(2)}</span> 
+                            <span style="color: green; font-weight: bold;">$${product.price.toFixed(2)}</span>
+                            <small style="color: gray;">(${product.discount}% off)</small>
+                        ` : `
+                            <span>$${product.price.toFixed(2)}</span>
+                        `}
+                    </p>
                     <p class="card-text">
                         <strong>Stock Status:</strong> 
                         <span style="color: ${stockStatus.color}; font-weight: bold;">
