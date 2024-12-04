@@ -201,7 +201,8 @@ function renderProducts(responseData, filters) {
     const app = document.getElementById('app');
     app.innerHTML = productsHTML;
 
-    attachActionListeners(filters); // Attach event listeners with filters
+    attachFilterActionListeners(filters); // Attach event listeners with filters
+    attachActionListeners(); // Attach event listeners with filters
 }
 
 function createProductsHTML(products, currentPage, totalPages, sortOrder, lowStock, outOfStock) {
@@ -233,7 +234,7 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
     `;
 }
 
-function createProductCard(product) {
+export function createProductCard(product) {
     const stockStatus = getStockStatus(product.stockCount);
 
     return `
@@ -255,7 +256,7 @@ function createProductCard(product) {
                 data-stock="${product.stockCount}">Edit</button>
     `: ''}
                     </p>
-                    <div class="mt-auto">
+                   <div class="mt-auto">
                         <a href="#" class="btn btn-primary me-2 add-to-cart-button" data-product-id="${product.productId}">Buy Now</a>
                         ${checkAdmin() ? `
                         <button class="btn btn-warning update-button me-2" data-id="${product.productId}">Update</button>
@@ -306,9 +307,7 @@ function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outO
     `;
 }
 
-
-
-function attachActionListeners(filters) {
+function attachFilterActionListeners(filters) {
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('page-link')) {
             e.preventDefault();
@@ -320,216 +319,215 @@ function attachActionListeners(filters) {
         }
     });
 
-    document.querySelectorAll('.edit-stock-button').forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.preventDefault();
-            const productId = button.getAttribute('data-id');
-            const currentStock = button.getAttribute('data-stock');
-            openEditStockModal(productId, currentStock);
-        });
-    });
-
-
     // Attach event listener for "Low Stock" checkbox
     document.getElementById('lowStockFilter').addEventListener('change', () => {
         const lowStock = document.getElementById('lowStockFilter').checked;
-        const updatedFilters = { ...filters, lowStock }; // Update filters
+        const updatedFilters = {...filters, lowStock}; // Update filters
         loadProducts(0, 12, updatedFilters.sortOrder, updatedFilters.lowStock, updatedFilters.outOfStock);
     });
 
     // Attach event listener for "Out of Stock" checkbox
     document.getElementById('outOfStockFilter').addEventListener('change', () => {
         const outOfStock = document.getElementById('outOfStockFilter').checked;
-        const updatedFilters = { ...filters, outOfStock }; // Update filters
+        const updatedFilters = {...filters, outOfStock}; // Update filters
         loadProducts(0, 12, updatedFilters.sortOrder, updatedFilters.lowStock, updatedFilters.outOfStock);
     });
+    }
 
     // Attach event listeners to product images
-    document.querySelectorAll('.product-image').forEach(img => {
-        img.addEventListener('click', (e) => {
-            e.preventDefault();
-            const productId = e.target.getAttribute('data-id');
-            if (productId) {
-                window.location.hash = `product?id=${productId}`;
-            } else {
-                console.error('Product ID is missing.');
-            }
-        });
-    });
 
-    // Attach event listeners to delete buttons
-    document.querySelectorAll('.delete-button').forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.preventDefault();
-            const productId = button.getAttribute('data-id');
-            if (productId) {
-                deleteProduct(productId);
-            } else {
-                console.error('Product ID is missing for deletion.');
-            }
-        });
-    });
-
-    // Attach event listeners to update buttons
-    document.querySelectorAll('.update-button').forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.preventDefault();
-            const productId = button.getAttribute('data-id');
-            if (productId) {
-                openProductModal('update', productId);
-            } else {
-                console.error('Product ID is missing for update.');
-            }
-        });
-    });
-
-    // Attach event listener to the "Create Product" button
-    const createProductButton = document.getElementById('createProductButton');
-    if (createProductButton) {
-        createProductButton.addEventListener('click', () => {
-            openProductModal('create');
-        });
-    }
-
-    // Event delegation for "Buy Now" buttons in the product container
-    const productContainer = document.getElementById('product-container');
-    if (productContainer) {
-        productContainer.addEventListener('click', function (event) {
-            if (event.target && event.target.classList.contains('add-to-cart-button')) {
-                event.preventDefault();
-                const productId = event.target.getAttribute('data-product-id');
-                addToCart(productId);
-            }
-        });
-    }
-}
-
-function openProductModal(mode, productId = null) {
-    const modalTitle = document.getElementById('productModalLabel');
-    const submitButton = document.getElementById('productSubmitButton');
-
-    if (mode === 'create') {
-        // Set modal for creation
-        modalTitle.textContent = 'Create Product';
-        submitButton.textContent = 'Create Product';
-        submitButton.classList.remove('btn-warning');
-        submitButton.classList.add('btn-primary');
-
-        // Clear all form fields
-        document.getElementById('productForm').reset();
-        document.getElementById('productId').value = '';
-    } else if (mode === 'update' && productId) {
-        // Set modal for update
-        modalTitle.textContent = 'Update Product';
-        submitButton.textContent = 'Update Product';
-        submitButton.classList.remove('btn-primary');
-        submitButton.classList.add('btn-warning');
-
-        // Fetch product data and populate the form
-        fetch(`http://localhost:8080/api/v1/products/${productId}`)
-            .then(response => {
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        throw new Error('Product not found.');
-                    }
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(product => {
-                populateProductModal(product);
-            })
-            .catch(error => {
-                alert(`Failed to load product for update: ${error.message}`);
-                console.error('Fetch product for update error:', error);
+    export function attachActionListeners() {
+        // Attach event listeners for "Edit Stock" buttons
+        document.querySelectorAll('.edit-stock-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const productId = button.getAttribute('data-id');
+                const currentStock = button.getAttribute('data-stock');
+                openEditStockModal(productId, currentStock);
             });
-    }
-
-    showModal('productModal');
-}
-
-function populateProductModal(product) {
-    console.log(product);
-    document.getElementById('productId').value = product.productId;
-    document.getElementById('productName').value = product.name;
-    document.getElementById('productDescription').value = product.description;
-    document.getElementById('productPrice').value = product.price;
-    document.getElementById('productStock').value = product.stockCount;
-    document.getElementById('productCategory').value = product.category.categoryName;
-    document.getElementById('productDiscount').value = product.discount || 0;
-    document.getElementById('productImages').value = product.images ? product.images.join(', ') : '';
-
-    // Handle tags
-    const tagInput = document.getElementById('productTags');
-    if (product.tags && product.tags.length > 0) {
-        // If the product has tags, display them as a comma-separated list
-        tagInput.value = product.tags.map(tag => tag.tagName).join(', ');
-    } else {
-        // If no tags exist, clear the field
-        tagInput.value = '';
-    }
-
-    // Hide previous errors
-    const errorDiv = document.getElementById('productError');
-    errorDiv.classList.add('d-none');
-    errorDiv.innerText = '';
-}
-
-function showModal(modalId) {
-    const modalElement = document.getElementById(modalId);
-    const modal = new bootstrap.Modal(modalElement);
-    modal.show();
-}
-
-async function renderProductDetails(product) {
-    const app = document.getElementById('app');
-
-    let relatedProducts = [];
-    try {
-        // Fetch related products from the backend
-        const response = await fetch(`http://localhost:8080/api/v1/products?category=${product.category.categoryName}`);
-        if (response.ok) {
-            relatedProducts = await response.json();
-            console.log('Fetched related products:', relatedProducts); // Log to inspect the data
-        } else {
-            console.error('Failed to fetch related products:', response.statusText);
-        }
-    } catch (error) {
-        console.error('Error fetching related products:', error);
-    }
-
-    // Ensure relatedProducts is always an array
-    if (!Array.isArray(relatedProducts.content)) {
-        relatedProducts.content = [];
-    }
-
-    // Exclude the current product from the related products list
-    relatedProducts.content = relatedProducts.content.filter(p => p.productId !== product.productId);
-
-    const productDetailsHTML = createProductDetailsHTML(product, relatedProducts);
-    app.innerHTML = productDetailsHTML;
-
-    const backButton = document.getElementById('backButton');
-    if (backButton) {
-        backButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.history.back(); // Navigate to the previous page
         });
+
+        // Attach event listeners to "Add to Cart" buttons
+        document.querySelectorAll('.add-to-cart-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const productId = button.getAttribute('data-product-id');
+                addToCart(productId); // Assuming addToCart is already implemented
+            });
+        });
+
+        // Attach event listeners to other buttons (e.g., Update, Delete) as needed
+        document.querySelectorAll('.update-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const productId = button.getAttribute('data-id');
+                openProductModal('update', productId); // Assuming openProductModal is already implemented
+            });
+        });
+
+        document.querySelectorAll('.delete-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const productId = button.getAttribute('data-id');
+                deleteProduct(productId); // Assuming deleteProduct is already implemented
+            });
+        });
+
+
+        document.querySelectorAll('.product-image').forEach(img => {
+            img.addEventListener('click', (e) => {
+                e.preventDefault();
+                const productId = e.target.getAttribute('data-id');
+                if (productId) {
+                    window.location.hash = `product?id=${productId}`;
+                } else {
+                    console.error('Product ID is missing.');
+                }
+            });
+        });
+
+        // Attach event listener to the "Create Product" button
+        const createProductButton = document.getElementById('createProductButton');
+        if (createProductButton) {
+            createProductButton.addEventListener('click', () => {
+                openProductModal('create');
+            });
+        }
+
+        // Event delegation for "Buy Now" buttons in the product container
+
     }
-}
 
-function createProductDetailsHTML(product, relatedProducts) {
-    const relatedProductContent = Array.isArray(relatedProducts.content) ? relatedProducts.content : [];
-    const itemsPerSlide = 4; // Number of items per slide in the carousel
-    const totalSlides = Math.ceil(relatedProductContent.length / itemsPerSlide);
 
-    // Function to group related products into sets of 4 for each slide
-    const groupedItems = [];
-    for (let i = 0; i < totalSlides; i++) {
-        groupedItems.push(relatedProductContent.slice(i * itemsPerSlide, (i + 1) * itemsPerSlide));
+
+
+
+    function openProductModal(mode, productId = null) {
+        const modalTitle = document.getElementById('productModalLabel');
+        const submitButton = document.getElementById('productSubmitButton');
+
+        if (mode === 'create') {
+            // Set modal for creation
+            modalTitle.textContent = 'Create Product';
+            submitButton.textContent = 'Create Product';
+            submitButton.classList.remove('btn-warning');
+            submitButton.classList.add('btn-primary');
+
+            // Clear all form fields
+            document.getElementById('productForm').reset();
+            document.getElementById('productId').value = '';
+        } else if (mode === 'update' && productId) {
+            // Set modal for update
+            modalTitle.textContent = 'Update Product';
+            submitButton.textContent = 'Update Product';
+            submitButton.classList.remove('btn-primary');
+            submitButton.classList.add('btn-warning');
+
+            // Fetch product data and populate the form
+            fetch(`http://localhost:8080/api/v1/products/${productId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 404) {
+                            throw new Error('Product not found.');
+                        }
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(product => {
+                    populateProductModal(product);
+                })
+                .catch(error => {
+                    alert(`Failed to load product for update: ${error.message}`);
+                    console.error('Fetch product for update error:', error);
+                });
+        }
+
+        showModal('productModal');
     }
 
-    return `
+    function populateProductModal(product) {
+        console.log(product);
+        document.getElementById('productId').value = product.productId;
+        document.getElementById('productName').value = product.name;
+        document.getElementById('productDescription').value = product.description;
+        document.getElementById('productPrice').value = product.price;
+        document.getElementById('productStock').value = product.stockCount;
+        document.getElementById('productCategory').value = product.category.categoryName;
+        document.getElementById('productDiscount').value = product.discount || 0;
+        document.getElementById('productImages').value = product.images ? product.images.join(', ') : '';
+
+        // Handle tags
+        const tagInput = document.getElementById('productTags');
+        if (product.tags && product.tags.length > 0) {
+            // If the product has tags, display them as a comma-separated list
+            tagInput.value = product.tags.map(tag => tag.tagName).join(', ');
+        } else {
+            // If no tags exist, clear the field
+            tagInput.value = '';
+        }
+
+        // Hide previous errors
+        const errorDiv = document.getElementById('productError');
+        errorDiv.classList.add('d-none');
+        errorDiv.innerText = '';
+    }
+
+    function showModal(modalId) {
+        const modalElement = document.getElementById(modalId);
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+    }
+
+    export async function renderProductDetails(product) {
+        const app = document.getElementById('app');
+
+        let relatedProducts = [];
+        try {
+            // Fetch related products from the backend
+            const response = await fetch(`http://localhost:8080/api/v1/products?category=${product.category.categoryName}`);
+            if (response.ok) {
+                relatedProducts = await response.json();
+                console.log('Fetched related products:', relatedProducts); // Log to inspect the data
+            } else {
+                console.error('Failed to fetch related products:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error fetching related products:', error);
+        }
+
+        // Ensure relatedProducts is always an array
+        if (!Array.isArray(relatedProducts.content)) {
+            relatedProducts.content = [];
+        }
+
+        // Exclude the current product from the related products list
+        relatedProducts.content = relatedProducts.content.filter(p => p.productId !== product.productId);
+
+        const productDetailsHTML = createProductDetailsHTML(product, relatedProducts);
+        app.innerHTML = productDetailsHTML;
+
+        const backButton = document.getElementById('backButton');
+        if (backButton) {
+            backButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.history.back(); // Navigate to the previous page
+            });
+        }
+    }
+
+    function createProductDetailsHTML(product, relatedProducts) {
+        const relatedProductContent = Array.isArray(relatedProducts.content) ? relatedProducts.content : [];
+        const itemsPerSlide = 4; // Number of items per slide in the carousel
+        const totalSlides = Math.ceil(relatedProductContent.length / itemsPerSlide);
+
+        // Function to group related products into sets of 4 for each slide
+        const groupedItems = [];
+        for (let i = 0; i < totalSlides; i++) {
+            groupedItems.push(relatedProductContent.slice(i * itemsPerSlide, (i + 1) * itemsPerSlide));
+        }
+
+        return `
         <div class="container my-4">
             <a href="#products?page=0" id="backButton" class="btn btn-secondary mb-3">Back to Products</a>
             <div class="row">
@@ -579,115 +577,116 @@ function createProductDetailsHTML(product, relatedProducts) {
             </div>
         </div>
     `;
-}
+    }
 
-function handleProductError(error) {
-    const app = document.getElementById('app');
-    app.innerHTML = `
+    function handleProductError(error) {
+        const app = document.getElementById('app');
+        app.innerHTML = `
         <div class="alert alert-danger text-center" role="alert">
             Failed to load product. ${error.message}
         </div>
     `;
-    console.error('Product fetch error:', error);
-}
-function deleteProduct(productId) {
-    // Confirm deletion with the user
-    const confirmation = confirm("Are you sure you want to delete this product?");
-    if (!confirmation) {
-        return; // Exit if the user cancels
+        console.error('Product fetch error:', error);
     }
 
-    // Show a loading indicator or disable the delete button (optional)
-    // You can enhance user experience by providing feedback here
+    function deleteProduct(productId) {
+        // Confirm deletion with the user
+        const confirmation = confirm("Are you sure you want to delete this product?");
+        if (!confirmation) {
+            return; // Exit if the user cancels
+        }
 
-    fetch(`http://localhost:8080/api/v1/products/${productId}/delete`, {
-        method: 'DELETE',
-        // headers: {
-        //     'Authorization': `Bearer ${yourAuthToken}` // Include if authentication is required
-        // },
-    })
-        .then(response => {
-            if (response.ok) {
-                return response.text(); // Or response.json() if the response is JSON
-            } else if (response.status === 404) {
-                throw new Error('Product not found.');
-            } else {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+        // Show a loading indicator or disable the delete button (optional)
+        // You can enhance user experience by providing feedback here
+
+        fetch(`http://localhost:8080/api/v1/products/${productId}/delete`, {
+            method: 'DELETE',
+            // headers: {
+            //     'Authorization': `Bearer ${yourAuthToken}` // Include if authentication is required
+            // },
         })
-        .then(message => {
-            alert(message); // Inform the user of successful deletion
-            // Refresh the current page of products
-            // Extract the current page from the URL hash
-            const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
-            const currentPage = parseInt(urlParams.get('page')) || 0;
-            loadProducts(currentPage, 12);
-        })
-        .catch(error => {
-            alert(`Failed to delete product: ${error.message}`);
-            console.error('Delete product error:', error);
-        });
-}
+            .then(response => {
+                if (response.ok) {
+                    return response.text(); // Or response.json() if the response is JSON
+                } else if (response.status === 404) {
+                    throw new Error('Product not found.');
+                } else {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+            })
+            .then(message => {
+                alert(message); // Inform the user of successful deletion
+                // Refresh the current page of products
+                // Extract the current page from the URL hash
+                const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
+                const currentPage = parseInt(urlParams.get('page')) || 0;
+                loadProducts(currentPage, 12);
+            })
+            .catch(error => {
+                alert(`Failed to delete product: ${error.message}`);
+                console.error('Delete product error:', error);
+            });
+    }
 
 // **New Functions for Create and Update Functionality**
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Handle the product form submission
-    const productForm = document.getElementById('productForm');
-    if (productForm) {
-        productForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            submitProductForm();
-        });
-    }
-});
+    document.addEventListener('DOMContentLoaded', () => {
+        // Handle the product form submission
+        const productForm = document.getElementById('productForm');
+        if (productForm) {
+            productForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitProductForm();
+            });
+        }
+    });
 
-function submitProductForm() {
-    const productId = document.getElementById('productId').value;
-    const name = document.getElementById('productName').value.trim();
-    const description = document.getElementById('productDescription').value.trim();
-    const price = parseFloat(document.getElementById('productPrice').value);
-    const stockCount = parseInt(document.getElementById('productStock').value, 10);
-    const category = document.getElementById('productCategory').value.trim();
-    const discount = parseFloat(document.getElementById('productDiscount').value);
-    const imagesInput = document.getElementById('productImages').value.trim();
-    const tagsInput = document.getElementById('productTags').value.trim();  // Get the tags input
+    function submitProductForm() {
+        const productId = document.getElementById('productId').value;
+        const name = document.getElementById('productName').value.trim();
+        const description = document.getElementById('productDescription').value.trim();
+        const price = parseFloat(document.getElementById('productPrice').value);
+        const stockCount = parseInt(document.getElementById('productStock').value, 10);
+        const category = document.getElementById('productCategory').value.trim();
+        const discount = parseFloat(document.getElementById('productDiscount').value);
+        const imagesInput = document.getElementById('productImages').value.trim();
+        const tagsInput = document.getElementById('productTags').value.trim();  // Get the tags input
 
-    // Basic Validation
-    if (!name || !description || isNaN(price) || isNaN(stockCount) || !category || isNaN(discount)) {
-        showProductError('Please fill in all required fields correctly.');
-        return;
-    }
+        // Basic Validation
+        if (!name || !description || isNaN(price) || isNaN(stockCount) || !category || isNaN(discount)) {
+            showProductError('Please fill in all required fields correctly.');
+            return;
+        }
 
-    // Parse images into an array
-    const images = imagesInput ? imagesInput.split(',').map(url => url.trim()) : [];
+        // Parse images into an array
+        const images = imagesInput ? imagesInput.split(',').map(url => url.trim()) : [];
 
-    // Parse tags into an array (comma-separated)
-    const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()) : [];
+        // Parse tags into an array (comma-separated)
+        const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()) : [];
 
-    // Determine if it's a create or update operation
-    const isUpdate = Boolean(productId);
+        // Determine if it's a create or update operation
+        const isUpdate = Boolean(productId);
 
-    // Construct the product payload
-    const productPayload = {
-        title: name, // Assuming ProductRequestDTO has a 'title' field
-        description: description,
-        price: price,
-        stock: stockCount, // Assuming 'stock' corresponds to 'stockCount'
-        category: category,
-        discountPercentage: discount, // Assuming 'discountPercentage' corresponds to 'discount'
-        images: images,
-        tags: tags  // Add tags to the payload
-    };
+        // Construct the product payload
+        const productPayload = {
+            title: name, // Assuming ProductRequestDTO has a 'title' field
+            description: description,
+            price: price,
+            stock: stockCount, // Assuming 'stock' corresponds to 'stockCount'
+            category: category,
+            discountPercentage: discount, // Assuming 'discountPercentage' corresponds to 'discount'
+            images: images,
+            tags: tags  // Add tags to the payload
+        };
 
-    // Determine the endpoint and HTTP method
-    const endpoint = isUpdate ? `http://localhost:8080/api/v1/products/${productId}/update` : `http://localhost:8080/api/v1/products/create`;
-    const method = isUpdate ? 'PUT' : 'POST';
+        // Determine the endpoint and HTTP method
+        const endpoint = isUpdate ? `http://localhost:8080/api/v1/products/${productId}/update` : `http://localhost:8080/api/v1/products/create`;
+        const method = isUpdate ? 'PUT' : 'POST';
 
-    // Optional: Show loading state
-    const submitButton = document.getElementById('productSubmitButton');
-    submitButton.disabled = true;
-    submitButton.innerHTML = isUpdate ? `
+        // Optional: Show loading state
+        const submitButton = document.getElementById('productSubmitButton');
+        submitButton.disabled = true;
+        submitButton.innerHTML = isUpdate ? `
         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         Updating...
     ` : `
@@ -695,87 +694,88 @@ function submitProductForm() {
         Creating...
     `;
 
-    fetch(endpoint, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-            // 'Authorization': `Bearer ${yourAuthToken}` // Include if authentication is required
-        },
-        body: JSON.stringify(productPayload)
-    })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error(text || `HTTP error! Status: ${response.status}`);
-                });
-            }
-            return response.json();
+        fetch(endpoint, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                // 'Authorization': `Bearer ${yourAuthToken}` // Include if authentication is required
+            },
+            body: JSON.stringify(productPayload)
         })
-        .then(product => {
-            alert(isUpdate ? 'Product updated successfully!' : 'Product created successfully!');
-            // Close the modal
-            const modalElement = document.getElementById('productModal');
-            const modalInstance = bootstrap.Modal.getInstance(modalElement);
-            modalInstance.hide();
-            // Refresh the products list or update the specific product card
-            refreshProducts();
-        })
-        .catch(error => {
-            showProductError(`Failed to ${isUpdate ? 'update' : 'create'} product: ${error.message}`);
-            console.error(`${isUpdate ? 'Update' : 'Create'} product error:`, error);
-        })
-        .finally(() => {
-            // Reset the submit button
-            submitButton.disabled = false;
-            submitButton.innerHTML = isUpdate ? 'Update Product' : 'Create Product';
-        });
-}
-
-function showProductError(message) {
-    const errorDiv = document.getElementById('productError');
-    errorDiv.innerText = message;
-    errorDiv.classList.remove('d-none');
-}
-
-function refreshProducts() {
-    // Extract the current page from the URL hash
-    const hash = window.location.hash;
-    const params = new URLSearchParams(hash.split('?')[1]);
-    const currentPage = parseInt(params.get('page')) || 0;
-    loadProducts(currentPage, 12);
-}
-
-
-
-function getStockStatus(stockCount) {
-    if (stockCount === 0) {
-        return {color: 'red', message: 'Out of stock'};
-    } else if (stockCount > 0 && stockCount < 5) {
-        return {color: '#DAA520', message: 'Low stock'};
-    } else {
-        return {color: 'green', message: 'In stock (5+)'};
-    }
-}
-
-document.addEventListener('click', (e) => {
-    if (e.target.id === 'applySortButton') {
-        const sortOrder = document.getElementById('sortPriceFilter').value;
-        window.location.hash = `#products?page=0&sort=${sortOrder}`;
-        loadProducts(0, 12, sortOrder); // Reload products with selected sort order
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(text || `HTTP error! Status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(product => {
+                alert(isUpdate ? 'Product updated successfully!' : 'Product created successfully!');
+                // Close the modal
+                const modalElement = document.getElementById('productModal');
+                const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                modalInstance.hide();
+                // Refresh the products list or update the specific product card
+                refreshProducts();
+            })
+            .catch(error => {
+                showProductError(`Failed to ${isUpdate ? 'update' : 'create'} product: ${error.message}`);
+                console.error(`${isUpdate ? 'Update' : 'Create'} product error:`, error);
+            })
+            .finally(() => {
+                // Reset the submit button
+                submitButton.disabled = false;
+                submitButton.innerHTML = isUpdate ? 'Update Product' : 'Create Product';
+            });
     }
 
-    if (e.target.classList.contains('page-link')) {
-        e.preventDefault();
-        const page = parseInt(e.target.getAttribute('data-page'));
-        const sortOrder = e.target.getAttribute('data-sort');
-        loadProducts(page, 12, sortOrder);
+    function showProductError(message) {
+        const errorDiv = document.getElementById('productError');
+        errorDiv.innerText = message;
+        errorDiv.classList.remove('d-none');
     }
-});
+
+    function refreshProducts() {
+        // Extract the current page from the URL hash
+        const hash = window.location.hash;
+        const params = new URLSearchParams(hash.split('?')[1]);
+        const currentPage = parseInt(params.get('page')) || 0;
+        loadProducts(currentPage, 12);
+    }
 
 
-function syncSortDropdown(sortOrder) {
-    const sortDropdown = document.getElementById('sortPriceFilter');
-    if (sortDropdown) {
-        sortDropdown.value = sortOrder;
+    function getStockStatus(stockCount) {
+        if (stockCount === 0) {
+            return {color: 'red', message: 'Out of stock'};
+        } else if (stockCount > 0 && stockCount < 5) {
+            return {color: '#DAA520', message: 'Low stock'};
+        } else {
+            return {color: 'green', message: 'In stock (5+)'};
+        }
     }
-}
+
+    document.addEventListener('click', (e) => {
+        if (e.target.id === 'applySortButton') {
+            const sortOrder = document.getElementById('sortPriceFilter').value;
+            window.location.hash = `#products?page=0&sort=${sortOrder}`;
+            loadProducts(0, 12, sortOrder); // Reload products with selected sort order
+        }
+
+        if (e.target.classList.contains('page-link')) {
+            e.preventDefault();
+            const page = parseInt(e.target.getAttribute('data-page'));
+            const sortOrder = e.target.getAttribute('data-sort');
+            loadProducts(page, 12, sortOrder);
+        }
+    });
+
+
+    function syncSortDropdown(sortOrder) {
+        const sortDropdown = document.getElementById('sortPriceFilter');
+        if (sortDropdown) {
+            sortDropdown.value = sortOrder;
+        }
+    }
+
+
