@@ -68,3 +68,19 @@ p {
     color: #000000; /* Rød til fejlmeddelelser */
     margin-top: -10px;
 }
+
+.container {
+    display: block; /* Sikrer lodret flow */
+    width: 100%;    /* Eller ønsket bredde */
+    margin-bottom: 20px; /* Giver afstand mellem sektionerne */
+}
+
+.form-section {
+    margin-bottom: 30px; /* Giver plads mellem form-sektionerne */
+}
+
+#appAdmin {
+    margin-top: 20px; /* Ekstra afstand til sektionen ovenfor */
+}
+
+

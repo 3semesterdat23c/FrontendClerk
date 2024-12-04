@@ -30,8 +30,8 @@ function makeAdmin(email){
         })
 }
 export function searchNextAdmin() {
-    const app = document.getElementById('app'); // Ensure you have a valid `app` element.
-    app.innerHTML = `
+    const appAdmin = document.getElementById('appAdmin'); // Ensure you have a valid `app` element.
+    appAdmin.innerHTML = `
         <div>
             <label for="admin-email">Enter email to make admin:</label>
             <input type="email" id="admin-email" placeholder="Enter email" required />
@@ -46,7 +46,6 @@ export function searchNextAdmin() {
     button.addEventListener('click', () => {
         const email = emailInput.value;
         // ... (existing code)
-        console.log(email);
         if (!email) {
             resultMessage.textContent = 'Please enter a valid email.';
             return;
@@ -59,6 +58,7 @@ export function searchNextAdmin() {
 
                 // Only proceed with making the user admin if the user confirms
                 if (confirm(`Are you sure you want to make ${user.firstName} ${user.lastName} an admin?`)) {
+                    resultMessage.textContent = 'User made admin.';
                     makeAdmin(email)
                 }
             })
@@ -74,8 +74,6 @@ export function searchNextAdmin() {
 function showModal(user) {
     const modal = document.createElement('div');
     modal.classList.add('modal');
-    console.log(user.firstName)
-    console.log(user.email)
     modal.innerHTML = `
     <div class="modal-content">
       <p>Are you sure you want to make the following user an admin?</p>

@@ -18,8 +18,8 @@ function parseHash(hash) {
 }
 
 export function navigateToProducts(){
-const page = parseInt(('page')) || 0;
-loadProducts(page);}
+    const page = parseInt(('page')) || 0;
+    loadProducts(page);}
 
 // Function to handle navigation
 function navigate() {
@@ -59,5 +59,3 @@ document.addEventListener('DOMContentLoaded', () => {
     navigate(); // Load the initial route
     window.addEventListener('hashchange', navigate); // Listen for hash changes
 });
-
-
