@@ -30,8 +30,8 @@ function makeAdmin(email){
         })
 }
 export function searchNextAdmin() {
-    const app = document.getElementById('app'); // Ensure you have a valid `app` element.
-    app.innerHTML = `
+    const appAdmin = document.getElementById('appAdmin'); // Ensure you have a valid `app` element.
+    appAdmin.innerHTML = `
         <div>
             <label for="admin-email">Enter email to make admin:</label>
             <input type="email" id="admin-email" placeholder="Enter email" required />
@@ -58,6 +58,7 @@ export function searchNextAdmin() {
 
                 // Only proceed with making the user admin if the user confirms
                 if (confirm(`Are you sure you want to make ${user.firstName} ${user.lastName} an admin?`)) {
+                    resultMessage.textContent = 'User made admin.';
                     makeAdmin(email)
                 }
             })

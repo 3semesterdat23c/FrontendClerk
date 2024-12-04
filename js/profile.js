@@ -1,7 +1,6 @@
 // profile.js
 
 import { loadmyAccount } from "./myAccount.js";
-import { checkAdmin, searchNextAdmin } from "./admin.js";
 import { navigateToProducts } from "./main.js";
 
 // Register Modal Template
@@ -106,9 +105,6 @@ function updateUIForLoggedInUser(mail) {
             </a>
             <ul class="dropdown-menu" aria-labelledby="userDropdown">
                 <li><button class="dropdown-item" id="myAccountButton">My Account</button></li>
-                ${checkAdmin() ? `
-                        <li><button class="dropdown-item" id="searchNextAdmin">Make a user admin</button></li>
-                            ` : ''}
                 <li><button class="dropdown-item" id="logoutButton">Logout</button></li>
             </ul>
         `;
@@ -116,7 +112,6 @@ function updateUIForLoggedInUser(mail) {
         // Attach event listeners
         document.getElementById('logoutButton')?.addEventListener('click', logoutUser);
         document.getElementById('myAccountButton')?.addEventListener('click', loadmyAccount);
-        document.getElementById('searchNextAdmin')?.addEventListener('click', searchNextAdmin);
     }
 }
 
@@ -125,6 +120,7 @@ export function uiDropdownDynamicChangerForLoginAndLogout() {
     const user = JSON.parse(localStorage.getItem('user'));
     if (user && user.email) {
         updateUIForLoggedInUser(user);
+        window.location.href = "/index.html";
     } else {
         updateDropdownForLoggedOutState();
     }
