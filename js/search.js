@@ -1,5 +1,5 @@
-import { createProductCard } from "./products.js";
-import { attachActionListeners } from "./products.js";
+import { createProductCard} from "./products/products.js";
+import {attachActionListeners} from "./products/attach-listeners.js";
 
 // Handle dynamic search
 function setupSearchBar() {

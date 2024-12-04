@@ -1,12 +1,11 @@
 // main.js
 
 import { loadHome } from './home.js';
-import { loadProducts, loadProductDetails } from './products.js';
+import { loadProducts } from './products/products.js';
 import { injectModals, uiDropdownDynamicChangerForLoginAndLogout } from './profile.js';
 import { loadCart } from './cart.js';
 import { setupSearchBar } from './search.js';
-
-
+import {loadProductDetails} from "./products/product-details.js";
 
 
 // Function to parse hash and extract route and query parameters
