@@ -102,6 +102,7 @@ export function loadmyAccount() {
         });
 
         saveButtonPassword.addEventListener('click', () => {
+            event.preventDefault()
             const password = document.getElementById('password').value
             const passwordConfirmation = document.getElementById('password-confirmation').value
             if (password){
@@ -134,6 +135,5 @@ export function loadmyAccount() {
         })
 
     }
-
 }
 
