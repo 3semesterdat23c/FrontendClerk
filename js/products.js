@@ -15,8 +15,8 @@ function createProductModal() {
                         <div class="modal-body">
                             <input type="hidden" id="productId" name="id">
                             <div class="mb-3">
-                                <label for="productName" class="form-label">Name</label>
-                                <input type="text" class="form-control" id="productName" name="name" required>
+                                <label for="productTitle" class="form-label">Title</label>
+                                <input type="text" class="form-control" id="productTitle" name="title" required>
                             </div>
                             <div class="mb-3">
                                 <label for="productDescription" class="form-label">Description</label>
@@ -26,6 +26,11 @@ function createProductModal() {
                                 <label for="productPrice" class="form-label">Price</label>
                                 <input type="number" step="0.01" class="form-control" id="productPrice" name="price" required>
                             </div>
+                             <div class="mb-3">
+                                <label for="productDiscountPrice" class="form-label">Price</label>
+                                <input type="number" step="0.01" class="form-control" id="productDiscountPrice" name="discountPrice" required>
+                            </div>
+                  
                             <div class="mb-3">
                                 <label for="productStock" class="form-label">Stock Count</label>
                                 <input type="number" class="form-control" id="productStock" name="stockCount" required>
@@ -37,10 +42,6 @@ function createProductModal() {
                             <div class="mb-3">
                                 <label for="productTags" class="form-label">Tags (comma-separated)</label>
                                 <input type="text" class="form-control" id="productTags" name="tags">
-                            </div>
-                            <div class="mb-3">
-                                <label for="productDiscount" class="form-label">Discount Percentage</label>
-                                <input type="number" step="0.01" class="form-control" id="productDiscount" name="discount" required>
                             </div>
                             <div class="mb-3">
                                 <label for="productImages" class="form-label">Images (comma-separated URLs)</label>
@@ -76,7 +77,7 @@ export function loadProducts(page = 0, size = 12, sortOrder = 'asc', lowStock = 
         </div>
     `;
 
-    const endpoint = `http://localhost:8080/api/v1/products?page=${page}&size=${size}&sort=price,${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}`;
+    const endpoint = `http://localhost:8080/api/v1/products?page=${page}&size=${size}&sort=discountPrice,${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}`;
     fetch(endpoint)
         .then(response => {
             if (!response.ok) {
@@ -233,41 +234,57 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
         ${createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock)}
     `;
 }
-
 export function createProductCard(product) {
     const stockStatus = getStockStatus(product.stockCount);
+
+    // Check if discountedPrice exists and is different from the price
+    const isDiscounted = product.discountPrice !== product.price;
 
     return `
         <div class="col-md-4 mb-4">
             <div class="card h-100 d-flex flex-column">
                 ${product.images && product.images.length > 0 ? `
-                    <img src="${product.images[0]}" class="card-img-top product-image" alt="${product.name}" data-id="${product.productId}">
+                    <img src="${product.images[0]}" class="card-img-top product-image" alt="${product.title}" data-id="${product.productId}">
                 ` : ''}
                 <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">${product.name}</h5>
-                    <p class="card-text"><strong>Price:</strong> $${product.price}</p>
+                    <h5 class="card-title">${product.title}</h5>
+                    <p class="card-text"><strong>Price:</strong> 
+                        ${isDiscounted ? `
+                            <span style="text-decoration: line-through; color: red;">$${product.price}</span>
+                            <span style="font-weight: bold; color: green;">$${product.discountPrice}</span>
+                        ` : `
+                            <span>$${product.price}</span>
+                        `}
+                    </p>
                     <p class="card-text">
                         <strong>Stock Status:</strong> 
                         <span style="color: ${stockStatus.color}; font-weight: bold;">
                             ${stockStatus.message}
                         </span>
                         ${checkAdmin() ? `
-        <button class="btn btn-sm btn-link edit-stock-button" data-id="${product.productId}"
-                data-stock="${product.stockCount}">Edit</button>
-    `: ''}
+                            <button class="btn btn-sm btn-link edit-stock-button" data-id="${product.productId}" data-stock="${product.stockCount}">Edit</button>
+                        ` : ''}
                     </p>
                    <div class="mt-auto">
                         <a href="#" class="btn btn-primary me-2 add-to-cart-button" data-product-id="${product.productId}">Buy Now</a>
                         ${checkAdmin() ? `
-                        <button class="btn btn-warning update-button me-2" data-id="${product.productId}">Update</button>
-                        <button class="btn btn-danger delete-button" data-id="${product.productId}">Delete</button>
-                            ` : ''}
+                            <button class="btn btn-warning update-button me-2" data-id="${product.productId}">Update</button>
+                            <button class="btn btn-danger delete-button" data-id="${product.productId}">Delete</button>
+                        ` : ''}
                     </div>
                 </div>
             </div>
         </div>
     `;
 }
+
+
+// Helper function to format prices with a currency symbol
+function formatPrice(price) {
+    return `$${(parseFloat(price) || 0).toFixed(2)}`;
+}
+
+
 
 
 function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock) {
@@ -447,14 +464,13 @@ function attachFilterActionListeners(filters) {
     }
 
     function populateProductModal(product) {
-        console.log(product);
         document.getElementById('productId').value = product.productId;
-        document.getElementById('productName').value = product.name;
+        document.getElementById('productTitle').value = product.title;
         document.getElementById('productDescription').value = product.description;
         document.getElementById('productPrice').value = product.price;
+        document.getElementById('productDiscountPrice').value = product.discountPrice;
         document.getElementById('productStock').value = product.stockCount;
         document.getElementById('productCategory').value = product.category.categoryName;
-        document.getElementById('productDiscount').value = product.discount || 0;
         document.getElementById('productImages').value = product.images ? product.images.join(', ') : '';
 
         // Handle tags
@@ -516,68 +532,77 @@ function attachFilterActionListeners(filters) {
         }
     }
 
-    function createProductDetailsHTML(product, relatedProducts) {
-        const relatedProductContent = Array.isArray(relatedProducts.content) ? relatedProducts.content : [];
-        const itemsPerSlide = 4; // Number of items per slide in the carousel
-        const totalSlides = Math.ceil(relatedProductContent.length / itemsPerSlide);
+function createProductDetailsHTML(product, relatedProducts) {
+    const relatedProductContent = Array.isArray(relatedProducts.content) ? relatedProducts.content : [];
+    const itemsPerSlide = 4; // Number of items per slide in the carousel
+    const totalSlides = Math.ceil(relatedProductContent.length / itemsPerSlide);
 
-        // Function to group related products into sets of 4 for each slide
-        const groupedItems = [];
-        for (let i = 0; i < totalSlides; i++) {
-            groupedItems.push(relatedProductContent.slice(i * itemsPerSlide, (i + 1) * itemsPerSlide));
-        }
+    // Function to group related products into sets of 4 for each slide
+    const groupedItems = [];
+    for (let i = 0; i < totalSlides; i++) {
+        groupedItems.push(relatedProductContent.slice(i * itemsPerSlide, (i + 1) * itemsPerSlide));
+    }
 
-        return `
-        <div class="container my-4">
-            <a href="#products?page=0" id="backButton" class="btn btn-secondary mb-3">Back to Products</a>
-            <div class="row">
-                <div class="col-md-6">
-                    ${product.images && product.images.length > 0 ? `<img src="${product.images[0]}" class="img-fluid" alt="${product.name}">` : ''}
-                </div>
-                <div class="col-md-6">
-                    <h2>${product.name}</h2>
-                    <p><strong>Price:</strong> $${product.price}</p>
-                    <p><strong>In Stock:</strong> ${product.stockCount}</p>
-                    <p><strong>Description:</strong> ${product.description || 'No description available.'}</p>
-                    <a href="#" class="btn btn-primary">Buy Now</a>
-                </div>
-                <div class="mt-4">
-                    <h3>Related Products</h3>
-                    <div id="relatedProductsCarousel" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-inner">
-                            ${groupedItems.map((group, index) => `
-                                <div class="carousel-item ${index === 0 ? 'active' : ''}">
-                                    <div class="row">
-                                        ${group.map(p => `
-                                            <div class="col-md-3">
-                                                <div class="card mb-3">
-                                                    ${p.images && p.images.length > 0 ? `<img src="${p.images[0]}" class="card-img-top" alt="${p.name}">` : ''}
-                                                    <div class="card-body">
-                                                        <h5 class="card-title">${p.name}</h5>
-                                                        <p class="card-text">$${p.price}</p>
-                                                        <a href="#product?id=${p.productId}" class="btn btn-secondary">View Details</a>
-                                                    </div>
+    // Function to format the price
+    function formatPrice(price, discountedPrice) {
+        const isDiscounted = price !== discountedPrice;
+        return isDiscounted ? `
+            <span style="text-decoration: line-through; color: red;">$${price}</span>
+            <span style="font-weight: bold; color: green;"> $${discountedPrice}</span>
+        ` : `<span>$${price}</span>`;
+    }
+
+    return `
+    <div class="container my-4">
+        <a href="#products?page=0" id="backButton" class="btn btn-secondary mb-3">Back to Products</a>
+        <div class="row">
+            <div class="col-md-6">
+                ${product.images && product.images.length > 0 ? `<img src="${product.images[0]}" class="img-fluid" alt="${product.name}">` : ''}
+            </div>
+            <div class="col-md-6">
+                <h2>${product.name}</h2>
+                <p><strong>Price:</strong> ${formatPrice(product.price, product.discountedPrice)}</p>
+                <p><strong>In Stock:</strong> ${product.stockCount}</p>
+                <p><strong>Description:</strong> ${product.description || 'No description available.'}</p>
+                <a href="#" class="btn btn-primary">Buy Now</a>
+            </div>
+            <div class="mt-4">
+                <h3>Related Products</h3>
+                <div id="relatedProductsCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        ${groupedItems.map((group, index) => `
+                            <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                <div class="row">
+                                    ${group.map(p => `
+                                        <div class="col-md-3">
+                                            <div class="card mb-3">
+                                                ${p.images && p.images.length > 0 ? `<img src="${p.images[0]}" class="card-img-top" alt="${p.name}">` : ''}
+                                                <div class="card-body">
+                                                    <h5 class="card-title">${p.title}</h5>
+                                                    <p class="card-text">${formatPrice(p.price, p.discountedPrice)}</p>
+                                                    <a href="#product?id=${p.productId}" class="btn btn-secondary">View Details</a>
                                                 </div>
                                             </div>
-                                        `).join('')}
-                                    </div>
+                                        </div>
+                                    `).join('')}
                                 </div>
-                            `).join('')}
-                        </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#relatedProductsCarousel" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Previous</span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#relatedProductsCarousel" data-bs-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Next</span>
-                        </button>
+                            </div>
+                        `).join('')}
                     </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#relatedProductsCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#relatedProductsCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
     `;
-    }
+}
 
     function handleProductError(error) {
         const app = document.getElementById('app');
@@ -643,17 +668,17 @@ function attachFilterActionListeners(filters) {
 
     function submitProductForm() {
         const productId = document.getElementById('productId').value;
-        const name = document.getElementById('productName').value.trim();
+        const title = document.getElementById('productTitle').value.trim();
         const description = document.getElementById('productDescription').value.trim();
         const price = parseFloat(document.getElementById('productPrice').value);
+        const discountPrice = parseFloat(document.getElementById('productDiscountPrice').value);
         const stockCount = parseInt(document.getElementById('productStock').value, 10);
         const category = document.getElementById('productCategory').value.trim();
-        const discount = parseFloat(document.getElementById('productDiscount').value);
         const imagesInput = document.getElementById('productImages').value.trim();
         const tagsInput = document.getElementById('productTags').value.trim();  // Get the tags input
 
         // Basic Validation
-        if (!name || !description || isNaN(price) || isNaN(stockCount) || !category || isNaN(discount)) {
+        if (!title || !description || isNaN(price) || isNaN(stockCount) || !category || isNaN(discountPrice)) {
             showProductError('Please fill in all required fields correctly.');
             return;
         }
@@ -669,12 +694,12 @@ function attachFilterActionListeners(filters) {
 
         // Construct the product payload
         const productPayload = {
-            title: name, // Assuming ProductRequestDTO has a 'title' field
+            title: title, // Assuming ProductRequestDTO has a 'title' field
             description: description,
             price: price,
+            discountPrice: discountPrice, // Assuming 'discountPercentage' corresponds to 'discount'
             stock: stockCount, // Assuming 'stock' corresponds to 'stockCount'
             category: category,
-            discountPercentage: discount, // Assuming 'discountPercentage' corresponds to 'discount'
             images: images,
             tags: tags  // Add tags to the payload
         };
@@ -770,12 +795,5 @@ function attachFilterActionListeners(filters) {
         }
     });
 
-
-    function syncSortDropdown(sortOrder) {
-        const sortDropdown = document.getElementById('sortPriceFilter');
-        if (sortDropdown) {
-            sortDropdown.value = sortOrder;
-        }
-    }
 
 
