@@ -38,6 +38,25 @@
     transition: all 0.3s ease-in-out;
 }
 
+.navbar {
+    padding: 10px 20px;
+}
+
+.navbar-nav .nav-link img {
+    margin-left: 10px;
+}
+
+.form-control {
+    max-width: 400px; /* Begrænser bredden på søgebaren */
+}
+
+.fixed-element {
+    position: fixed;
+    top: 20px;
+    right: 80px;
+}
+
+
 
 .modal-content {
     background-color: #f9f9f9;
