@@ -60,7 +60,11 @@ export function loadmyAccount() {
         <br>
         <p id="form-message-password"></p>
    </div>
+ 
 </div>
+  
+
+<div id="appAdmin" class="container"></div>
     `;
         if (checkAdmin()===true){
         searchNextAdmin()}
