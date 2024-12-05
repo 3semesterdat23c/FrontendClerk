@@ -48,9 +48,25 @@ export function attachActionListeners() {
         button.addEventListener('click', (e) => {
             e.preventDefault();
             const productId = button.getAttribute('data-product-id');
-            addToCart(productId); // Assuming addToCart is already implemented
+
+            // Find the quantity input field relative to the button
+            const quantityInput = button.parentElement.querySelector('.quantity-input');
+            let quantity = 1; // Default quantity
+
+            if (quantityInput) {
+                quantity = parseInt(quantityInput.value, 10);
+
+                // Validate the quantity
+                if (isNaN(quantity) || quantity < 1) {
+                    alert('Please enter a valid quantity of 1 or more.');
+                    return;
+                }
+            }
+
+            addToCart(productId, quantity); // Pass the quantity to addToCart
         });
     });
+
 
     // Attach event listeners to other buttons (e.g., Update, Delete) as needed
     document.querySelectorAll('.update-button').forEach(button => {
