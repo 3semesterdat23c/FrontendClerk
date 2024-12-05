@@ -1,6 +1,7 @@
 // profile.js
 
 import { loadmyAccount } from "./myAccount.js";
+import { navigateToProducts } from "./main.js";
 
 // Register Modal Template
 function registerModalTemplate() {
@@ -71,8 +72,11 @@ function loginModalTemplate() {
 // Logout Function
 function logoutUser() {
     localStorage.removeItem('user');
+    localStorage.clear();
     updateDropdownForLoggedOutState();
     alert('You have been logged out.');
+    reroute();
+
 }
 
 // Update Dropdown for Logged-Out State
@@ -92,12 +96,12 @@ function updateDropdownForLoggedOutState() {
 }
 
 // Update Dropdown for Logged-In State
-function updateUIForLoggedInUser(userData) {
+function updateUIForLoggedInUser(mail) {
     const accountDropdownContainer = document.getElementById('accountDropdownContainer');
     if (accountDropdownContainer) {
         accountDropdownContainer.innerHTML = `
             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                ${userData.email}
+                ${mail}
                 <img src="images/Shadowman.jpg" alt="User" style="width: 30px; height: 30px;">
             </a>
             <ul class="dropdown-menu" aria-labelledby="userDropdown">
@@ -117,6 +121,7 @@ export function uiDropdownDynamicChangerForLoginAndLogout() {
     const user = JSON.parse(localStorage.getItem('user'));
     if (user && user.email) {
         updateUIForLoggedInUser(user);
+        window.location.href = "/index.html";
     } else {
         updateDropdownForLoggedOutState();
     }
@@ -146,9 +151,10 @@ function attachRegisterFormListener() {
 
                 if (response.ok) {
                     const message = await response.text();
-                    alert(message);
+                    alert("Your account has been created!");
                     const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
                     registerModal.hide();
+                    registerForm.reset();
                 } else if (response.status === 409) {
                     const errorMessage = await response.text();
                     alert(errorMessage);
@@ -160,7 +166,7 @@ function attachRegisterFormListener() {
                 alert('An error occurred while registering. Please try again later.');
             }
         });
-    }
+        }
 }
 
 // Login Form Listener
@@ -186,11 +192,17 @@ function attachLoginFormListener() {
                 if (response.ok) {
                     const resData = await response.json();
                     localStorage.setItem('user', JSON.stringify(resData));
+                    localStorage.setItem('token', resData.token);
+
                     alert('Login successful! Welcome, ' + loginRequestDTO.email);
-                    updateUIForLoggedInUser(resData);
+                    const mail = loginRequestDTO.email
+                    updateUIForLoggedInUser(mail);
 
                     const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
                     loginModal.hide();
+                    loginForm.reset();
+                    reroute();
+
                 } else if (response.status === 401) {
                     const errorMessage = await response.text();
                     alert('Invalid credentials: ' + errorMessage);
@@ -225,3 +237,8 @@ export function injectModals() {
     attachRegisterFormListener();
     attachLoginFormListener();
 }
+
+function reroute() {
+    navigateToProducts()
+}
+

@@ -1,17 +1,23 @@
 // main.js
 
 import { loadHome } from './home.js';
-import { loadProducts, loadProductDetails } from './products.js';
-import { loadAdmin } from './admin.js';
+import { loadProducts } from './products/products.js';
 import { injectModals, uiDropdownDynamicChangerForLoginAndLogout } from './profile.js';
-
+import { loadCart } from './cart.js';
+import { setupSearchBar } from './search.js';
+import {loadProductDetails} from "./products/product-details.js";
 
 // Function to parse hash and extract route and query parameters
+
 function parseHash(hash) {
     const [route, queryString] = hash.split('?');
     const params = new URLSearchParams(queryString);
     return { route, params };
 }
+
+export function navigateToProducts(){
+    const page = parseInt(('page')) || 0;
+    loadProducts(page);}
 
 // Function to handle navigation
 function navigate() {
@@ -20,7 +26,7 @@ function navigate() {
 
     switch (route) {
         case 'home':
-            loadHome();
+            loadProducts();
             break;
         case 'products':
             const page = parseInt(params.get('page')) || 0;
@@ -35,8 +41,9 @@ function navigate() {
                 loadProducts(); // Fallback to product list
             }
             break;
-        case 'admin':
-            loadAdmin();
+
+        case 'cart':
+            loadCart();
             break;
         default:
             loadHome();
@@ -46,8 +53,7 @@ function navigate() {
 document.addEventListener('DOMContentLoaded', () => {
     injectModals(); // Inject modals on page load
     uiDropdownDynamicChangerForLoginAndLogout();
+    setupSearchBar();
     navigate(); // Load the initial route
     window.addEventListener('hashchange', navigate); // Listen for hash changes
 });
-
-
