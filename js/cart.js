@@ -91,22 +91,21 @@ function renderCart(cartData) {
         <div id="cart-items" class="row">
     `;
 
-    // Iterate over cart items and build the HTML for each
     cartData.forEach(item => {
         cartContent += `
-            <div class="cart-item col-md-6 col-lg-4 mb-4">
-                <div class="card h-100">
-                    <img src="${item.productImageUrl}" class="card-img-top" alt="${item.productName}">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">${item.productName}</h5>
-                        <p class="card-text mb-1">Price: $${item.priceAtTimeOfOrder.toFixed(2)}</p>
-                        <p class="card-text mb-1">Quantity: ${item.quantity}</p>
-                        <p class="card-text mb-3">Subtotal: $${(item.priceAtTimeOfOrder * item.quantity).toFixed(2)}</p>
-                        <button class="btn btn-danger mt-auto remove-from-cart-button" data-product-id="${item.productId}">Remove</button>
-                    </div>
+        <div class="cart-item col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <img src="${item.productImageUrl}" class="card-img-top product-image" alt="${item.productName}" data-id="${item.productId}">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">${item.productName}</h5>
+                    <p class="card-text mb-1">Price: $${item.priceAtTimeOfOrder.toFixed(2)}</p>
+                    <p class="cart-text mb-1">Quantity: ${item.quantity}</p>
+                    <p class="card-text mb-3">Subtotal: $${(item.priceAtTimeOfOrder * item.quantity).toFixed(2)}</p>
+                    <button class="btn btn-danger mt-auto remove-from-cart-button" data-product-id="${item.productId}">Remove</button>
                 </div>
             </div>
-        `;
+        </div>
+    `;
     });
 
     // Close the cart items container
