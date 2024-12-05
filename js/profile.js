@@ -144,7 +144,7 @@ function attachRegisterFormListener() {
             const userRequestDTO = { firstName, lastName, email, password };
 
             try {
-                const response = await fetch(`${baseUrl()}/api/v1/users/register`, {
+                const response = await fetch(`${baseUrl()}/users/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(userRequestDTO),
@@ -184,7 +184,7 @@ function attachLoginFormListener() {
             const loginRequestDTO = { email, password };
 
             try {
-                const response = await fetch(`${baseUrl()}/api/v1/users/login`, {
+                const response = await fetch(`${baseUrl()}/users/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(loginRequestDTO),

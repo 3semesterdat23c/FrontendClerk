@@ -51,6 +51,7 @@ export function openEditStockModal(productId, currentStock) {
     modal.show();
 }
 
+
 export function updateStock(productId, newStock, modal) {
     fetch(`${baseUrl()}/${productId}/update/stock`, {
         method: 'PUT',
