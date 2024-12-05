@@ -2,6 +2,7 @@
 
 import { loadmyAccount } from "./myAccount.js";
 import { navigateToProducts } from "./main.js";
+import {baseUrl} from "./config";
 
 // Register Modal Template
 function registerModalTemplate() {
@@ -143,7 +144,7 @@ function attachRegisterFormListener() {
             const userRequestDTO = { firstName, lastName, email, password };
 
             try {
-                const response = await fetch('http://localhost:8080/api/v1/users/register', {
+                const response = await fetch(`${baseUrl()}/api/v1/users/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(userRequestDTO),
@@ -183,7 +184,7 @@ function attachLoginFormListener() {
             const loginRequestDTO = { email, password };
 
             try {
-                const response = await fetch('http://localhost:8080/api/v1/users/login', {
+                const response = await fetch(`${baseUrl()}/api/v1/users/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(loginRequestDTO),
