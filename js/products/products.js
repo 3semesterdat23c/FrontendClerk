@@ -91,8 +91,8 @@ export function createProductCard(product) {
                     <h5 class="card-title">${product.title}</h5>
                     <p class="card-text"><strong>Price:</strong> 
                         ${isDiscounted ? `
-                            <span style="text-decoration: line-through; color: red;">$${product.price}</span>
-                            <span style="font-weight: bold; color: green;">$${product.discountPrice}</span>
+                            <span style="text-decoration: line-through; color: red;">$${product.price.toFixed(2)}</span>
+                            <span style="font-weight: bold; color: green;">$${product.discountPrice.toFixed(2)}</span>
                         ` : `
                             <span>$${product.price}</span>
                         `}
@@ -284,6 +284,10 @@ function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outO
         // Basic Validation
         if (!title || !description || isNaN(price) || isNaN(stockCount) || !category || isNaN(discountPrice)) {
             showProductError('Please fill in all required fields correctly.');
+            return;
+        }
+        if (discountPrice>price){
+            showProductError('Please make a discountprice lower than the price or equal.');
             return;
         }
 
