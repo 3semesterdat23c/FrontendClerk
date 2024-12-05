@@ -1,5 +1,6 @@
 import { createProductCard} from "./products/products.js";
 import {attachActionListeners} from "./products/attach-listeners.js";
+import {baseUrl} from "./config.js";
 
 // Handle dynamic search
 function setupSearchBar() {
@@ -36,8 +37,8 @@ function performSearch(query) {
 
     // API endpoint for search with explicit pagination
     const endpoint = query
-        ? `http://localhost:8080/api/v1/products?search=${encodeURIComponent(query)}&page=0&size=100` // Adjust size if necessary
-        : `http://localhost:8080/api/v1/products?page=0&size=1000`;
+        ? `${baseUrl()}products?search=${encodeURIComponent(query)}&page=0&size=100` // Adjust size if necessary
+        : `${baseUrl()}/products?page=0&size=1000`;
 
     // Fetch and render products
     fetch(endpoint)

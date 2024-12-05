@@ -1,10 +1,11 @@
 import {parseJwt, searchNextAdmin, checkAdmin} from "./admin.js";
+import {baseUrl} from "./config.js";
 
 export function loadmyAccount() {
     const token = localStorage.getItem('user');
     const string = parseJwt(token)
     const email = string["sub"]
-    fetch(`http://localhost:8080/api/v1/users/${email}/user`) // Fetch user information
+    fetch(`${baseUrl()}/users/${email}/user`) // Fetch user information
         .then(response => response.json())
         .then(user => {
             const id = user.userId
@@ -81,7 +82,7 @@ export function loadmyAccount() {
             };
 
             // Call an API to update the user (if implemented)
-            fetch(`http://localhost:8080/api/v1/users/${id}/update`, {
+            fetch(`${baseUrl()}/users/${id}/update`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -110,7 +111,7 @@ export function loadmyAccount() {
                 const updatedUser = {
                     password: password,
                 };
-                fetch(`http://localhost:8080/api/v1/users/${id}/updatepassword`, {
+                fetch(`${baseUrl()}/users/${id}/updatepassword`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',

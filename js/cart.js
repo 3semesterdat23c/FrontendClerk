@@ -1,4 +1,5 @@
 // cart.js
+import {baseUrl} from "./config.js";
 export async function addToCart(productId) {
     try {
         const token = localStorage.getItem('token'); // Use 'token' if it's stored under this key
@@ -14,7 +15,7 @@ export async function addToCart(productId) {
             'Authorization': `Bearer ${token}`, // Add token to the headers
         };
 
-        const response = await fetch('http://localhost:8080/api/v1/order/cart', {
+        const response = await fetch(`${baseUrl()}/order/cart`, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify({
@@ -49,7 +50,7 @@ export async function loadCart() {
     // Function to load and display the cart contents
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:8080/api/v1/order/cart', {
+        const response = await fetch(`${baseUrl()}/order/cart`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
