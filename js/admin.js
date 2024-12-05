@@ -17,7 +17,7 @@ export function parseJwt (token) {
 
 }
 function makeAdmin(email){
-    fetch(`${baseUrl()}/api/v1/users/${email}/setadmin`, {
+    fetch(`${baseUrl()}/users/${email}/setadmin`, {
         method: 'PUT',
     })
         .then(response => {
