@@ -1,5 +1,5 @@
 import { refreshProducts } from './products.js';
-
+import {baseUrl} from "../config.js";
 export function createEditStockModal() {
     const modalHTML = `
         <div class="modal fade" id="editStockModal" tabindex="-1" aria-labelledby="editStockModalLabel" aria-hidden="true">
@@ -52,7 +52,7 @@ export function openEditStockModal(productId, currentStock) {
 }
 
 export function updateStock(productId, newStock, modal) {
-    fetch(`http://localhost:8080/api/v1/products/${productId}/update/stock`, {
+    fetch(`${baseUrl()}/${productId}/update/stock`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newStock)
