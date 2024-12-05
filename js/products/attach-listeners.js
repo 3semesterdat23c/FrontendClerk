@@ -98,6 +98,17 @@ export function attachActionListeners() {
             }
         });
     });
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('product-image')) {
+            e.preventDefault();
+            const productId = e.target.getAttribute('data-id');
+            if (productId) {
+                window.location.hash = `product?id=${productId}`;
+            } else {
+                console.error('Product ID is missing.');
+            }
+        }
+    });
 
     // Attach event listener to the "Create Product" button
     const createProductButton = document.getElementById('createProductButton');
