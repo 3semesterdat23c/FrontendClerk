@@ -1,3 +1,6 @@
+import { attachFilterActionListeners,attachActionListeners } from './attach-listeners.js';
+
+
 export function loadProductDetails(productId) {
     const app = document.getElementById('app');
 
@@ -51,7 +54,7 @@ export async function renderProductDetails(product) {
 
     const productDetailsHTML = createProductDetailsHTML(product, relatedProducts);
     app.innerHTML = productDetailsHTML;
-
+    attachActionListeners();
     const backButton = document.getElementById('backButton');
     if (backButton) {
         backButton.addEventListener('click', (e) => {
@@ -93,8 +96,15 @@ export function createProductDetailsHTML(product, relatedProducts) {
                 <p><strong>Price:</strong> ${formatPrice(product.price, product.discountPrice)}</p>
                 <p><strong>In Stock:</strong> ${product.stockCount}</p>
                 <p><strong>Description:</strong> ${product.description || 'No description available.'}</p>
-                <a href="#" class="btn btn-primary">Buy Now</a>
-            </div>
+               
+  <div class="input-group mb-3" style="max-width: 200px;">
+                <input type="number" class="form-control quantity-input" min="1" max="${product.stockCount}" value="1">
+                <button class="btn btn-primary add-to-cart-button" 
+                        data-product-id="${product.productId}" 
+                        data-stock-count="${product.stockCount}">
+                    Buy Now
+                </button>            </div>
+                </div>
             <div class="mt-4">
                 <h3>Related Products</h3>
                 <div id="relatedProductsCarousel" class="carousel slide" data-bs-ride="carousel">
@@ -131,4 +141,14 @@ export function createProductDetailsHTML(product, relatedProducts) {
         </div>
     </div>
     `;
+}
+
+function handleProductError(error) {
+    const app = document.getElementById('app');
+    app.innerHTML = `
+        <div class="alert alert-danger text-center" role="alert">
+            Failed to load product. ${error.message}
+        </div>
+    `;
+    console.error('Product fetch error:', error);
 }

@@ -1,8 +1,7 @@
 // cart.js
-export async function addToCart(productId) {
+export async function addToCart(productId, quantity) {
     try {
-        const token = localStorage.getItem('token'); // Use 'token' if it's stored under this key
-        console.log('Token retrieved:', token); // Log the token to ensure it's available
+        const token = localStorage.getItem('token');
 
         if (!token) {
             alert('You must be logged in to add items to the cart.');
@@ -11,7 +10,7 @@ export async function addToCart(productId) {
 
         const headers = {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`, // Add token to the headers
+            'Authorization': `Bearer ${token}`,
         };
 
         const response = await fetch('http://localhost:8080/api/v1/order/cart', {
@@ -19,14 +18,13 @@ export async function addToCart(productId) {
             headers: headers,
             body: JSON.stringify({
                 productId: productId,
-                quantity: 1, // Default quantity; adjust as needed
+                quantity: quantity, // Use the quantity parameter
             }),
         });
 
         if (response.ok) {
-            // Optionally, provide feedback to the user
-            alert('Product added to cart successfully!');
-            const data = await response.json(); // You can access response data if needed
+            alert(`Added ${quantity} item(s) to your cart successfully!`);
+            const data = await response.json();
             console.log('Server response:', data);
         } else {
             let errorMessage = 'Unknown error occurred.';
@@ -43,6 +41,7 @@ export async function addToCart(productId) {
         alert('An error occurred while adding the product to the cart.');
     }
 }
+
 
 
 export async function loadCart() {
