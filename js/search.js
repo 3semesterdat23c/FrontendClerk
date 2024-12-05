@@ -37,7 +37,7 @@ function performSearch(query) {
 
     // API endpoint for search with explicit pagination
     const endpoint = query
-        ? `${baseUrl()}products?search=${encodeURIComponent(query)}&page=0&size=100` // Adjust size if necessary
+        ? `${baseUrl()}/products?search=${encodeURIComponent(query)}&page=0&size=100` // Adjust size if necessary
         : `${baseUrl()}/products?page=0&size=1000`;
 
     // Fetch and render products
