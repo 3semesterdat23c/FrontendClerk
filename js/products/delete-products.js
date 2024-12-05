@@ -1,4 +1,6 @@
 import {loadProducts} from "./products.js";
+import {baseUrl} from "../config.js";
+
 
 export function deleteProduct(productId) {
     // Confirm deletion with the user
@@ -10,7 +12,7 @@ export function deleteProduct(productId) {
     // Show a loading indicator or disable the delete button (optional)
     // You can enhance user experience by providing feedback here
 
-    fetch(`http://localhost:8080/api/v1/products/${productId}/delete`, {
+    fetch(`${baseUrl()}/products/${productId}/delete`, {
         method: 'DELETE',
         // headers: {
         //     'Authorization': `Bearer ${yourAuthToken}` // Include if authentication is required
