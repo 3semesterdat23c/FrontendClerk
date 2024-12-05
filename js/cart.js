@@ -1,4 +1,5 @@
 // cart.js
+import {baseUrl} from "./config.js";
 export async function addToCart(productId, quantity) {
     try {
         const token = localStorage.getItem('token');
@@ -13,7 +14,7 @@ export async function addToCart(productId, quantity) {
             'Authorization': `Bearer ${token}`,
         };
 
-        const response = await fetch('http://localhost:8080/api/v1/order/cart', {
+        const response = await fetch(`${baseUrl()}/order/cart`, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify({
@@ -43,12 +44,11 @@ export async function addToCart(productId, quantity) {
 }
 
 
-
 export async function loadCart() {
     // Function to load and display the cart contents
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:8080/api/v1/order/cart', {
+        const response = await fetch(`${baseUrl()}/order/cart`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -146,7 +146,7 @@ function attachRemoveFromCartListeners() {
 export async function removeFromCart(productId) {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:8080/api/v1/order/delete', {
+        const response = await fetch(`${baseUrl()}/order/delete`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',

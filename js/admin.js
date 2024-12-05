@@ -1,3 +1,4 @@
+import {baseUrl} from "./config.js";
 export function checkAdmin(){
     const token =localStorage.getItem('user');
     if (token){
@@ -16,7 +17,7 @@ export function parseJwt (token) {
 
 }
 function makeAdmin(email){
-    fetch(`http://localhost:8080/api/v1/users/${email}/setadmin`, {
+    fetch(`${baseUrl()}/users/${email}/setadmin`, {
         method: 'PUT',
     })
         .then(response => {
@@ -51,7 +52,7 @@ export function searchNextAdmin() {
             return;
         }
 
-        fetch(`http://localhost:8080/api/v1/users/${email}/user`) // Fetch user information
+        fetch(`${baseUrl()}/users/${email}/user`) // Fetch user information
             .then(response => response.json())
             .then(user => {
                 showModal(user);

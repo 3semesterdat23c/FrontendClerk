@@ -3,6 +3,7 @@ import { createProductModal } from './create-products.js';
 import { deleteProduct } from './delete-products.js';
 import { openEditStockModal } from './update-stock.js';
 import { checkAdmin} from "../admin.js";
+import {baseUrl} from "../config.js";
 
 
 // Function to create a generic Product Modal (used for both Create and Update)
@@ -17,7 +18,7 @@ export function loadProducts(page = 0, size = 12, sortOrder = 'asc', lowStock = 
         </div>
     `;
 
-    const endpoint = `http://localhost:8080/api/v1/products?page=${page}&size=${size}&sort=discountPrice,${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}`;
+    const endpoint = `${baseUrl()}/products?page=${page}&size=${size}&sort=discountPrice,${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}`;
     fetch(endpoint)
         .then(response => {
             if (!response.ok) {
@@ -192,7 +193,7 @@ function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outO
             submitButton.classList.add('btn-warning');
 
             // Fetch product data and populate the form
-            fetch(`http://localhost:8080/api/v1/products/${productId}`)
+            fetch(`${baseUrl()}/products/${productId}`)
                 .then(response => {
                     if (!response.ok) {
                         if (response.status === 404) {
@@ -313,7 +314,7 @@ function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outO
         };
 
         // Determine the endpoint and HTTP method
-        const endpoint = isUpdate ? `http://localhost:8080/api/v1/products/${productId}/update` : `http://localhost:8080/api/v1/products/create`;
+        const endpoint = isUpdate ? `${baseUrl()}/products/${productId}/update` : `${baseUrl()}/products/create`;
         const method = isUpdate ? 'PUT' : 'POST';
 
         // Optional: Show loading state

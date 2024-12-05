@@ -1,6 +1,7 @@
 import { attachFilterActionListeners,attachActionListeners } from './attach-listeners.js';
 
 
+import {baseUrl} from "../config.js";
 export function loadProductDetails(productId) {
     const app = document.getElementById('app');
 
@@ -12,7 +13,7 @@ export function loadProductDetails(productId) {
         </div>
     `;
 
-    fetch(`http://localhost:8080/api/v1/products/${productId}`)
+    fetch(`${baseUrl()}/products/${productId}`)
         .then(response => {
             if (!response.ok) {
                 if (response.status === 404) {
@@ -33,7 +34,7 @@ export async function renderProductDetails(product) {
     let relatedProducts = [];
     try {
         // Fetch related products from the backend
-        const response = await fetch(`http://localhost:8080/api/v1/products?category=${product.category.categoryName}`);
+        const response = await fetch(`${baseUrl()}/products?category=${product.category.categoryName}`);
         if (response.ok) {
             relatedProducts = await response.json();
             console.log('Fetched related products:', relatedProducts); // Log to inspect the data
