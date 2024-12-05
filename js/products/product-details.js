@@ -95,14 +95,14 @@ export function createProductDetailsHTML(product, relatedProducts) {
             <div class="col-md-6">
                 <h2>${product.title}</h2>
                 <p><strong>Price:</strong> ${formatPrice(product.price, product.discountPrice)}</p>
-                <p><strong>In Stock:</strong> ${product.stockCount}</p>
+        <p><strong>In Stock:</strong> <span id="stock-count">${product.stockCount}</span></p>
                 <p><strong>Description:</strong> ${product.description || 'No description available.'}</p>
                
   <div class="input-group mb-3" style="max-width: 200px;">
                 <input type="number" class="form-control quantity-input" min="1" max="${product.stockCount}" value="1">
                 <button class="btn btn-primary add-to-cart-button" 
                         data-product-id="${product.productId}" 
-                        data-stock-count="${product.stockCount}">
+  >
                     Buy Now
                 </button>            </div>
                 </div>
