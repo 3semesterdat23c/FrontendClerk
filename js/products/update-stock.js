@@ -53,7 +53,7 @@ export function openEditStockModal(productId, currentStock) {
 
 
 export function updateStock(productId, newStock, modal) {
-    fetch(`${baseUrl()}/${productId}/update/stock`, {
+    fetch(`${baseUrl()}/products/${productId}/update/stock`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newStock)
