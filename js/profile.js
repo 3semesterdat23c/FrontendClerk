@@ -2,7 +2,7 @@
 
 import { loadmyAccount } from "./myAccount.js";
 import { navigateToProducts } from "./main.js";
-import {baseUrl} from "./config";
+import {baseUrl} from "./config.js";
 
 // Register Modal Template
 function registerModalTemplate() {
