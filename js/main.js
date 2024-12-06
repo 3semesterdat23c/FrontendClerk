@@ -6,6 +6,7 @@ import { injectModals, uiDropdownDynamicChangerForLoginAndLogout } from './profi
 import { loadCart } from './cart.js';
 import { setupSearchBar } from './search.js';
 import {loadProductDetails} from "./products/product-details.js";
+import {renderPaymentForm} from "./checkout.js";
 
 // Function to parse hash and extract route and query parameters
 
@@ -44,6 +45,9 @@ function navigate() {
 
         case 'cart':
             loadCart();
+            break;
+        case 'checkout':
+            renderPaymentForm();
             break;
         default:
             loadHome();
