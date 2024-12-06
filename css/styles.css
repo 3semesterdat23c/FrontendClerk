@@ -1,3 +1,40 @@
+/* Generel layout og struktur */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+#app {
+    min-height: calc(100vh - 200px); /* Justér 200px afhængigt af navbar + footer højde */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Navbar styling */
+.navbar {
+    position: sticky;
+    top: 0;
+    padding: 10px 20px;
+    margin: 0 auto;
+    z-index: 1030; /* Sørger for, at den altid vises over indholdet */
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Giver lidt skygge for separation */
+}
+
+.search-bar {
+    position: absolute;
+    margin-left: 30%;
+    padding: 10px;
+    font-size: 16px;
+    width: 40%;
+}
+
+.fixed-element {
+    margin-left: 60%;
+    top: 20px;
+    right: 80px;
+}
+
+/* Card styling */
 .card {
     display: flex;
     flex-direction: column;
@@ -27,49 +64,19 @@
     margin-top: auto;
 }
 
-/* Optional: Adjust the shadow man icon size */
+/* Shadow man icon */
 .nav-item.dropdown img {
     border-radius: 50%; /* Makes the icon circular */
     cursor: pointer;
 }
 
-/* Optional: Add hover effects */
 .nav-item.dropdown .dropdown-menu {
     transition: all 0.3s ease-in-out;
     left: -150%;
     margin-top: 20%;
 }
 
-.navbar {
-    padding: 10px 20px;
-    margin: 0 auto;
-}
-
-.search-bar {
-    position: absolute;
-    margin-left: 30%;
-    padding: 10px;
-    font-size: 16px;
-    width: 40%;
-}
-
-
-.fixed-element {
-    margin-left: 60%;
-    top: 20px;
-    right: 80px;
-}
-
-.modal-content {
-    background-color: #f9f9f9;
-    border-radius: 10px;
-}
-.modal-header {
-    background-color: #007bff;
-    color: white;
-    border-bottom: 2px solid #0056b3;
-}
-
+/* Carousel styling */
 #relatedProductsCarousel .carousel-inner .carousel-item {
     padding: 10px;
 }
@@ -102,3 +109,46 @@
 #relatedProductsCarousel .carousel-control-next-icon {
     background-color: #000; /* Adjust the color of the arrows for visibility */
 }
+
+/* Footer styling */
+.footer {
+    margin-top: auto; /* Sørger for, at footeren altid er nederst */
+    border-top: 1px solid #ddd; /* Giver en diskret adskillelse fra resten af siden */
+    color: #333; /* Standard tekstfarve */
+    background-color: #f8f9fa; /* Lys baggrund */
+}
+
+.footer h5 {
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.footer a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+    color: #0056b3;
+}
+
+.footer img {
+    cursor: pointer;
+}
+
+.footer .container {
+    max-width: 1200px; /* Begrænser bredden på footer-indhold */
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-left: 28%;
+}
+.footer.row {
+    width: 100%; /* Sørger for, at kolonner fylder hele bredden */
+    display: flex; /* Flexbox til nem placering */
+    justify-content: space-between; /* Placer elementer med afstand */
+
+}
+
