@@ -33,7 +33,7 @@ function makeAdmin(email){
 export function searchNextAdmin() {
     const appAdmin = document.getElementById('appAdmin'); // Ensure you have a valid `app` element.
     appAdmin.innerHTML = `
-        <div>
+        <div class="form-section">
             <label for="admin-email">Enter email to make admin:</label>
             <input type="email" id="admin-email" placeholder="Enter email" required />
             <button id="make-admin-btn" class="btn btn-primary">Make Admin</button>
