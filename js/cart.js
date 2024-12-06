@@ -43,15 +43,15 @@ export async function addToCart(productId, quantity) {
     }
 }
 
-
 export async function loadCart() {
     // Function to load and display the cart contents
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${baseUrl()}/order/cart`, {
+        const response = await fetch('http://localhost:8080/api/v1/order/cart', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             },
         });
 
@@ -91,21 +91,30 @@ function renderCart(cartData) {
         <div id="cart-items" class="row">
     `;
 
+    // Iterate over cart items and build the HTML for each
     cartData.forEach(item => {
+        const isDiscounted = item.priceAtTimeOfOrder < item.originalPrice;
         cartContent += `
-        <div class="cart-item col-md-6 col-lg-4 mb-4">
-            <div class="card h-100">
-                <img src="${item.productImageUrl}" class="card-img-top product-image" alt="${item.productName}" data-id="${item.productId}">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">${item.productName}</h5>
-                    <p class="card-text mb-1">Price: $${item.priceAtTimeOfOrder.toFixed(2)}</p>
-                    <p class="cart-text mb-1">Quantity: ${item.quantity}</p>
-                    <p class="card-text mb-3">Subtotal: $${(item.priceAtTimeOfOrder * item.quantity).toFixed(2)}</p>
-                    <button class="btn btn-danger mt-auto remove-from-cart-button" data-product-id="${item.productId}">Remove</button>
+            <div class="cart-item col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <img src="${item.productImageUrl}" class="card-img-top product-image" alt="${item.productName}" data-id="${item.productId}">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">${item.productName}</h5>
+                        <p class="card-text mb-1"><strong>Price:</strong> ${
+            isDiscounted ? `
+                                <span style="text-decoration: line-through; color: red;">$${item.originalPrice.toFixed(2)}</span>
+                                <span style="font-weight: bold; color: green;">$${item.priceAtTimeOfOrder.toFixed(2)}</span>
+                            ` : `
+                                <span>$${item.priceAtTimeOfOrder.toFixed(2)}</span>
+                            `
+        }</p>
+                        <p class="card-text mb-1"><strong>Quantity:</strong> ${item.quantity}</p>
+                        <p class="card-text mb-3"><strong>Subtotal:</strong> $${(item.priceAtTimeOfOrder * item.quantity).toFixed(2)}</p>
+                        <button class="btn btn-danger mt-auto remove-from-cart-button" data-product-id="${item.productId}">Remove</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
+        `;
     });
 
     // Close the cart items container
@@ -127,7 +136,6 @@ function renderCart(cartData) {
     // Attach event listeners to "Remove" buttons
     attachRemoveFromCartListeners();
 }
-
 
 
 function attachRemoveFromCartListeners() {
@@ -161,7 +169,7 @@ export async function removeFromCart(productId) {
             loadCart();
         } else {
             const errorData = await response.json();
-            alert(`Failed to remove product from cart: ${errorData.message}`);
+                alert(`Failed to remove product from cart: ${errorData.message}`);
         }
     } catch (error) {
         console.error('Error removing product from cart:', error);
@@ -170,3 +178,5 @@ export async function removeFromCart(productId) {
 
 
 }
+
+//Edit here
