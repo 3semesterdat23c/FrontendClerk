@@ -12,7 +12,7 @@ export function renderPaymentForm() {
                         <form id="payment-form">
                             <div class="mb-3">
                                 <label for="cardNumber" class="form-label">Card Number:</label>
-                                <input type="text" id="cardNumber" class="form-control" placeholder="1234 5678 9101 1121" maxlength="19" required />
+                                <input type="text" id="cardNumber" class="form-control" placeholder="1234 5678 9101 1121" maxlength="16" required />
                             </div>
                             <div class="mb-3">
                                 <label for="cardHolder" class="form-label">Cardholder Name:</label>
@@ -20,7 +20,7 @@ export function renderPaymentForm() {
                             </div>
                             <div class="mb-3">
                                 <label for="expiryDate" class="form-label">Expiry Date:</label>
-                                <input type="text" id="expiryDate" class="form-control" placeholder="MM/YY" maxlength="5" required />
+                                <input type="text" id="expiryDate" class="form-control" placeholder="MM/YY" maxlength="4" required />
                             </div>
                             <div class="mb-3">
                                 <label for="cvv" class="form-label">CVV:</label>
