@@ -1,116 +1,3 @@
-/* Generel layout og struktur */
-html, body {
-    height: 100%;
-    overflow: visible;
-}
-
-#app {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Navbar styling */
-.navbar {
-    position: sticky;
-    top: 0;
-    padding: 10px 20px;
-    margin: 0 auto;
-    z-index: 1030; /* Sørger for, at den altid vises over indholdet */
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Giver lidt skygge for separation */
-}
-
-.search-bar {
-    position: absolute;
-    margin-left: 30%;
-    padding: 10px;
-    font-size: 16px;
-    width: 40%;
-}
-
-.fixed-element {
-    margin-left: 60%;
-    top: 20px;
-    right: 80px;
-}
-
-/* Card styling */
-.card {
-    display: flex;
-    flex-direction: column;
-}
-
-.card-img-top {
-    width: 100%;
-    height: 250px;
-    object-fit: cover;
-}
-
-.card-body {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-}
-
-.card-title {
-    flex-shrink: 0;
-}
-
-.card-text {
-    flex-grow: 1;
-}
-
-.card-body .btn {
-    margin-top: auto;
-}
-
-/* Shadow man icon */
-.nav-item.dropdown img {
-    border-radius: 50%; /* Makes the icon circular */
-    cursor: pointer;
-}
-
-.nav-item.dropdown .dropdown-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 10px;
-}
-
-/* Carousel styling */
-#relatedProductsCarousel .carousel-inner .carousel-item {
-    padding: 10px;
-}
-
-#relatedProductsCarousel .carousel-item .card {
-    height: 100%;
-}
-
-#relatedProductsCarousel {
-    position: relative;
-}
-
-#relatedProductsCarousel .carousel-control-prev,
-#relatedProductsCarousel .carousel-control-next {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 1;
-}
-
-#relatedProductsCarousel .carousel-control-prev {
-    left: -40px; /* Move the previous button outside */
-}
-
-#relatedProductsCarousel .carousel-control-next {
-    right: -40px; /* Move the next button outside */
-}
-
-#relatedProductsCarousel .carousel-control-prev-icon,
-#relatedProductsCarousel .carousel-control-next-icon {
-    background-color: #000; /* Adjust the color of the arrows for visibility */
-}
-
 /* Footer styling */
 .footer {
     position: relative;
@@ -118,6 +5,7 @@ html, body {
     border-top: 1px solid #ddd;
     color: #333;
     background-color: #f8f9fa;
+    padding: 20px 0;
 }
 
 .footer h5 {
@@ -135,22 +23,45 @@ html, body {
     color: #0056b3;
 }
 
-.footer img {
-    cursor: pointer;
-}
-
+/* Centering the container in the footer */
 .footer .container {
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%; /* Take full width */
+    max-width: 1200px; /* Limit the maximum width */
+    margin: 0 auto; /* Center the container horizontally */
+    padding: 0 15px; /* Add padding to avoid elements touching the edge */
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
-    margin-left: 28%;
 }
-.footer.row {
+
+/* For rows in the footer */
+.footer .row {
     width: 100%;
     display: flex;
     justify-content: space-between;
-
 }
 
+.footer .col-lg-4, .footer .col-md-6 {
+    padding-left: 15px; /* Optional: Add padding to avoid touching the sides */
+    padding-right: 15px; /* Optional: Add padding to avoid touching the sides */
+}
+
+/* Center the Quick Links section */
+.footer .col-lg-4.text-center {
+    text-align: center;
+}
+
+/* Move the Contact section to the right */
+.footer .col-lg-4.text-end {
+    text-align: right;
+}
+
+.text-blue {
+    color: #007bff; /* Blue color */
+}
+
+/* Reset extra margins or padding if any from parent containers */
+body, .footer {
+    margin: 0;
+    padding: 0;
+}
