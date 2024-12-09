@@ -7,8 +7,16 @@ import {baseUrl} from "../config.js";
 
 
 // Function to create a generic Product Modal (used for both Create and Update)
-
-export function loadProducts(page = 0, size = 12, sortOrder = 'asc', lowStock = false, outOfStock = false) {
+export function loadProducts(
+    page = 0,
+    size = 12,
+    sortOrder = 'asc',
+    lowStock = false,
+    outOfStock = false,
+    categoryId = null,
+    categories = [],
+    searchTerm = null // Optional for additional filtering
+) {
     const app = document.getElementById('app');
     app.innerHTML = `
         <div class="text-center my-4">
@@ -18,7 +26,22 @@ export function loadProducts(page = 0, size = 12, sortOrder = 'asc', lowStock = 
         </div>
     `;
 
-    const endpoint = `${baseUrl()}/products?page=${page}&size=${size}&sort=discountPrice,${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}`;
+    let endpoint;
+
+    // Check if a categoryId is selected
+    if (categoryId) {
+        // Use findByCategory endpoint
+        endpoint = `${baseUrl()}/products/categories/${categoryId}?page=${page}&size=${size}&sort=discountPrice,${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}`;
+    } else {
+        // Default endpoint for general products
+        endpoint = `${baseUrl()}/products?page=${page}&size=${size}&sort=discountPrice,${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}`;
+    }
+
+    // If a search term is provided, add it as a query parameter
+    if (searchTerm) {
+        endpoint += `&search=${encodeURIComponent(searchTerm)}`;
+    }
+
     fetch(endpoint)
         .then(response => {
             if (!response.ok) {
@@ -26,10 +49,37 @@ export function loadProducts(page = 0, size = 12, sortOrder = 'asc', lowStock = 
             }
             return response.json();
         })
-        .then(data => renderProducts(data, { page, sortOrder, lowStock, outOfStock }))
+        .then(data => {
+            if (categories.length === 0) {
+                // Fetch categories if not already provided
+                fetch(`${baseUrl()}/category/categories`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch categories');
+                        }
+                        return response.json();
+                    })
+                    .then(fetchedCategories => {
+                        renderProducts(data, {
+                            page,
+                            sortOrder,
+                            lowStock,
+                            outOfStock,
+                            categoryId,
+                            categories: fetchedCategories,
+                            searchTerm,
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching categories:', error);
+                        renderProducts(data, { page, sortOrder, lowStock, outOfStock, categoryId, categories: [], searchTerm });
+                    });
+            } else {
+                renderProducts(data, { page, sortOrder, lowStock, outOfStock, categoryId, categories, searchTerm });
+            }
+        })
         .catch(handleProductError);
 }
-
 
 
 function renderProducts(responseData, filters) {
@@ -39,7 +89,15 @@ function renderProducts(responseData, filters) {
         throw new Error('Invalid product data');
     }
 
-    const productsHTML = createProductsHTML(products, currentPage, totalPages, filters.sortOrder, filters.lowStock, filters.outOfStock);
+    const productsHTML = createProductsHTML(
+        products,
+        currentPage,
+        totalPages,
+        filters.sortOrder,
+        filters.lowStock,
+        filters.outOfStock,
+        filters.categories // Pass categories here
+    );
 
     const app = document.getElementById('app');
     app.innerHTML = productsHTML;
@@ -47,20 +105,28 @@ function renderProducts(responseData, filters) {
     attachFilterActionListeners(filters); // Attach event listeners with filters
     attachActionListeners(); // Attach event listeners with filters
 }
-
-function createProductsHTML(products, currentPage, totalPages, sortOrder, lowStock, outOfStock) {
+function createProductsHTML(products, currentPage, totalPages, sortOrder, lowStock, outOfStock, categories = []) {
     return `
         <h1 class="text-center my-4">Our Products</h1>
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
-                
                     <input type="checkbox" id="lowStockFilter" class="form-check-input" ${lowStock ? 'checked' : ''}>
-                     <label for="lowStockFilter" class="form-check-label">Low Stock</label>
+                    <label for="lowStockFilter" class="form-check-label">Low Stock</label>
                     <input type="checkbox" id="outOfStockFilter" class="form-check-input ms-3" ${outOfStock ? 'checked' : ''}>
                     <label for="outOfStockFilter" class="form-check-label">Out of Stock</label>
                 </div>
+
+                <div>
+                  <select id="categoryFilter" class="form-select d-inline-block w-auto me-2">
+    <option value="">All Categories</option>
+    ${categories.map(category => `<option value="${category.categoryId}">${category.categoryName}</option>`).join('')}
+                    </select>
+                    <button class="btn btn-primary" id="applyCategoryFilterButton">Filter</button>
+                </div>
+
                 ${checkAdmin() ? `<button class="btn btn-success" id="createProductButton">Add New Product</button>` : ''}
+
                 <div>
                     <select id="sortPriceFilter" class="form-select d-inline-block w-auto me-2">
                         <option value="asc" ${sortOrder === 'asc' ? 'selected' : ''}>Price: Low to High</option>
@@ -76,6 +142,7 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
         ${createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock)}
     `;
 }
+
 export function createProductCard(product) {
     const stockStatus = getStockStatus(product.stockCount);
 
@@ -260,16 +327,6 @@ function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outO
 
 // **New Functions for Create and Update Functionality**
 
-    document.addEventListener('DOMContentLoaded', () => {
-        // Handle the product form submission
-        const productForm = document.getElementById('productForm');
-        if (productForm) {
-            productForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                submitProductForm();
-            });
-        }
-    });
 
     function submitProductForm() {
         const productId = document.getElementById('productId').value;
@@ -314,7 +371,7 @@ function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outO
         };
 
         // Determine the endpoint and HTTP method
-        const endpoint = isUpdate ? `${baseUrl()}/products/${productId}/update` : `${baseUrl()}/products/create`;
+        const endpoint = isUpdate ? `${baseUrl()}/products/${productId}/update` : `${baseUrl()}/api/v1/products/create`;
         const method = isUpdate ? 'PUT' : 'POST';
 
         // Optional: Show loading state
@@ -403,6 +460,18 @@ function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outO
             loadProducts(page, 12, sortOrder);
         }
     });
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Handle the product form submission
+    const productForm = document.getElementById('productForm');
+    if (productForm) {
+        productForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            submitProductForm();
+        });
+    }
+});
 
 
 
