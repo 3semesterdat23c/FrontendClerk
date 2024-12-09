@@ -2,11 +2,9 @@ import { attachActionListeners, attachFilterActionListeners } from './attach-lis
 import { createProductModal } from './create-products.js';
 import { deleteProduct } from './delete-products.js';
 import { openEditStockModal } from './update-stock.js';
-import { checkAdmin} from "../admin.js";
-import {baseUrl} from "../config.js";
+import { checkAdmin } from "../admin.js";
+import { baseUrl } from "../config.js";
 
-
-// Function to create a generic Product Modal (used for both Create and Update)
 export function loadProducts(
     page = 0,
     size = 12,
@@ -15,7 +13,7 @@ export function loadProducts(
     outOfStock = false,
     categoryId = null,
     categories = [],
-    searchTerm = null // Optional for additional filtering
+    searchTerm = null
 ) {
     const app = document.getElementById('app');
     app.innerHTML = `
@@ -28,16 +26,14 @@ export function loadProducts(
 
     let endpoint;
 
-    // Check if a categoryId is selected
     if (categoryId) {
-        // Use findByCategory endpoint
+        // Category filter
         endpoint = `${baseUrl()}/products/categories/${categoryId}?page=${page}&size=${size}&sort=discountPrice,${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}`;
     } else {
-        // Default endpoint for general products
+        // General products
         endpoint = `${baseUrl()}/products?page=${page}&size=${size}&sort=discountPrice,${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}`;
     }
 
-    // If a search term is provided, add it as a query parameter
     if (searchTerm) {
         endpoint += `&search=${encodeURIComponent(searchTerm)}`;
     }
@@ -51,7 +47,7 @@ export function loadProducts(
         })
         .then(data => {
             if (categories.length === 0) {
-                // Fetch categories if not already provided
+                // Fetch categories if not provided
                 fetch(`${baseUrl()}/category/categories`)
                     .then(response => {
                         if (!response.ok) {
@@ -81,7 +77,6 @@ export function loadProducts(
         .catch(handleProductError);
 }
 
-
 function renderProducts(responseData, filters) {
     const { content: products, totalPages, number: currentPage } = responseData;
 
@@ -101,13 +96,13 @@ function renderProducts(responseData, filters) {
         filters.searchTerm
     );
 
-
     const app = document.getElementById('app');
     app.innerHTML = productsHTML;
 
-    attachFilterActionListeners(filters); // Attach event listeners with filters
-    attachActionListeners(); // Attach event listeners with filters
+    attachFilterActionListeners(filters);
+    attachActionListeners();
 }
+
 function createProductsHTML(products, currentPage, totalPages, sortOrder, lowStock, outOfStock, categories = [], categoryId = null, searchTerm = null) {
     return `
         <h1 class="text-center my-4">Our Products</h1>
@@ -121,9 +116,13 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
                 </div>
 
                 <div>
-                  <select id="categoryFilter" class="form-select d-inline-block w-auto me-2">
-    <option value="">All Categories</option>
-    ${categories.map(category => `<option value="${category.categoryId}">${category.categoryName}</option>`).join('')}
+                    <select id="categoryFilter" class="form-select d-inline-block w-auto me-2">
+                        <option value="" ${categoryId === null ? 'selected' : ''}>All Categories</option>
+                        ${categories.map(category => `
+                            <option value="${category.categoryId}" ${categoryId === category.categoryId ? 'selected' : ''}>
+                                ${category.categoryName}
+                            </option>
+                        `).join('')}
                     </select>
                     <button class="btn btn-primary" id="applyCategoryFilterButton">Filter</button>
                 </div>
@@ -148,8 +147,6 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
 
 export function createProductCard(product) {
     const stockStatus = getStockStatus(product.stockCount);
-
-    // Check if discountedPrice exists and is different from the price
     const isDiscounted = product.discountPrice !== product.price;
 
     return `
@@ -164,20 +161,14 @@ export function createProductCard(product) {
                         ${isDiscounted ? `
                             <span style="text-decoration: line-through; color: red;">$${product.price.toFixed(2)}</span>
                             <span style="font-weight: bold; color: green;">$${product.discountPrice.toFixed(2)}</span>
-                        ` : `
-                            <span>$${product.price}</span>
-                        `}
+                        ` : `<span>$${product.price}</span>`}
                     </p>
                     <p class="card-text">
                         <strong>Stock Status:</strong> 
-                        <span style="color: ${stockStatus.color}; font-weight: bold;">
-                            ${stockStatus.message}
-                        </span>
-                        ${checkAdmin() ? `
-                            <button class="btn btn-sm btn-link edit-stock-button" data-id="${product.productId}" data-stock="${product.stockCount}">Edit</button>
-                        ` : ''}
+                        <span style="color: ${stockStatus.color}; font-weight: bold;">${stockStatus.message}</span>
+                        ${checkAdmin() ? `<button class="btn btn-sm btn-link edit-stock-button" data-id="${product.productId}" data-stock="${product.stockCount}">Edit</button>` : ''}
                     </p>
-                   <div class="mt-auto">
+                    <div class="mt-auto">
                         <a href="#" class="btn btn-primary me-2 add-to-cart-button" data-product-id="${product.productId}">Buy Now</a>
                         ${checkAdmin() ? `
                             <button class="btn btn-warning update-button me-2" data-id="${product.productId}">Update</button>
@@ -188,12 +179,6 @@ export function createProductCard(product) {
             </div>
         </div>
     `;
-}
-
-
-// Helper function to format prices with a currency symbol
-function formatPrice(price) {
-    return `$${(parseFloat(price) || 0).toFixed(2)}`;
 }
 
 function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId = null, searchTerm = null) {
@@ -264,33 +249,25 @@ function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outO
     `;
 }
 
-
-
-
-
-
 export function openProductModal(mode, productId = null) {
     const modalTitle = document.getElementById('productModalLabel');
     const submitButton = document.getElementById('productSubmitButton');
 
     if (mode === 'create') {
-        // Set modal for creation
         modalTitle.textContent = 'Create Product';
         submitButton.textContent = 'Create Product';
         submitButton.classList.remove('btn-warning');
         submitButton.classList.add('btn-primary');
 
-        // Clear all form fields
+        // Clear form
         document.getElementById('productForm').reset();
         document.getElementById('productId').value = '';
     } else if (mode === 'update' && productId) {
-        // Set modal for update
         modalTitle.textContent = 'Update Product';
         submitButton.textContent = 'Update Product';
         submitButton.classList.remove('btn-primary');
         submitButton.classList.add('btn-warning');
 
-        // Fetch product data and populate the form
         fetch(`${baseUrl()}/products/${productId}`)
             .then(response => {
                 if (!response.ok) {
@@ -323,17 +300,13 @@ function populateProductModal(product) {
     document.getElementById('productCategory').value = product.category.categoryName;
     document.getElementById('productImages').value = product.images ? product.images.join(', ') : '';
 
-    // Handle tags
     const tagInput = document.getElementById('productTags');
     if (product.tags && product.tags.length > 0) {
-        // If the product has tags, display them as a comma-separated list
         tagInput.value = product.tags.map(tag => tag.tagName).join(', ');
     } else {
-        // If no tags exist, clear the field
         tagInput.value = '';
     }
 
-    // Hide previous errors
     const errorDiv = document.getElementById('productError');
     errorDiv.classList.add('d-none');
     errorDiv.innerText = '';
@@ -355,10 +328,6 @@ function handleProductError(error) {
     console.error('Product fetch error:', error);
 }
 
-
-// **New Functions for Create and Update Functionality**
-
-
 function submitProductForm() {
     const productId = document.getElementById('productId').value;
     const title = document.getElementById('productTitle').value.trim();
@@ -368,59 +337,45 @@ function submitProductForm() {
     const stockCount = parseInt(document.getElementById('productStock').value, 10);
     const category = document.getElementById('productCategory').value.trim();
     const imagesInput = document.getElementById('productImages').value.trim();
-    const tagsInput = document.getElementById('productTags').value.trim();  // Get the tags input
+    const tagsInput = document.getElementById('productTags').value.trim();
 
-    // Basic Validation
     if (!title || !description || isNaN(price) || isNaN(stockCount) || !category || isNaN(discountPrice)) {
         showProductError('Please fill in all required fields correctly.');
         return;
     }
-    if (discountPrice>price){
+    if (discountPrice > price) {
         showProductError('Please make a discountprice lower than the price or equal.');
         return;
     }
 
-    // Parse images into an array
     const images = imagesInput ? imagesInput.split(',').map(url => url.trim()) : [];
-
-    // Parse tags into an array (comma-separated)
     const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()) : [];
 
-    // Determine if it's a create or update operation
     const isUpdate = Boolean(productId);
-
-    // Construct the product payload
     const productPayload = {
-        title: title, // Assuming ProductRequestDTO has a 'title' field
-        description: description,
-        price: price,
-        discountPrice: discountPrice, // Assuming 'discountPercentage' corresponds to 'discount'
-        stock: stockCount, // Assuming 'stock' corresponds to 'stockCount'
-        category: category,
-        images: images,
-        tags: tags  // Add tags to the payload
+        title,
+        description,
+        price,
+        discountPrice,
+        stock: stockCount,
+        category,
+        images,
+        tags
     };
 
-    // Determine the endpoint and HTTP method
     const endpoint = isUpdate ? `${baseUrl()}/products/${productId}/update` : `${baseUrl()}/api/v1/products/create`;
     const method = isUpdate ? 'PUT' : 'POST';
 
-    // Optional: Show loading state
     const submitButton = document.getElementById('productSubmitButton');
     submitButton.disabled = true;
-    submitButton.innerHTML = isUpdate ? `
-        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        Updating...
-    ` : `
-        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        Creating...
-    `;
+    submitButton.innerHTML = isUpdate
+        ? `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...`
+        : `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...`;
 
     fetch(endpoint, {
         method: method,
         headers: {
-            'Content-Type': 'application/json',
-            // 'Authorization': `Bearer ${yourAuthToken}` // Include if authentication is required
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify(productPayload)
     })
@@ -434,11 +389,9 @@ function submitProductForm() {
         })
         .then(product => {
             alert(isUpdate ? 'Product updated successfully!' : 'Product created successfully!');
-            // Close the modal
             const modalElement = document.getElementById('productModal');
             const modalInstance = bootstrap.Modal.getInstance(modalElement);
             modalInstance.hide();
-            // Refresh the products list or update the specific product card
             refreshProducts();
         })
         .catch(error => {
@@ -446,7 +399,6 @@ function submitProductForm() {
             console.error(`${isUpdate ? 'Update' : 'Create'} product error:`, error);
         })
         .finally(() => {
-            // Reset the submit button
             submitButton.disabled = false;
             submitButton.innerHTML = isUpdate ? 'Update Product' : 'Create Product';
         });
@@ -459,71 +411,21 @@ function showProductError(message) {
 }
 
 export function refreshProducts() {
-    // Extract the current page from the URL hash
     const hash = window.location.hash;
     const params = new URLSearchParams(hash.split('?')[1]);
     const currentPage = parseInt(params.get('page')) || 0;
     loadProducts(currentPage, 12);
 }
 
-
 function getStockStatus(stockCount) {
     if (stockCount === 0) {
-        return {color: 'red', message: 'Out of stock'};
+        return { color: 'red', message: 'Out of stock' };
     } else if (stockCount > 0 && stockCount < 5) {
-        return {color: '#DAA520', message: 'Low stock'};
+        return { color: '#DAA520', message: 'Low stock' };
     } else {
-        return {color: 'green', message: 'In stock (5+)'};
+        return { color: 'green', message: 'In stock (5+)' };
     }
 }
-
-document.addEventListener('click', (e) => {
-    if (e.target.id === 'applySortButton') {
-        const sortOrder = document.getElementById('sortPriceFilter').value;
-        const filters = {
-            sortOrder,
-            lowStock: document.getElementById('lowStockFilter').checked,
-            outOfStock: document.getElementById('outOfStockFilter').checked,
-            categoryId: document.getElementById('categoryFilter').value || null,
-
-
-        };
-
-        loadProducts(
-            0,
-            12,
-            filters.sortOrder,
-            filters.lowStock,
-            filters.outOfStock,
-            filters.categoryId
-        );
-    }
-
-
-
-    if (e.target.id === 'applyCategoryFilterButton') {
-        const categoryId = document.getElementById('categoryFilter').value;
-        const filters = {
-            categoryId,
-            sortOrder: document.getElementById('sortPriceFilter').value,
-            lowStock: document.getElementById('lowStockFilter').checked,
-            outOfStock: document.getElementById('outOfStockFilter').checked,
-        };
-
-        loadProducts(
-            0,
-            12,
-            filters.sortOrder,
-            filters.lowStock,
-            filters.outOfStock,
-            filters.categoryId
-        );
-
-    }
-
-});
-
-
 
 document.addEventListener('DOMContentLoaded', () => {
     // Handle the product form submission
@@ -535,5 +437,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
-

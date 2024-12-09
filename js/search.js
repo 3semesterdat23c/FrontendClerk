@@ -1,8 +1,7 @@
-import { createProductCard} from "./products/products.js";
-import {attachActionListeners} from "./products/attach-listeners.js";
-import {baseUrl} from "./config.js";
+import { createProductCard } from "./products/products.js";
+import { attachActionListeners } from "./products/attach-listeners.js";
+import { baseUrl } from "./config.js";
 
-// Handle dynamic search
 function setupSearchBar() {
     const searchInput = document.getElementById('searchInput');
     if (!searchInput) return;
@@ -12,13 +11,11 @@ function setupSearchBar() {
     searchInput.addEventListener('input', (e) => {
         const query = e.target.value.trim();
 
-        // Clear any previously set timeout
         clearTimeout(timeout);
 
-        // Add a slight delay to avoid making too many API requests
         timeout = setTimeout(() => {
             performSearch(query);
-        }, 300); // 300ms debounce
+        }, 300);
     });
 }
 
@@ -73,11 +70,11 @@ function renderFilteredProducts(data, query, currentPage, size) {
         ${createSearchPaginationHTML(data.number, data.totalPages, query, size)}
     `;
 
-    // Attach event listeners
     attachActionListeners();
 }
+
 function createSearchPaginationHTML(currentPage, totalPages, query, size) {
-    if (totalPages <= 1) return ''; // No need for pagination if only one page
+    if (totalPages <= 1) return '';
 
     const maxVisiblePages = 7;
     let startPage = Math.max(0, currentPage - 3);
@@ -114,6 +111,7 @@ function createSearchPaginationHTML(currentPage, totalPages, query, size) {
         </nav>
     `;
 }
+
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('search-page-link')) {
         e.preventDefault();
@@ -124,8 +122,5 @@ document.addEventListener('click', (e) => {
     }
 });
 
-
-// Initialize the search bar on page load
 document.addEventListener('DOMContentLoaded', setupSearchBar);
-
 export { setupSearchBar };
