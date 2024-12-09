@@ -96,8 +96,11 @@ function renderProducts(responseData, filters) {
         filters.sortOrder,
         filters.lowStock,
         filters.outOfStock,
-        filters.categories // Pass categories here
+        filters.categories,
+        filters.categoryId,
+        filters.searchTerm
     );
+
 
     const app = document.getElementById('app');
     app.innerHTML = productsHTML;
@@ -105,7 +108,7 @@ function renderProducts(responseData, filters) {
     attachFilterActionListeners(filters); // Attach event listeners with filters
     attachActionListeners(); // Attach event listeners with filters
 }
-function createProductsHTML(products, currentPage, totalPages, sortOrder, lowStock, outOfStock, categories = []) {
+function createProductsHTML(products, currentPage, totalPages, sortOrder, lowStock, outOfStock, categories = [], categoryId = null, searchTerm = null) {
     return `
         <h1 class="text-center my-4">Our Products</h1>
         <div class="container">
@@ -139,7 +142,7 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
                 ${products.map(product => createProductCard(product)).join('')}
             </div>
         </div>
-        ${createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock)}
+        ${createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId, searchTerm)}
     `;
 }
 
@@ -193,10 +196,11 @@ function formatPrice(price) {
     return `$${(parseFloat(price) || 0).toFixed(2)}`;
 }
 
+function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId = null, searchTerm = null) {
+    const categoryParam = categoryId ? `&categoryId=${categoryId}` : '';
+    const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
+    const baseParams = `&sort=${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}${categoryParam}${searchParam}`;
 
-
-
-function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock) {
     const maxVisiblePages = 7;
     let startPage = Math.max(0, currentPage - 3);
     let endPage = Math.min(totalPages - 1, currentPage + 3);
@@ -218,15 +222,42 @@ function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outO
         <nav aria-label="Page navigation">
             <ul class="pagination justify-content-center">
                 <li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
-                    <a class="page-link" href="#products?page=0&sort=${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}" data-page="0" data-sort="${sortOrder}" data-low-stock="${lowStock}" data-out-of-stock="${outOfStock}">First</a>
+                    <a class="page-link"
+                       href="#products?page=0${baseParams}"
+                       data-page="0"
+                       data-sort="${sortOrder}"
+                       data-low-stock="${lowStock}"
+                       data-out-of-stock="${outOfStock}"
+                       ${categoryId ? `data-category-id="${categoryId}"` : ''}
+                       ${searchTerm ? `data-search-term="${searchTerm}"` : ''}>
+                       First
+                    </a>
                 </li>
                 ${pages.map(i => `
                     <li class="page-item ${currentPage === i ? 'active' : ''}">
-                        <a class="page-link" href="#products?page=${i}&sort=${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}" data-page="${i}" data-sort="${sortOrder}" data-low-stock="${lowStock}" data-out-of-stock="${outOfStock}">${i + 1}</a>
+                        <a class="page-link"
+                           href="#products?page=${i}${baseParams}"
+                           data-page="${i}"
+                           data-sort="${sortOrder}"
+                           data-low-stock="${lowStock}"
+                           data-out-of-stock="${outOfStock}"
+                           ${categoryId ? `data-category-id="${categoryId}"` : ''}
+                           ${searchTerm ? `data-search-term="${searchTerm}"` : ''}>
+                           ${i + 1}
+                        </a>
                     </li>
                 `).join('')}
                 <li class="page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}">
-                    <a class="page-link" href="#products?page=${totalPages - 1}&sort=${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}" data-page="${totalPages - 1}" data-sort="${sortOrder}" data-low-stock="${lowStock}" data-out-of-stock="${outOfStock}">Last</a>
+                    <a class="page-link"
+                       href="#products?page=${totalPages - 1}${baseParams}"
+                       data-page="${totalPages - 1}"
+                       data-sort="${sortOrder}"
+                       data-low-stock="${lowStock}"
+                       data-out-of-stock="${outOfStock}"
+                       ${categoryId ? `data-category-id="${categoryId}"` : ''}
+                       ${searchTerm ? `data-search-term="${searchTerm}"` : ''}>
+                       Last
+                    </a>
                 </li>
             </ul>
         </nav>
@@ -459,6 +490,7 @@ document.addEventListener('click', (e) => {
         performSearch('', 0, 12, filters); // Trigger search with filters
     }
 
+});
     if (e.target.id === 'applyCategoryFilterButton') {
         const categoryId = document.getElementById('categoryFilter').value;
         const filters = {
@@ -469,8 +501,8 @@ document.addEventListener('click', (e) => {
         };
 
         performSearch('', 0, 12, filters); // Trigger search with filters
-    }
-});
+
+};
 
 
 

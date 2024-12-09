@@ -10,6 +10,7 @@ export function attachFilterActionListeners(filters) {
             return;
         }
 
+
         const selectedCategory = categoryFilter.value || null; // Get the selected category ID
         loadProducts(
             0,
@@ -61,6 +62,22 @@ export function attachActionListeners() {
             openEditStockModal(productId, currentStock);
         });
     });
+
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('page-link')) {
+            e.preventDefault();
+
+            const page = parseInt(e.target.getAttribute('data-page'), 10);
+            const sortOrder = e.target.getAttribute('data-sort');
+            const lowStock = e.target.getAttribute('data-low-stock') === 'true';
+            const outOfStock = e.target.getAttribute('data-out-of-stock') === 'true';
+            const categoryId = e.target.getAttribute('data-category-id') || null;
+            const searchTerm = e.target.getAttribute('data-search-term') || null;
+
+            loadProducts(page, 12, sortOrder, lowStock, outOfStock, categoryId, [], searchTerm);
+        }
+
+});
 
     // Attach event listeners to "Add to Cart" buttons
     document.querySelectorAll('.add-to-cart-button').forEach(button => {
