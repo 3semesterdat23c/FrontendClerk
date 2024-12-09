@@ -1,5 +1,6 @@
 import { parseJwt, searchNextAdmin, checkAdmin } from "./admin.js";
 import { baseUrl } from "./config.js";
+import { showOrderModal } from "./myOrderModal.js";
 
 export function loadmyAccount() {
     const user = localStorage.getItem('user');
@@ -189,6 +190,17 @@ export function loadmyAccount() {
                     orders.forEach(order => {
                         const listItem = document.createElement('li');
                         listItem.textContent = `Order ID: ${order.id} | Order date: ${formatDate(order.orderDate)} | Total: ${getOrderTotalPrice(order)} | No. of items: ${getOrderTotalItems(order)}`;
+
+                        // Add a click event to open the modal when an order is clicked
+                        listItem.addEventListener('click', function() {
+                            // Pass the selected order to the showOrderModal function
+                            showOrderModal(order);
+                        });
+
+                        // Add the 'clickable' class for styling
+                        listItem.classList.add('clickable');
+                        orderList.appendChild(listItem);
+
                         orderList.appendChild(listItem);
                     });
                 } else {
