@@ -13,7 +13,9 @@ export function loadProducts(
     outOfStock = false,
     categoryId = null,
     categories = [],
-    searchTerm = null
+    searchTerm = null,
+    min = "",
+    max = null
 ) {
     const app = document.getElementById('app');
     app.innerHTML = `
@@ -36,6 +38,11 @@ export function loadProducts(
 
     if (searchTerm) {
         endpoint += `&search=${encodeURIComponent(searchTerm)}`;
+    }
+
+    // If min and max are provided
+    if (min !== null && min !== '' && max !== null && max !== '') {
+        endpoint += `&min=${encodeURIComponent(min)}&max=${encodeURIComponent(max)}`;
     }
 
     fetch(endpoint)
@@ -64,14 +71,16 @@ export function loadProducts(
                             categoryId,
                             categories: fetchedCategories,
                             searchTerm,
+                            min,
+                            max
                         });
                     })
                     .catch(error => {
                         console.error('Error fetching categories:', error);
-                        renderProducts(data, { page, sortOrder, lowStock, outOfStock, categoryId, categories: [], searchTerm });
+                        renderProducts(data, { page, sortOrder, lowStock, outOfStock, categoryId, categories: [], searchTerm, min, max });
                     });
             } else {
-                renderProducts(data, { page, sortOrder, lowStock, outOfStock, categoryId, categories, searchTerm });
+                renderProducts(data, { page, sortOrder, lowStock, outOfStock, categoryId, categories, searchTerm, min, max });
             }
         })
         .catch(handleProductError);
@@ -93,7 +102,9 @@ function renderProducts(responseData, filters) {
         filters.outOfStock,
         filters.categories,
         filters.categoryId,
-        filters.searchTerm
+        filters.searchTerm,
+        filters.min,
+        filters.max
     );
 
     const app = document.getElementById('app');
@@ -103,19 +114,19 @@ function renderProducts(responseData, filters) {
     attachActionListeners();
 }
 
-function createProductsHTML(products, currentPage, totalPages, sortOrder, lowStock, outOfStock, categories = [], categoryId = null, searchTerm = null) {
+function createProductsHTML(products, currentPage, totalPages, sortOrder, lowStock, outOfStock, categories = [], categoryId = null, searchTerm = null, min = '', max = '') {
     return `
         <h1 class="text-center my-4">Our Products</h1>
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+                <div class="mb-3 mb-md-0">
                     <input type="checkbox" id="lowStockFilter" class="form-check-input" ${lowStock ? 'checked' : ''}>
                     <label for="lowStockFilter" class="form-check-label">Low Stock</label>
                     <input type="checkbox" id="outOfStockFilter" class="form-check-input ms-3" ${outOfStock ? 'checked' : ''}>
                     <label for="outOfStockFilter" class="form-check-label">Out of Stock</label>
                 </div>
 
-                <div>
+                <div class="mb-3 mb-md-0 d-flex align-items-center">
                     <select id="categoryFilter" class="form-select d-inline-block w-auto me-2">
                         <option value="" ${categoryId === null ? 'selected' : ''}>All Categories</option>
                         ${categories.map(category => `
@@ -124,12 +135,18 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
                             </option>
                         `).join('')}
                     </select>
-                    <button class="btn btn-primary" id="applyCategoryFilterButton">Filter</button>
+                    <button class="btn btn-primary me-3" id="applyCategoryFilterButton">Filter</button>
+
+                    <div class="input-group w-auto" style="max-width:300px;">
+                        <input type="number" step="0.01" class="form-control" id="minPrice" placeholder="Min" value="${min}">
+                        <input type="number" step="0.01" class="form-control" id="maxPrice" placeholder="Max" value="${max}">
+                        <button class="btn btn-primary" id="applyPriceFilterButton">Apply</button>
+                    </div>
                 </div>
 
-                ${checkAdmin() ? `<button class="btn btn-success" id="createProductButton">Add New Product</button>` : ''}
+                ${checkAdmin() ? `<button class="btn btn-success mb-3 mb-md-0" id="createProductButton">Add New Product</button>` : ''}
 
-                <div>
+                <div class="mb-3 mb-md-0">
                     <select id="sortPriceFilter" class="form-select d-inline-block w-auto me-2">
                         <option value="asc" ${sortOrder === 'asc' ? 'selected' : ''}>Price: Low to High</option>
                         <option value="desc" ${sortOrder === 'desc' ? 'selected' : ''}>Price: High to Low</option>
@@ -141,7 +158,7 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
                 ${products.map(product => createProductCard(product)).join('')}
             </div>
         </div>
-        ${createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId, searchTerm)}
+        ${createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId, searchTerm, min, max)}
     `;
 }
 
@@ -161,7 +178,7 @@ export function createProductCard(product) {
                         ${isDiscounted ? `
                             <span style="text-decoration: line-through; color: red;">$${product.price.toFixed(2)}</span>
                             <span style="font-weight: bold; color: green;">$${product.discountPrice.toFixed(2)}</span>
-                        ` : `<span>$${product.price}</span>`}
+                        ` : `<span>$${product.price.toFixed(2)}</span>`}
                     </p>
                     <p class="card-text">
                         <strong>Stock Status:</strong> 
@@ -181,10 +198,14 @@ export function createProductCard(product) {
     `;
 }
 
-function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId = null, searchTerm = null) {
+function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId = null, searchTerm = null, min = '', max = '') {
     const categoryParam = categoryId ? `&categoryId=${categoryId}` : '';
     const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
-    const baseParams = `&sort=${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}${categoryParam}${searchParam}`;
+
+    const minParam = min ? `&min=${encodeURIComponent(min)}` : '';
+    const maxParam = max ? `&max=${encodeURIComponent(max)}` : '';
+
+    const baseParams = `&sort=${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}${categoryParam}${searchParam}${minParam}${maxParam}`;
 
     const maxVisiblePages = 7;
     let startPage = Math.max(0, currentPage - 3);
@@ -214,7 +235,9 @@ function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outO
                        data-low-stock="${lowStock}"
                        data-out-of-stock="${outOfStock}"
                        ${categoryId ? `data-category-id="${categoryId}"` : ''}
-                       ${searchTerm ? `data-search-term="${searchTerm}"` : ''}>
+                       ${searchTerm ? `data-search-term="${searchTerm}"` : ''}
+                       ${min ? `data-min="${min}"` : ''}
+                       ${max ? `data-max="${max}"` : ''}>
                        First
                     </a>
                 </li>
@@ -227,7 +250,9 @@ function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outO
                            data-low-stock="${lowStock}"
                            data-out-of-stock="${outOfStock}"
                            ${categoryId ? `data-category-id="${categoryId}"` : ''}
-                           ${searchTerm ? `data-search-term="${searchTerm}"` : ''}>
+                           ${searchTerm ? `data-search-term="${searchTerm}"` : ''}
+                           ${min ? `data-min="${min}"` : ''}
+                           ${max ? `data-max="${max}"` : ''}>
                            ${i + 1}
                         </a>
                     </li>
@@ -240,7 +265,9 @@ function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outO
                        data-low-stock="${lowStock}"
                        data-out-of-stock="${outOfStock}"
                        ${categoryId ? `data-category-id="${categoryId}"` : ''}
-                       ${searchTerm ? `data-search-term="${searchTerm}"` : ''}>
+                       ${searchTerm ? `data-search-term="${searchTerm}"` : ''}
+                       ${min ? `data-min="${min}"` : ''}
+                       ${max ? `data-max="${max}"` : ''}>
                        Last
                     </a>
                 </li>
@@ -414,7 +441,15 @@ export function refreshProducts() {
     const hash = window.location.hash;
     const params = new URLSearchParams(hash.split('?')[1]);
     const currentPage = parseInt(params.get('page')) || 0;
-    loadProducts(currentPage, 12);
+    const sortOrder = params.get('sort') || 'asc';
+    const lowStock = params.get('lowStock') === 'true';
+    const outOfStock = params.get('outOfStock') === 'true';
+    const categoryId = params.get('categoryId') || null;
+    const searchTerm = params.get('search') || null;
+    const min = params.get('min') || '';
+    const max = params.get('max') || '';
+
+    loadProducts(currentPage, 12, sortOrder, lowStock, outOfStock, categoryId, [], searchTerm, min, max);
 }
 
 function getStockStatus(stockCount) {
@@ -428,7 +463,6 @@ function getStockStatus(stockCount) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Handle the product form submission
     const productForm = document.getElementById('productForm');
     if (productForm) {
         productForm.addEventListener('submit', (e) => {
@@ -436,4 +470,34 @@ document.addEventListener('DOMContentLoaded', () => {
             submitProductForm();
         });
     }
+
+    document.addEventListener('click', (e) => {
+        if (e.target.id === 'applySortButton') {
+            // Retrieve current filters
+            const filters = gatherFilters();
+            loadProducts(0, 12, filters.sortOrder, filters.lowStock, filters.outOfStock, filters.categoryId, [], filters.searchTerm, filters.min, filters.max);
+        }
+
+        if (e.target.id === 'applyCategoryFilterButton') {
+            const filters = gatherFilters();
+            loadProducts(0, 12, filters.sortOrder, filters.lowStock, filters.outOfStock, filters.categoryId, [], filters.searchTerm, filters.min, filters.max);
+        }
+
+        if (e.target.id === 'applyPriceFilterButton') {
+            const filters = gatherFilters();
+            loadProducts(0, 12, filters.sortOrder, filters.lowStock, filters.outOfStock, filters.categoryId, [], filters.searchTerm, filters.min, filters.max);
+        }
+    });
 });
+
+function gatherFilters() {
+    return {
+        sortOrder: document.getElementById('sortPriceFilter') ? document.getElementById('sortPriceFilter').value : 'asc',
+        lowStock: document.getElementById('lowStockFilter') ? document.getElementById('lowStockFilter').checked : false,
+        outOfStock: document.getElementById('outOfStockFilter') ? document.getElementById('outOfStockFilter').checked : false,
+        categoryId: document.getElementById('categoryFilter') ? (document.getElementById('categoryFilter').value || null) : null,
+        searchTerm: null, // If you have a search input somewhere, handle it here
+        min: document.getElementById('minPrice') ? document.getElementById('minPrice').value : '',
+        max: document.getElementById('maxPrice') ? document.getElementById('maxPrice').value : ''
+    };
+}
