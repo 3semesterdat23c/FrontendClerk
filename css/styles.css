@@ -118,6 +118,7 @@ html, body {
     border-top: 1px solid #ddd;
     color: #333;
     background-color: #f8f9fa;
+    padding: 20px 0;
 }
 
 .footer h5 {
@@ -145,12 +146,29 @@ html, body {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
-    margin-left: 28%;
 }
-.footer.row {
+
+.footer .row {
     width: 100%;
     display: flex;
     justify-content: space-between;
-
 }
 
+.footer .col-lg-4 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.footer .col-lg-4:nth-child(2) {
+    justify-content: center; /* Quick Links section in the center */
+}
+
+.footer .col-lg-4:nth-child(3) {
+    justify-content: center; /* Contact section on the right */
+}
+
+.text-blue {
+    color: #007bff; /* Blue color */
+}
+/* Contact section on the right */

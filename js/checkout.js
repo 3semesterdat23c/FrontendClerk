@@ -37,12 +37,35 @@ export function renderPaymentForm() {
 
     document.body.appendChild(modalDiv);
 
+    // Add toast HTML for notifications
+    const toastDiv = document.createElement("div");
+    toastDiv.id = "toastContainer";
+    toastDiv.className = "position-fixed bottom-0 end-0 p-3";
+    toastDiv.style.zIndex = "1055";
+    toastDiv.innerHTML = `
+        <div id="paymentToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    Payment successful! Redirecting to products...
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(toastDiv);
+
     // Initialize modal
     const paymentModal = new bootstrap.Modal(document.getElementById("paymentModal"));
     paymentModal.show();
 
     // Add the event listener after the modal has been added to the DOM
     document.getElementById('payButton').addEventListener('click', validatePayment);
+
+    // Reset the form when modal is closed
+    document.getElementById('paymentModal').addEventListener('hidden.bs.modal', function () {
+        document.getElementById('payment-form').reset(); // Reset form fields
+        document.getElementById('paymentStatus').innerHTML = ''; // Clear any payment status message
+    });
 }
 
 function validatePayment() {
@@ -66,8 +89,6 @@ function validatePayment() {
 
     let orderId;
 
-
-
     // Fetch the current order ID
     fetch('http://localhost:8080/api/v1/order/active', {
         method: 'GET',
@@ -80,17 +101,7 @@ function validatePayment() {
                 throw new Error("Unable to fetch active order");
             }
 
-            // Check if the response has content and is JSON
-            return response.text().then(text => {
-                if (text) {
-                    try {
-                        return JSON.parse(text); // Attempt to parse JSON
-                    } catch (e) {
-                        throw new Error("Invalid JSON response from server");
-                    }
-                }
-                throw new Error("Empty response from the server");
-            });
+            return response.json();
         })
         .then(orderData => {
             orderId = orderData.id;
@@ -111,7 +122,6 @@ function validatePayment() {
             }
         })
         .then(() => {
-            // Proceed with checkout
             return fetch(`http://localhost:8080/api/v1/order/checkout/${orderId}`, {
                 method: 'POST',
                 headers: {
@@ -127,13 +137,23 @@ function validatePayment() {
         })
         .then(message => {
             showPaymentStatus(message, "success");
+
+            const toastElement = document.getElementById("paymentToast");
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+
+            const paymentModal = bootstrap.Modal.getInstance(document.getElementById("paymentModal"));
+            paymentModal.hide();
+
+            setTimeout(() => {
+                window.location.hash = "#products";
+            }, 2000);
         })
         .catch(error => {
             showPaymentStatus(error.message, "danger");
         });
 }
 
-// Helper function to display payment status messages
 function showPaymentStatus(message, type) {
     const statusDiv = document.getElementById("paymentStatus");
     statusDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
