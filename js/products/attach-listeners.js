@@ -2,57 +2,40 @@ import { loadProducts, openProductModal } from './products.js';
 import { addToCart } from '../cart.js';
 import { openEditStockModal } from './update-stock.js';
 import { deleteProduct } from './delete-products.js';
-export function attachFilterActionListeners(filters) {
-    document.getElementById('applyCategoryFilterButton').addEventListener('click', () => {
-        const categoryFilter = document.getElementById('categoryFilter');
-        if (!categoryFilter) {
-            console.error('Category filter dropdown not found!');
-            return;
-        }
 
-        const selectedCategory = categoryFilter.value || null; // Get the selected category ID
-        loadProducts(
-            0,
-            12,
-            filters.sortOrder,
-            filters.lowStock,
-            filters.outOfStock,
-            selectedCategory,
-            filters.categories
-        );
+export function attachFilterActionListeners(filters) {
+    // Helper function to read all filter states from the DOM
+    function getAllFilters() {
+        const sortOrder = document.getElementById('sortPriceFilter').value;
+        const lowStock = document.getElementById('lowStockFilter').checked;
+        const outOfStock = document.getElementById('outOfStockFilter').checked;
+        const categoryId = document.getElementById('categoryFilter').value || null;
+        return { sortOrder, lowStock, outOfStock, categoryId };
+    }
+
+    document.getElementById('applyCategoryFilterButton').addEventListener('click', () => {
+        const { sortOrder, lowStock, outOfStock, categoryId } = getAllFilters();
+        loadProducts(0, 12, sortOrder, lowStock, outOfStock, categoryId, filters.categories);
+    });
+
+    document.getElementById('applySortButton').addEventListener('click', () => {
+        const { sortOrder, lowStock, outOfStock, categoryId } = getAllFilters();
+        loadProducts(0, 12, sortOrder, lowStock, outOfStock, categoryId, filters.categories);
     });
 
     document.getElementById('lowStockFilter').addEventListener('change', () => {
-        const lowStock = document.getElementById('lowStockFilter').checked;
-        loadProducts(
-            0,
-            12,
-            filters.sortOrder,
-            lowStock,
-            filters.outOfStock,
-            filters.categoryId,
-            filters.categories
-        );
+        const { sortOrder, lowStock, outOfStock, categoryId } = getAllFilters();
+        loadProducts(0, 12, sortOrder, lowStock, outOfStock, categoryId, filters.categories);
     });
 
     document.getElementById('outOfStockFilter').addEventListener('change', () => {
-        const outOfStock = document.getElementById('outOfStockFilter').checked;
-        loadProducts(
-            0,
-            12,
-            filters.sortOrder,
-            filters.lowStock,
-            outOfStock,
-            filters.categoryId,
-            filters.categories
-        );
+        const { sortOrder, lowStock, outOfStock, categoryId } = getAllFilters();
+        loadProducts(0, 12, sortOrder, lowStock, outOfStock, categoryId, filters.categories);
     });
 }
 
-
-
 export function attachActionListeners() {
-    // Attach event listeners for "Edit Stock" buttons
+    // Edit stock
     document.querySelectorAll('.edit-stock-button').forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
@@ -62,37 +45,44 @@ export function attachActionListeners() {
         });
     });
 
-    // Attach event listeners to "Add to Cart" buttons
+    // Pagination
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('page-link') && !e.target.classList.contains('search-page-link')) {
+            e.preventDefault();
+            const page = parseInt(e.target.getAttribute('data-page'), 10);
+            const sortOrder = e.target.getAttribute('data-sort');
+            const lowStock = e.target.getAttribute('data-low-stock') === 'true';
+            const outOfStock = e.target.getAttribute('data-out-of-stock') === 'true';
+            const categoryId = e.target.getAttribute('data-category-id') || null;
+            const searchTerm = e.target.getAttribute('data-search-term') || null;
+            loadProducts(page, 12, sortOrder, lowStock, outOfStock, categoryId, [], searchTerm);
+        }
+    });
+
+    // Add to cart
     document.querySelectorAll('.add-to-cart-button').forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
             const productId = button.getAttribute('data-product-id');
-
-            // Find the quantity input field relative to the button
             const quantityInput = button.parentElement.querySelector('.quantity-input');
-            let quantity = 1; // Default quantity
-
+            let quantity = 1;
             if (quantityInput) {
                 quantity = parseInt(quantityInput.value, 10);
-
-                // Validate the quantity
                 if (isNaN(quantity) || quantity < 1) {
                     alert('Please enter a valid quantity of 1 or more.');
                     return;
                 }
             }
-
-            addToCart(productId, quantity); // Pass the quantity to addToCart
+            addToCart(productId, quantity);
         });
     });
 
-
-    // Attach event listeners to other buttons (e.g., Update, Delete) as needed
+    // Update/Delete product
     document.querySelectorAll('.update-button').forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
             const productId = button.getAttribute('data-id');
-            openProductModal('update', productId); // Assuming openProductModal is already implemented
+            openProductModal('update', productId);
         });
     });
 
@@ -100,12 +90,11 @@ export function attachActionListeners() {
         button.addEventListener('click', (e) => {
             e.preventDefault();
             const productId = button.getAttribute('data-id');
-
-            deleteProduct(productId); // Assuming deleteProduct is already implemented
+            deleteProduct(productId);
         });
     });
 
-
+    // Product image click
     document.querySelectorAll('.product-image').forEach(img => {
         img.addEventListener('click', (e) => {
             e.preventDefault();
@@ -117,6 +106,7 @@ export function attachActionListeners() {
             }
         });
     });
+
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('product-image')) {
             e.preventDefault();
@@ -129,19 +119,10 @@ export function attachActionListeners() {
         }
     });
 
-    // Attach event listener to the "Create Product" button
     const createProductButton = document.getElementById('createProductButton');
     if (createProductButton) {
         createProductButton.addEventListener('click', () => {
             openProductModal('create');
         });
     }
-
-    // Event delegation for "Buy Now" buttons in the product container
-
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    loadProducts(0, 12, 'asc', false, false, null, []);
-});
-
