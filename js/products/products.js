@@ -446,20 +446,32 @@ function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outO
         }
     }
 
-    document.addEventListener('click', (e) => {
-        if (e.target.id === 'applySortButton') {
-            const sortOrder = document.getElementById('sortPriceFilter').value;
-            window.location.hash = `#products?page=0&sort=${sortOrder}`;
-            loadProducts(0, 12, sortOrder); // Reload products with selected sort order
-        }
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'applySortButton') {
+        const sortOrder = document.getElementById('sortPriceFilter').value;
+        const filters = {
+            sortOrder,
+            lowStock: document.getElementById('lowStockFilter').checked,
+            outOfStock: document.getElementById('outOfStockFilter').checked,
+            categoryId: document.getElementById('categoryFilter').value || null,
+        };
 
-        if (e.target.classList.contains('page-link')) {
-            e.preventDefault();
-            const page = parseInt(e.target.getAttribute('data-page'));
-            const sortOrder = e.target.getAttribute('data-sort');
-            loadProducts(page, 12, sortOrder);
-        }
-    });
+        performSearch('', 0, 12, filters); // Trigger search with filters
+    }
+
+    if (e.target.id === 'applyCategoryFilterButton') {
+        const categoryId = document.getElementById('categoryFilter').value;
+        const filters = {
+            categoryId,
+            sortOrder: document.getElementById('sortPriceFilter').value,
+            lowStock: document.getElementById('lowStockFilter').checked,
+            outOfStock: document.getElementById('outOfStockFilter').checked,
+        };
+
+        performSearch('', 0, 12, filters); // Trigger search with filters
+    }
+});
+
 
 
 document.addEventListener('DOMContentLoaded', () => {
