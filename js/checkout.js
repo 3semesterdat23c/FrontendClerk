@@ -64,6 +64,10 @@ function validatePayment() {
         return;
     }
 
+    let orderId;
+
+
+
     // Fetch the current order ID
     fetch('http://localhost:8080/api/v1/order/active', {
         method: 'GET',
@@ -89,7 +93,7 @@ function validatePayment() {
             });
         })
         .then(orderData => {
-            const orderId = orderData.id;
+            orderId = orderData.id;
 
             // Proceed with payment validation
             return fetch('http://localhost:8080/api/v1/order/validatePayment', {
@@ -105,18 +109,6 @@ function validatePayment() {
             if (!response.ok) {
                 throw new Error("Unable to verify payment");
             }
-
-            // Check if the response has content and is JSON
-            return response.text().then(text => {
-                if (text) {
-                    try {
-                        return JSON.parse(text); // Attempt to parse JSON
-                    } catch (e) {
-                        throw new Error("Invalid JSON response during payment verification");
-                    }
-                }
-                throw new Error("Empty response from the server during payment verification");
-            });
         })
         .then(() => {
             // Proceed with checkout
