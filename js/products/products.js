@@ -485,12 +485,22 @@ document.addEventListener('click', (e) => {
             lowStock: document.getElementById('lowStockFilter').checked,
             outOfStock: document.getElementById('outOfStockFilter').checked,
             categoryId: document.getElementById('categoryFilter').value || null,
+
+
         };
 
-        performSearch('', 0, 12, filters); // Trigger search with filters
+        loadProducts(
+            0,
+            12,
+            filters.sortOrder,
+            filters.lowStock,
+            filters.outOfStock,
+            filters.categoryId
+        );
     }
 
-});
+
+
     if (e.target.id === 'applyCategoryFilterButton') {
         const categoryId = document.getElementById('categoryFilter').value;
         const filters = {
@@ -500,9 +510,18 @@ document.addEventListener('click', (e) => {
             outOfStock: document.getElementById('outOfStockFilter').checked,
         };
 
-        performSearch('', 0, 12, filters); // Trigger search with filters
+        loadProducts(
+            0,
+            12,
+            filters.sortOrder,
+            filters.lowStock,
+            filters.outOfStock,
+            filters.categoryId
+        );
 
-};
+    }
+
+});
 
 
 
