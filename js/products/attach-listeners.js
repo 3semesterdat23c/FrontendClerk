@@ -2,15 +2,18 @@ import { loadProducts, openProductModal } from './products.js';
 import { addToCart } from '../cart.js';
 import { openEditStockModal } from './update-stock.js';
 import { deleteProduct } from './delete-products.js';
+import { checkAdmin } from "../admin.js";
 
 export function attachFilterActionListeners(filters) {
     // Helper function to read all filter states from the DOM
     function getAllFilters() {
         const sortOrder = document.getElementById('sortPriceFilter').value;
+        const categoryId = document.getElementById('categoryFilter').value || null;
+        if (checkAdmin()===true){
         const lowStock = document.getElementById('lowStockFilter').checked;
         const outOfStock = document.getElementById('outOfStockFilter').checked;
-        const categoryId = document.getElementById('categoryFilter').value || null;
-        return { sortOrder, lowStock, outOfStock, categoryId };
+        return { sortOrder, lowStock, outOfStock, categoryId }}
+        return  {sortOrder,  categoryId }
     }
 
     document.getElementById('applyCategoryFilterButton').addEventListener('click', () => {
@@ -23,15 +26,17 @@ export function attachFilterActionListeners(filters) {
         loadProducts(0, 12, sortOrder, lowStock, outOfStock, categoryId, filters.categories);
     });
 
-    document.getElementById('lowStockFilter').addEventListener('change', () => {
-        const { sortOrder, lowStock, outOfStock, categoryId } = getAllFilters();
-        loadProducts(0, 12, sortOrder, lowStock, outOfStock, categoryId, filters.categories);
-    });
+    if (checkAdmin()===true) {
+        document.getElementById('lowStockFilter').addEventListener('change', () => {
+            const {sortOrder, lowStock, outOfStock, categoryId} = getAllFilters();
+            loadProducts(0, 12, sortOrder, lowStock, outOfStock, categoryId, filters.categories);
+        });
 
-    document.getElementById('outOfStockFilter').addEventListener('change', () => {
-        const { sortOrder, lowStock, outOfStock, categoryId } = getAllFilters();
-        loadProducts(0, 12, sortOrder, lowStock, outOfStock, categoryId, filters.categories);
-    });
+        document.getElementById('outOfStockFilter').addEventListener('change', () => {
+            const {sortOrder, lowStock, outOfStock, categoryId} = getAllFilters();
+            loadProducts(0, 12, sortOrder, lowStock, outOfStock, categoryId, filters.categories);
+        });
+    }
 }
 
 export function attachActionListeners() {
