@@ -37,7 +37,7 @@ export function createProductModal() {
                             </div>
                             <div class="mb-3">
                                 <label for="productTags" class="form-label">Tags (comma-separated)</label>
-                                <input type="text" class="form-control" id="productTags" name="tags">
+                                <input type="text" class="form-control" id="productTags" name="tags" required>
                             </div>
                             <div class="mb-3">
                                 <label for="productImages" class="form-label">Images (comma-separated URLs)</label>
