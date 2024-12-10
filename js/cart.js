@@ -1,9 +1,11 @@
+// Function to add a product to the cart
 // cart.js
 import {baseUrl} from "./config.js";
-export async function addToCart(productId) {
+import {renderPaymentForm} from "./checkout.js";
+
+export async function addToCart(productId, quantity) {
     try {
-        const token = localStorage.getItem('token'); // Use 'token' if it's stored under this key
-        console.log('Token retrieved:', token); // Log the token to ensure it's available
+        const token = localStorage.getItem('token');
 
         if (!token) {
             alert('You must be logged in to add items to the cart.');
@@ -12,7 +14,7 @@ export async function addToCart(productId) {
 
         const headers = {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`, // Add token to the headers
+            'Authorization': `Bearer ${token}`,
         };
 
         const response = await fetch(`${baseUrl()}/order/cart`, {
@@ -20,14 +22,13 @@ export async function addToCart(productId) {
             headers: headers,
             body: JSON.stringify({
                 productId: productId,
-                quantity: 1, // Default quantity; adjust as needed
+                quantity: quantity, // Use the quantity parameter
             }),
         });
 
         if (response.ok) {
-            // Optionally, provide feedback to the user
-            alert('Product added to cart successfully!');
-            const data = await response.json(); // You can access response data if needed
+            alert(`Added ${quantity} item(s) to your cart successfully!`);
+            const data = await response.json();
             console.log('Server response:', data);
         } else {
             let errorMessage = 'Unknown error occurred.';
@@ -45,15 +46,15 @@ export async function addToCart(productId) {
     }
 }
 
-
 export async function loadCart() {
     // Function to load and display the cart contents
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${baseUrl()}/order/cart`, {
+        const response = await fetch('http://localhost:8080/api/v1/order/cart', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             },
         });
 
@@ -70,6 +71,7 @@ export async function loadCart() {
     }
 }
 
+// Function to render the cart data
 function renderCart(cartData) {
     console.log('cartdata: ', cartData);
     const mainContent = document.getElementById('app'); // Using 'app' as the container
@@ -95,15 +97,23 @@ function renderCart(cartData) {
 
     // Iterate over cart items and build the HTML for each
     cartData.forEach(item => {
+        const isDiscounted = item.priceAtTimeOfOrder < item.originalPrice;
         cartContent += `
             <div class="cart-item col-md-6 col-lg-4 mb-4">
                 <div class="card h-100">
-                    <img src="${item.productImageUrl}" class="card-img-top" alt="${item.productName}">
+                    <img src="${item.productImageUrl}" class="card-img-top product-image" alt="${item.productName}" data-id="${item.productId}">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title">${item.productName}</h5>
-                        <p class="card-text mb-1">Price: $${item.priceAtTimeOfOrder.toFixed(2)}</p>
-                        <p class="card-text mb-1">Quantity: ${item.quantity}</p>
-                        <p class="card-text mb-3">Subtotal: $${(item.priceAtTimeOfOrder * item.quantity).toFixed(2)}</p>
+                        <p class="card-text mb-1"><strong>Price:</strong> ${
+            isDiscounted ? `
+                                <span style="text-decoration: line-through; color: red;">$${item.originalPrice.toFixed(2)}</span>
+                                <span style="font-weight: bold; color: green;">$${item.priceAtTimeOfOrder.toFixed(2)}</span>
+                            ` : `
+                                <span>$${item.priceAtTimeOfOrder.toFixed(2)}</span>
+                            `
+        }</p>
+                        <p class="card-text mb-1"><strong>Quantity:</strong> ${item.quantity}</p>
+                        <p class="card-text mb-3"><strong>Subtotal:</strong> $${(item.priceAtTimeOfOrder * item.quantity).toFixed(2)}</p>
                         <button class="btn btn-danger mt-auto remove-from-cart-button" data-product-id="${item.productId}">Remove</button>
                     </div>
                 </div>
@@ -119,7 +129,7 @@ function renderCart(cartData) {
         <div class="row">
             <div class="col text-end">
                 <h4>Total Price: $${totalPrice.toFixed(2)}</h4>
-                <button class="btn btn-primary btn-lg">Proceed to Checkout</button>
+                <button class="btn btn-primary btn-lg" id="checkout">Proceed to Checkout</button>
             </div>
         </div>
     `;
@@ -129,10 +139,26 @@ function renderCart(cartData) {
 
     // Attach event listeners to "Remove" buttons
     attachRemoveFromCartListeners();
+    // Attach event listeners to quantity change buttons
+    attachQuantityChangeListeners();
+
+    attachToCheckoutListener();
+
+
+}
+
+function attachToCheckoutListener() {
+    const checkoutButton = document.getElementById("checkout");
+
+    checkoutButton.addEventListener("click", function () {
+        renderPaymentForm(); // Render and open the payment modal
+    });
 }
 
 
 
+
+// Function to attach event listeners to the "Remove" buttons
 function attachRemoveFromCartListeners() {
     const cartItemsContainer = document.getElementById('cart-items');
 
@@ -145,6 +171,7 @@ function attachRemoveFromCartListeners() {
     });
 }
 
+// Function to handle removing a product from the cart
 export async function removeFromCart(productId) {
     try {
         const token = localStorage.getItem('token');
@@ -164,12 +191,70 @@ export async function removeFromCart(productId) {
             loadCart();
         } else {
             const errorData = await response.json();
-            alert(`Failed to remove product from cart: ${errorData.message}`);
+                alert(`Failed to remove product from cart: ${errorData.message}`);
         }
     } catch (error) {
         console.error('Error removing product from cart:', error);
         alert('An error occurred while removing the product from the cart.');
     }
-
-
 }
+
+// Function to attach event listeners for quantity changes
+function attachQuantityChangeListeners() {
+    const cartItemsContainer = document.getElementById('cart-items');
+
+    cartItemsContainer.addEventListener('click', async function (event) {
+        if (event.target && event.target.classList.contains('change-quantity-button')) {
+            event.preventDefault();
+            const productId = event.target.getAttribute('data-product-id');
+            const action = event.target.getAttribute('data-action');
+            const quantityDisplay = event.target.closest('.card-body').querySelector('.quantity-display');
+            let currentQuantity = parseInt(quantityDisplay.textContent);
+
+            if (action === 'increase') {
+                currentQuantity += 1; // Increase quantity
+            } else if (action === 'decrease' && currentQuantity > 1) {
+                currentQuantity -= 1; // Decrease quantity, but not below 1
+            }
+
+            // Update the displayed quantity
+            quantityDisplay.textContent = currentQuantity;
+
+            // Send the updated quantity to the backend
+            await updateQuantity(productId, currentQuantity);
+        }
+    });
+}
+
+// Function to update the product quantity in the cart (frontend only)
+async function updateQuantity(productId, quantity) {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:8080/api/v1/order/cart/quantity', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                productId: productId,
+                quantity: quantity,
+            }),
+        });
+
+        if (response.ok) {
+            console.log(`Updated product ${productId} quantity to ${quantity}`);
+            loadCart(); // Refresh the cart to show updated data
+        } else {
+            const errorData = await response.json();
+            alert(`Failed to update quantity: ${errorData.message}`);
+        }
+    } catch (error) {
+        console.error('Error updating quantity:', error);
+        alert('An error occurred while updating the product quantity.');
+    }
+}
+
+
+
+//Edit here
