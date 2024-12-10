@@ -108,13 +108,11 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
         <h1 class="text-center my-4">Our Products</h1>
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                ${checkAdmin() ? `
+                <div>     
                             <input type="checkbox" id="lowStockFilter" class="form-check-input" ${lowStock ? 'checked' : ''}>
                     <label for="lowStockFilter" class="form-check-label">Low Stock</label>
                     <input type="checkbox" id="outOfStockFilter" class="form-check-input ms-3" ${outOfStock ? 'checked' : ''}>
                     <label for="outOfStockFilter" class="form-check-label">Out of Stock</label>
-                   ` : ''}
                 </div>
 
                 <div>
