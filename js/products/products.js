@@ -84,6 +84,14 @@ function renderProducts(responseData, filters) {
         throw new Error('Invalid product data');
     }
 
+    let lowStockFilter = false;
+    let outOfStockFilter = false;
+
+    if (checkAdmin() === true) {
+        lowStockFilter = filters.lowStock;
+        outOfStockFilter = filters.outOfStock;
+    }
+
     const productsHTML = createProductsHTML(
         products,
         currentPage,
@@ -108,12 +116,14 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
         <h1 class="text-center my-4">Our Products</h1>
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-3">
+              ${checkAdmin() ? ` 
                 <div>     
                             <input type="checkbox" id="lowStockFilter" class="form-check-input" ${lowStock ? 'checked' : ''}>
                     <label for="lowStockFilter" class="form-check-label">Low Stock</label>
                     <input type="checkbox" id="outOfStockFilter" class="form-check-input ms-3" ${outOfStock ? 'checked' : ''}>
                     <label for="outOfStockFilter" class="form-check-label">Out of Stock</label>
                 </div>
+                `: ''}
 
                 <div>
                     <select id="categoryFilter" class="form-select d-inline-block w-auto me-2">
