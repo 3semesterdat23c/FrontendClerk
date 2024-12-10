@@ -16,6 +16,10 @@ export function parseJwt (token) {
     return JSON.parse(jsonPayload);
 
 }
+window.addEventListener('beforeunload', () => {
+    localStorage.removeItem('user');
+});
+
 function makeAdmin(email){
     fetch(`${baseUrl()}/users/${email}/setadmin`, {
         method: 'PUT',
