@@ -4,7 +4,6 @@ import { deleteProduct } from './delete-products.js';
 import { openEditStockModal } from './update-stock.js';
 import { checkAdmin } from "../admin.js";
 import { baseUrl } from "../config.js";
-
 export function loadProducts(
     page = 0,
     size = 12,
@@ -15,6 +14,28 @@ export function loadProducts(
     categories = [],
     searchTerm = null
 ) {
+    // If a categoryId is given but no categories are available, fetch categories first
+    if (categoryId && (!categories || categories.length === 0)) {
+        fetch(`${baseUrl()}/category/categories`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch categories');
+                }
+                return response.json();
+            })
+            .then(fetchedCategories => {
+                // Now that we have categories, call loadProducts again with them
+                loadProducts(page, size, sortOrder, lowStock, outOfStock, categoryId, fetchedCategories, searchTerm);
+            })
+            .catch(error => {
+                console.error('Error fetching categories:', error);
+                // Even if categories fail to load, we can still attempt to load products without filtering by category name
+                loadProducts(page, size, sortOrder, lowStock, outOfStock, categoryId, [], searchTerm);
+            });
+        return; // Stop execution until we have categories
+    }
+
+    // At this point, if categoryId was provided, we should have categories available
     const app = document.getElementById('app');
     app.innerHTML = `
         <div class="text-center my-4">
@@ -24,14 +45,21 @@ export function loadProducts(
         </div>
     `;
 
-    let endpoint;
+    // Base endpoint
+    let endpoint = `${baseUrl()}/products?page=${page}&size=${size}&sort=discountPrice,${sortOrder}`;
 
-    if (categoryId) {
-        // Category filter
-        endpoint = `${baseUrl()}/products/categories/${categoryId}?page=${page}&size=${size}&sort=discountPrice,${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}`;
+    let categoryNameParam = '';
+    if (categoryId && categories && categories.length > 0) {
+        const selectedCategory = categories.find(cat => String(cat.categoryId) === String(categoryId));
+        if (selectedCategory) {
+            categoryNameParam = selectedCategory.categoryName;
+        } else {
+            console.warn(`No category found for id ${categoryId}. The category filter might not work correctly.`);
+        }
+        endpoint += `&category=${encodeURIComponent(categoryNameParam)}&lowStock=${lowStock}&outOfStock=${outOfStock}`;
     } else {
-        // General products
-        endpoint = `${baseUrl()}/products?page=${page}&size=${size}&sort=discountPrice,${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}`;
+        // No category filtering
+        endpoint += `&lowStock=${lowStock}&outOfStock=${outOfStock}`;
     }
 
     if (searchTerm) {
@@ -46,8 +74,8 @@ export function loadProducts(
             return response.json();
         })
         .then(data => {
+            // If categories were not provided and we don't need them for filtering, let's fetch them now for UI
             if (categories.length === 0) {
-                // Fetch categories if not provided
                 fetch(`${baseUrl()}/category/categories`)
                     .then(response => {
                         if (!response.ok) {
@@ -71,6 +99,7 @@ export function loadProducts(
                         renderProducts(data, { page, sortOrder, lowStock, outOfStock, categoryId, categories: [], searchTerm });
                     });
             } else {
+                // We already have categories
                 renderProducts(data, { page, sortOrder, lowStock, outOfStock, categoryId, categories, searchTerm });
             }
         })
