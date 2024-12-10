@@ -1,36 +1,40 @@
+// attach-listeners.js
 import { loadProducts, openProductModal } from './products.js';
 import { addToCart } from '../cart.js';
 import { openEditStockModal } from './update-stock.js';
 import { deleteProduct } from './delete-products.js';
+import { filtersState } from './filtersState.js'; // Corrected import path
 
-export function attachFilterActionListeners(filters) {
-    // Helper function to read all filter states from the DOM
-    function getAllFilters() {
-        const sortOrder = document.getElementById('sortPriceFilter').value;
-        const lowStock = document.getElementById('lowStockFilter').checked;
-        const outOfStock = document.getElementById('outOfStockFilter').checked;
-        const categoryId = document.getElementById('categoryFilter').value || null;
-        return { sortOrder, lowStock, outOfStock, categoryId };
+export function attachFilterActionListeners() {
+    function updateFilters() {
+        filtersState.sortOrder = document.getElementById('sortPriceFilter').value;
+        filtersState.lowStock = document.getElementById('lowStockFilter').checked;
+        filtersState.outOfStock = document.getElementById('outOfStockFilter').checked;
+        filtersState.categoryId = document.getElementById('categoryFilter').value || null;
     }
 
     document.getElementById('applyCategoryFilterButton').addEventListener('click', () => {
-        const { sortOrder, lowStock, outOfStock, categoryId } = getAllFilters();
-        loadProducts(0, 12, sortOrder, lowStock, outOfStock, categoryId, filters.categories);
+        updateFilters();
+        filtersState.page = 0;
+        loadProducts();
     });
 
     document.getElementById('applySortButton').addEventListener('click', () => {
-        const { sortOrder, lowStock, outOfStock, categoryId } = getAllFilters();
-        loadProducts(0, 12, sortOrder, lowStock, outOfStock, categoryId, filters.categories);
+        updateFilters();
+        filtersState.page = 0;
+        loadProducts();
     });
 
     document.getElementById('lowStockFilter').addEventListener('change', () => {
-        const { sortOrder, lowStock, outOfStock, categoryId } = getAllFilters();
-        loadProducts(0, 12, sortOrder, lowStock, outOfStock, categoryId, filters.categories);
+        updateFilters();
+        filtersState.page = 0;
+        loadProducts();
     });
 
     document.getElementById('outOfStockFilter').addEventListener('change', () => {
-        const { sortOrder, lowStock, outOfStock, categoryId } = getAllFilters();
-        loadProducts(0, 12, sortOrder, lowStock, outOfStock, categoryId, filters.categories);
+        updateFilters();
+        filtersState.page = 0;
+        loadProducts();
     });
 }
 
@@ -50,12 +54,8 @@ export function attachActionListeners() {
         if (e.target.classList.contains('page-link') && !e.target.classList.contains('search-page-link')) {
             e.preventDefault();
             const page = parseInt(e.target.getAttribute('data-page'), 10);
-            const sortOrder = e.target.getAttribute('data-sort');
-            const lowStock = e.target.getAttribute('data-low-stock') === 'true';
-            const outOfStock = e.target.getAttribute('data-out-of-stock') === 'true';
-            const categoryId = e.target.getAttribute('data-category-id') || null;
-            const searchTerm = e.target.getAttribute('data-search-term') || null;
-            loadProducts(page, 12, sortOrder, lowStock, outOfStock, categoryId, [], searchTerm);
+            filtersState.page = page;
+            loadProducts();
         }
     });
 

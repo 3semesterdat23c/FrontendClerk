@@ -4,38 +4,12 @@ import { deleteProduct } from './delete-products.js';
 import { openEditStockModal } from './update-stock.js';
 import { checkAdmin } from "../admin.js";
 import { baseUrl } from "../config.js";
-export function loadProducts(
-    page = 0,
-    size = 12,
-    sortOrder = 'asc',
-    lowStock = false,
-    outOfStock = false,
-    categoryId = null,
-    categories = [],
-    searchTerm = null
-) {
-    // If a categoryId is given but no categories are available, fetch categories first
-    if (categoryId && (!categories || categories.length === 0)) {
-        fetch(`${baseUrl()}/category/categories`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch categories');
-                }
-                return response.json();
-            })
-            .then(fetchedCategories => {
-                // Now that we have categories, call loadProducts again with them
-                loadProducts(page, size, sortOrder, lowStock, outOfStock, categoryId, fetchedCategories, searchTerm);
-            })
-            .catch(error => {
-                console.error('Error fetching categories:', error);
-                // Even if categories fail to load, we can still attempt to load products without filtering by category name
-                loadProducts(page, size, sortOrder, lowStock, outOfStock, categoryId, [], searchTerm);
-            });
-        return; // Stop execution until we have categories
-    }
+import { filtersState } from './filtersState.js';
 
-    // At this point, if categoryId was provided, we should have categories available
+export function loadProducts() {
+    const { page, size, sortOrder, lowStock, outOfStock, categoryId, categories, searchTerm } = filtersState;
+
+    // Show loading spinner
     const app = document.getElementById('app');
     app.innerHTML = `
         <div class="text-center my-4">
@@ -45,27 +19,23 @@ export function loadProducts(
         </div>
     `;
 
-    // Base endpoint
+    // Build endpoint
     let endpoint = `${baseUrl()}/products?page=${page}&size=${size}&sort=discountPrice,${sortOrder}`;
 
-    let categoryNameParam = '';
-    if (categoryId && categories && categories.length > 0) {
+    if (categoryId && categories.length > 0) {
         const selectedCategory = categories.find(cat => String(cat.categoryId) === String(categoryId));
         if (selectedCategory) {
-            categoryNameParam = selectedCategory.categoryName;
-        } else {
-            console.warn(`No category found for id ${categoryId}. The category filter might not work correctly.`);
+            endpoint += `&category=${encodeURIComponent(selectedCategory.categoryName)}`;
         }
-        endpoint += `&category=${encodeURIComponent(categoryNameParam)}&lowStock=${lowStock}&outOfStock=${outOfStock}`;
-    } else {
-        // No category filtering
-        endpoint += `&lowStock=${lowStock}&outOfStock=${outOfStock}`;
     }
+
+    endpoint += `&lowStock=${lowStock}&outOfStock=${outOfStock}`;
 
     if (searchTerm) {
         endpoint += `&search=${encodeURIComponent(searchTerm)}`;
     }
 
+    // Fetch products
     fetch(endpoint)
         .then(response => {
             if (!response.ok) {
@@ -74,9 +44,8 @@ export function loadProducts(
             return response.json();
         })
         .then(data => {
-            // If categories were not provided and we don't need them for filtering, let's fetch them now for UI
-            if (categories.length === 0) {
-                fetch(`${baseUrl()}/category/categories`)
+            if (filtersState.categories.length === 0) {
+                return fetch(`${baseUrl()}/category/categories`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Failed to fetch categories');
@@ -84,28 +53,19 @@ export function loadProducts(
                         return response.json();
                     })
                     .then(fetchedCategories => {
-                        renderProducts(data, {
-                            page,
-                            sortOrder,
-                            lowStock,
-                            outOfStock,
-                            categoryId,
-                            categories: fetchedCategories,
-                            searchTerm,
-                        });
+                        filtersState.categories = fetchedCategories;
+                        renderProducts(data, filtersState);
                     })
                     .catch(error => {
                         console.error('Error fetching categories:', error);
-                        renderProducts(data, { page, sortOrder, lowStock, outOfStock, categoryId, categories: [], searchTerm });
+                        renderProducts(data, { ...filtersState, categories: [] });
                     });
             } else {
-                // We already have categories
-                renderProducts(data, { page, sortOrder, lowStock, outOfStock, categoryId, categories, searchTerm });
+                renderProducts(data, filtersState);
             }
         })
         .catch(handleProductError);
 }
-
 function renderProducts(responseData, filters) {
     const { content: products, totalPages, number: currentPage } = responseData;
 
@@ -148,9 +108,10 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
                     <select id="categoryFilter" class="form-select d-inline-block w-auto me-2">
                         <option value="" ${categoryId === null ? 'selected' : ''}>All Categories</option>
                         ${categories.map(category => `
-                            <option value="${category.categoryId}" ${categoryId === category.categoryId ? 'selected' : ''}>
-                                ${category.categoryName}
-                            </option>
+                           <option value="${category.categoryId}" ${String(categoryId) === String(category.categoryId) ? 'selected' : ''}>
+    ${category.categoryName}
+</option>
+    
                         `).join('')}
                     </select>
                     <button class="btn btn-primary" id="applyCategoryFilterButton">Filter</button>
@@ -443,8 +404,10 @@ export function refreshProducts() {
     const hash = window.location.hash;
     const params = new URLSearchParams(hash.split('?')[1]);
     const currentPage = parseInt(params.get('page')) || 0;
-    loadProducts(currentPage, 12);
+    filtersState.page = currentPage; // Update the global state
+    loadProducts(); // Call without arguments
 }
+
 
 function getStockStatus(stockCount) {
     if (stockCount === 0) {
