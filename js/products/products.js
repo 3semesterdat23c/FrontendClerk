@@ -1,3 +1,4 @@
+// products.js
 import { attachActionListeners, attachFilterActionListeners } from './attach-listeners.js';
 import { createProductModal } from './create-products.js';
 import { deleteProduct } from './delete-products.js';
@@ -5,8 +6,9 @@ import { openEditStockModal } from './update-stock.js';
 import { checkAdmin } from "../admin.js";
 import { baseUrl } from "../config.js";
 import { filtersState } from './filtersState.js';
+
 export function loadProducts() {
-    const { page, size, sortOrder, lowStock, outOfStock, categoryId, categories, searchTerm } = filtersState;
+    const { page, size, sortOrder, lowStock, outOfStock, categoryId, categories, searchTerm, minPrice, maxPrice } = filtersState;
 
     // Show loading spinner
     const app = document.getElementById('app');
@@ -32,6 +34,15 @@ export function loadProducts() {
 
     if (searchTerm) {
         endpoint += `&search=${encodeURIComponent(searchTerm)}`;
+    }
+
+    // Include minPrice and maxPrice if they are set
+    if (minPrice !== null && minPrice !== undefined) {
+        endpoint += `&minPrice=${minPrice}`;
+    }
+
+    if (maxPrice !== null && maxPrice !== undefined) {
+        endpoint += `&maxPrice=${maxPrice}`;
     }
 
     // Fetch products
@@ -90,7 +101,9 @@ function renderProducts(responseData, filters) {
         filters.outOfStock,
         filters.categories,
         filters.categoryId,
-        filters.searchTerm
+        filters.searchTerm,
+        filters.minPrice,
+        filters.maxPrice
     );
 
     const app = document.getElementById('app');
@@ -100,18 +113,16 @@ function renderProducts(responseData, filters) {
     attachActionListeners();
 }
 
-function createProductsHTML(products, currentPage, totalPages, sortOrder, lowStock, outOfStock, categories = [], categoryId = null, searchTerm = null) {
+function createProductsHTML(products, currentPage, totalPages, sortOrder, lowStock, outOfStock, categories = [], categoryId = null, searchTerm = null, minPrice = null, maxPrice = null) {
     return `
         <div>
         <br>
         <br>
         <div class="container"> 
-            <div class="d-flex justify-content-between align-items-center mb-3">
-            
-              
-
-                <div>
-                    <select id="categoryFilter" class="form-select d-inline-block w-auto me-2">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                
+                <div class="d-flex flex-wrap align-items-center">
+                    <select id="categoryFilter" class="form-select d-inline-block w-auto me-2 mb-2">
                         <option value="" ${categoryId === null ? 'selected' : ''}>All Categories</option>
                       ${categories.map(category => {
         const formattedName = category.categoryName
@@ -127,31 +138,44 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
     }).join('')}
                     </select>            
                 
-                    <select id="sortPriceFilter" class="form-select d-inline-block w-auto me-2">
+                    <select id="sortPriceFilter" class="form-select d-inline-block w-auto me-2 mb-2">
                         <option value="asc" ${sortOrder === 'asc' ? 'selected' : ''}>Price: Low to High</option>
                         <option value="desc" ${sortOrder === 'desc' ? 'selected' : ''}>Price: High to Low</option>
                     </select>
-                    
                 </div>
+                
             ${checkAdmin() ? ` 
-                <div>     
-                            <input type="checkbox" id="lowStockFilter" class="form-check-input" ${lowStock ? 'checked' : ''}>
-                    <label for="lowStockFilter" class="form-check-label">Low Stock</label>
-                    <input type="checkbox" id="outOfStockFilter" class="form-check-input ms-3" ${outOfStock ? 'checked' : ''}>
-                    <label for="outOfStockFilter" class="form-check-label">Out of Stock</label>
+                <div class="d-flex flex-wrap align-items-center mb-2">     
+                    <div class="form-check me-3">
+                        <input type="checkbox" id="lowStockFilter" class="form-check-input" ${lowStock ? 'checked' : ''}>
+                        <label for="lowStockFilter" class="form-check-label">Low Stock</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" id="outOfStockFilter" class="form-check-input ms-3" ${outOfStock ? 'checked' : ''}>
+                        <label for="outOfStockFilter" class="form-check-label">Out of Stock</label>
+                    </div>
                 </div>
                 `: ''}
             
-            <div>
-                ${checkAdmin() ? `<button class="btn btn-success" id="createProductButton">Add New Product</button>` : ''}                
-                <button class="btn btn-primary" id="resetFilters">Reset filters</button>
+            <div class="d-flex flex-wrap align-items-center mb-2">
+                <div class="me-3">
+                    <input type="number" id="minPrice" class="form-control" placeholder="Min Price" min="0" value="${minPrice !== null ? minPrice : ''}">
+                </div>
+                <div class="me-3">
+                    <input type="number" id="maxPrice" class="form-control" placeholder="Max Price" min="0" value="${maxPrice !== null ? maxPrice : ''}">
                 </div>
             </div>
+
+            <div class="d-flex flex-wrap align-items-center mb-3">
+                ${checkAdmin() ? `<button class="btn btn-success me-2" id="createProductButton">Add New Product</button>` : ''}                
+                <button class="btn btn-secondary" id="resetFilters">Reset Filters</button>
+            </div>
+
             <div id="product-container" class="row">
                 ${products.map(product => createProductCard(product)).join('')}
             </div>
         </div>
-        ${createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId, searchTerm)}
+        ${createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId, searchTerm, minPrice, maxPrice)}
     </div>`;
 }
 
@@ -190,14 +214,11 @@ export function createProductCard(product) {
         </div>
     </div>
 </div>
-
     `;
 }
 
-function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId = null, searchTerm = null) {
-    const categoryParam = categoryId ? `&categoryId=${categoryId}` : '';
-    const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
-    const baseParams = `&sort=${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}${categoryParam}${searchParam}`;
+function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId = null, searchTerm = null, minPrice = null, maxPrice = null) {
+    const baseParams = ''; // Filters are managed via filtersState
 
     const maxVisiblePages = 7;
     let startPage = Math.max(0, currentPage - 3);
@@ -234,7 +255,6 @@ function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outO
         </nav>
     `;
 }
-
 
 export function openProductModal(mode, productId = null) {
     const modalTitle = document.getElementById('productModalLabel');
@@ -331,7 +351,7 @@ function submitProductForm() {
         return;
     }
     if (discountPrice > price) {
-        showProductError('Please make a discountprice lower than the price or equal.');
+        showProductError('Please make a discount price lower than the price or equal.');
         return;
     }
 
@@ -404,7 +424,6 @@ export function refreshProducts() {
     filtersState.page = currentPage; // Update the global state
     loadProducts(); // Call without arguments
 }
-
 
 function getStockStatus(stockCount) {
     if (stockCount === 0) {
