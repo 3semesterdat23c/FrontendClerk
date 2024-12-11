@@ -102,7 +102,8 @@ function renderProducts(responseData, filters) {
 
 function createProductsHTML(products, currentPage, totalPages, sortOrder, lowStock, outOfStock, categories = [], categoryId = null, searchTerm = null) {
     return `
-        <h1 class="text-center my-4">Our Products</h1>
+        <br>
+        <br>
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-3">
               ${checkAdmin() ? ` 
@@ -150,34 +151,37 @@ export function createProductCard(product) {
     const isDiscounted = product.discountPrice !== product.price;
 
     return `
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 d-flex flex-column">
-                ${product.images && product.images.length > 0 ? `
-                    <img src="${product.images[0]}" class="card-img-top product-image" alt="${product.title}" data-id="${product.productId}">
+<div class="col-md-4 mb-4">
+    <div class="card h-100 d-flex flex-column">
+        ${product.images && product.images.length > 0 ? `
+            <div class="image-container">
+                <img src="${product.images[0]}" class="card-img-top product-image" alt="${product.title}" data-id="${product.productId}">
+            </div>
+        ` : ''}
+        <div class="card-body d-flex flex-column">
+            <h5 class="card-title">${product.title}</h5>
+            <p class="card-text"><strong>Price:</strong> 
+                ${isDiscounted ? `
+                    <span style="text-decoration: line-through; color: red;">$${product.price.toFixed(2)}</span>
+                    <span style="font-weight: bold; color: green;">$${product.discountPrice.toFixed(2)}</span>
+                ` : `<span>$${product.price}</span>`}
+            </p>
+            <p class="card-text">
+                <strong>Stock Status:</strong> 
+                <span style="color: ${stockStatus.color}; font-weight: bold;">${stockStatus.message}</span>
+                ${checkAdmin() ? `<button class="btn btn-sm btn-link edit-stock-button" data-id="${product.productId}" data-stock="${product.stockCount}">Edit</button>` : ''}
+            </p>
+            <div class="mt-auto">
+                <a href="#" class="btn btn-primary me-2 add-to-cart-button" data-product-id="${product.productId}">Buy Now</a>
+                ${checkAdmin() ? `
+                    <button class="btn btn-warning update-button me-2" data-id="${product.productId}">Update</button>
+                    <button class="btn btn-danger delete-button" data-id="${product.productId}">Delete</button>
                 ` : ''}
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">${product.title}</h5>
-                    <p class="card-text"><strong>Price:</strong> 
-                        ${isDiscounted ? `
-                            <span style="text-decoration: line-through; color: red;">$${product.price.toFixed(2)}</span>
-                            <span style="font-weight: bold; color: green;">$${product.discountPrice.toFixed(2)}</span>
-                        ` : `<span>$${product.price}</span>`}
-                    </p>
-                    <p class="card-text">
-                        <strong>Stock Status:</strong> 
-                        <span style="color: ${stockStatus.color}; font-weight: bold;">${stockStatus.message}</span>
-                        ${checkAdmin() ? `<button class="btn btn-sm btn-link edit-stock-button" data-id="${product.productId}" data-stock="${product.stockCount}">Edit</button>` : ''}
-                    </p>
-                    <div class="mt-auto">
-                        <a href="#" class="btn btn-primary me-2 add-to-cart-button" data-product-id="${product.productId}">Buy Now</a>
-                        ${checkAdmin() ? `
-                            <button class="btn btn-warning update-button me-2" data-id="${product.productId}">Update</button>
-                            <button class="btn btn-danger delete-button" data-id="${product.productId}">Delete</button>
-                        ` : ''}
-                    </div>
-                </div>
             </div>
         </div>
+    </div>
+</div>
+
     `;
 }
 
