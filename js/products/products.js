@@ -5,7 +5,6 @@ import { openEditStockModal } from './update-stock.js';
 import { checkAdmin } from "../admin.js";
 import { baseUrl } from "../config.js";
 import { filtersState } from './filtersState.js';
-
 export function loadProducts() {
     const { page, size, sortOrder, lowStock, outOfStock, categoryId, categories, searchTerm } = filtersState;
 
@@ -19,7 +18,7 @@ export function loadProducts() {
         </div>
     `;
 
-    // Build endpoint
+    // Build endpoint with all filters and search term
     let endpoint = `${baseUrl()}/products?page=${page}&size=${size}&sort=discountPrice,${sortOrder}`;
 
     if (categoryId && categories.length > 0) {
@@ -66,6 +65,7 @@ export function loadProducts() {
         })
         .catch(handleProductError);
 }
+
 function renderProducts(responseData, filters) {
     const { content: products, totalPages, number: currentPage } = responseData;
 
@@ -210,47 +210,21 @@ function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outO
         <nav aria-label="Page navigation">
             <ul class="pagination justify-content-center">
                 <li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
-                    <a class="page-link"
-                       href="#products?page=0${baseParams}"
-                       data-page="0"
-                       data-sort="${sortOrder}"
-                       data-low-stock="${lowStock}"
-                       data-out-of-stock="${outOfStock}"
-                       ${categoryId ? `data-category-id="${categoryId}"` : ''}
-                       ${searchTerm ? `data-search-term="${searchTerm}"` : ''}>
-                       First
-                    </a>
+                    <a class="page-link search-page-link" href="#" data-page="0">First</a>
                 </li>
                 ${pages.map(i => `
                     <li class="page-item ${currentPage === i ? 'active' : ''}">
-                        <a class="page-link"
-                           href="#products?page=${i}${baseParams}"
-                           data-page="${i}"
-                           data-sort="${sortOrder}"
-                           data-low-stock="${lowStock}"
-                           data-out-of-stock="${outOfStock}"
-                           ${categoryId ? `data-category-id="${categoryId}"` : ''}
-                           ${searchTerm ? `data-search-term="${searchTerm}"` : ''}>
-                           ${i + 1}
-                        </a>
+                        <a class="page-link search-page-link" href="#" data-page="${i}">${i + 1}</a>
                     </li>
                 `).join('')}
                 <li class="page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}">
-                    <a class="page-link"
-                       href="#products?page=${totalPages - 1}${baseParams}"
-                       data-page="${totalPages - 1}"
-                       data-sort="${sortOrder}"
-                       data-low-stock="${lowStock}"
-                       data-out-of-stock="${outOfStock}"
-                       ${categoryId ? `data-category-id="${categoryId}"` : ''}
-                       ${searchTerm ? `data-search-term="${searchTerm}"` : ''}>
-                       Last
-                    </a>
+                    <a class="page-link search-page-link" href="#" data-page="${totalPages - 1}">Last</a>
                 </li>
             </ul>
         </nav>
     `;
 }
+
 
 export function openProductModal(mode, productId = null) {
     const modalTitle = document.getElementById('productModalLabel');
