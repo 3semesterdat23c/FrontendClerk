@@ -3,15 +3,21 @@ import { loadProducts, openProductModal } from './products.js';
 import { addToCart } from '../cart.js';
 import { openEditStockModal } from './update-stock.js';
 import { deleteProduct } from './delete-products.js';
+import { checkAdmin } from "../admin.js";
 import { filtersState } from './filtersState.js'; // Corrected import path
 
 export function attachFilterActionListeners() {
     function updateFilters() {
-        filtersState.sortOrder = document.getElementById('sortPriceFilter').value;
-        filtersState.lowStock = document.getElementById('lowStockFilter').checked;
-        filtersState.outOfStock = document.getElementById('outOfStockFilter').checked;
         filtersState.categoryId = document.getElementById('categoryFilter').value || null;
-    }
+
+        filtersState.sortOrder = document.getElementById('sortPriceFilter').value;
+        if (checkAdmin()===true){
+
+            filtersState.lowStock = document.getElementById('lowStockFilter').checked;
+        filtersState.outOfStock = document.getElementById('outOfStockFilter').checked;
+            return { sortOrder, lowStock, outOfStock, categoryId }}
+        return  {sortOrder,  categoryId }
+        }
 
     document.getElementById('applyCategoryFilterButton').addEventListener('click', () => {
         updateFilters();
@@ -25,7 +31,9 @@ export function attachFilterActionListeners() {
         loadProducts();
     });
 
-    document.getElementById('lowStockFilter').addEventListener('change', () => {
+    if (checkAdmin()===true) {
+
+        document.getElementById('lowStockFilter').addEventListener('change', () => {
         updateFilters();
         filtersState.page = 0;
         loadProducts();
