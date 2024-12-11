@@ -107,8 +107,27 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
         <br>
         <div class="container"> 
             <div class="d-flex justify-content-between align-items-center mb-3">
-            <button class="btn btn-primary" id="resetFilters">Reset filters</button>
-              ${checkAdmin() ? ` 
+            
+              
+
+                <div>
+                    <select id="categoryFilter" class="form-select d-inline-block w-auto me-2">
+                        <option value="" ${categoryId === null ? 'selected' : ''}>All Categories</option>
+                        ${categories.map(category => `
+                           <option value="${category.categoryId}" ${String(categoryId) === String(category.categoryId) ? 'selected' : ''}>
+                     ${category.categoryName}
+                </option>
+    
+                        `).join('')}
+                    </select>            
+                
+                    <select id="sortPriceFilter" class="form-select d-inline-block w-auto me-2">
+                        <option value="asc" ${sortOrder === 'asc' ? 'selected' : ''}>Price: Low to High</option>
+                        <option value="desc" ${sortOrder === 'desc' ? 'selected' : ''}>Price: High to Low</option>
+                    </select>
+                    
+                </div>
+            ${checkAdmin() ? ` 
                 <div>     
                             <input type="checkbox" id="lowStockFilter" class="form-check-input" ${lowStock ? 'checked' : ''}>
                     <label for="lowStockFilter" class="form-check-label">Low Stock</label>
@@ -116,26 +135,10 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
                     <label for="outOfStockFilter" class="form-check-label">Out of Stock</label>
                 </div>
                 `: ''}
-
-                <div>
-                    <select id="categoryFilter" class="form-select d-inline-block w-auto me-2">
-                        <option value="" ${categoryId === null ? 'selected' : ''}>All Categories</option>
-                        ${categories.map(category => `
-                           <option value="${category.categoryId}" ${String(categoryId) === String(category.categoryId) ? 'selected' : ''}>
-    ${category.categoryName}
-</option>
-    
-                        `).join('')}
-                    </select>            
-                </div>
-
-                ${checkAdmin() ? `<button class="btn btn-success" id="createProductButton">Add New Product</button>` : ''}
-
-                <div>
-                    <select id="sortPriceFilter" class="form-select d-inline-block w-auto me-2">
-                        <option value="asc" ${sortOrder === 'asc' ? 'selected' : ''}>Price: Low to High</option>
-                        <option value="desc" ${sortOrder === 'desc' ? 'selected' : ''}>Price: High to Low</option>
-                    </select>
+            
+            <div>
+                ${checkAdmin() ? `<button class="btn btn-success" id="createProductButton">Add New Product</button>` : ''}                
+                <button class="btn btn-primary" id="resetFilters">Reset filters</button>
                 </div>
             </div>
             <div id="product-container" class="row">
@@ -172,7 +175,7 @@ export function createProductCard(product) {
                 ${checkAdmin() ? `<button class="btn btn-sm btn-link edit-stock-button" data-id="${product.productId}" data-stock="${product.stockCount}">Edit</button>` : ''}
             </p>
             <div class="mt-auto">
-                <a href="#" class="btn btn-primary me-2 add-to-cart-button" data-product-id="${product.productId}">Buy Now</a>
+                <a href="#" class="btn btn-primary me-2 add-to-cart-button" data-product-id="${product.productId}">Add to cart</a>
                 ${checkAdmin() ? `
                     <button class="btn btn-warning update-button me-2" data-id="${product.productId}">Update</button>
                     <button class="btn btn-danger delete-button" data-id="${product.productId}">Delete</button>
