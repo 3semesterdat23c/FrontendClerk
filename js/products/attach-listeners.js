@@ -41,6 +41,15 @@ export function attachFilterActionListeners() {
             loadProducts();
         });
     }
+
+    document.getElementById('resetFilters').addEventListener('click', () => {
+        filtersState.categoryId = null
+        filtersState.sortOrder = 'asc'
+        if (checkAdmin()===true){
+        filtersState.lowStock = false
+        filtersState.outOfStock = false}
+        loadProducts();
+    });
 }
 export function attachActionListeners() {
     // Edit stock
