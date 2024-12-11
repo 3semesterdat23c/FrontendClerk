@@ -7,6 +7,7 @@ import { loadCart } from './cart.js';
 import { setupSearchBar } from './search.js';
 import {loadProductDetails} from "./products/product-details.js";
 import {renderPaymentForm} from "./checkout.js";
+import {loadOrderConfirmationView} from "./order-confirmation.js";
 
 // Function to parse hash and extract route and query parameters
 
@@ -48,6 +49,15 @@ function navigate() {
             break;
         case 'checkout':
             renderPaymentForm();
+            break;
+        case 'order-confirmation':
+            const orderId = params.get('orderId');
+            if (!orderId) {
+                // If no orderId provided, redirect to products or home
+                window.location.hash = '#products';
+            } else {
+                loadOrderConfirmationView(orderId);
+            }
             break;
         default:
             loadHome();
