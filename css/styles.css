@@ -171,4 +171,17 @@ html, body {
 .text-blue {
     color: #007bff; /* Blue color */
 }
-/* Contact section on the right */
+
+#cartItemCount {
+    justify-content: center;
+    align-items: center;
+    top: 2px;
+    margin-left: 15px !important;
+    position: absolute; /* Placering ovenpå kurv */
+    color: black; /* Sort tekst */
+    background-color: white !important; /* Hvid baggrund */
+    border-radius: 50%; /* Rund form */
+    font-size: 10px;
+}
+
+
