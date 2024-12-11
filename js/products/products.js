@@ -166,8 +166,6 @@ function createProductsHTML(
                             <input type="number" id="maxPrice" class="form-control" placeholder="Max Price" min="0" value="${maxPrice !== null ? maxPrice : ''}">
                         </div>
 
-                        <!-- Apply Price Filter Button (Optional) -->
-                        <button class="btn btn-primary mb-2" id="applyPriceFilter">Apply Price Filter</button>
                     </div>
                     
                     ${checkAdmin() ? ` 
