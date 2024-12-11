@@ -102,6 +102,7 @@ function renderProducts(responseData, filters) {
 
 function createProductsHTML(products, currentPage, totalPages, sortOrder, lowStock, outOfStock, categories = [], categoryId = null, searchTerm = null) {
     return `
+        <div>
         <br>
         <br>
         <div class="container">
@@ -124,8 +125,7 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
 </option>
     
                         `).join('')}
-                    </select>
-                    <button class="btn btn-primary" id="applyCategoryFilterButton">Filter</button>
+                    </select>            
                 </div>
 
                 ${checkAdmin() ? `<button class="btn btn-success" id="createProductButton">Add New Product</button>` : ''}
@@ -135,7 +135,6 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
                         <option value="asc" ${sortOrder === 'asc' ? 'selected' : ''}>Price: Low to High</option>
                         <option value="desc" ${sortOrder === 'desc' ? 'selected' : ''}>Price: High to Low</option>
                     </select>
-                    <button class="btn btn-primary" id="applySortButton">Sort</button>
                 </div>
             </div>
             <div id="product-container" class="row">
@@ -143,7 +142,7 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
             </div>
         </div>
         ${createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId, searchTerm)}
-    `;
+    </div>`;
 }
 
 export function createProductCard(product) {
