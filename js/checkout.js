@@ -146,7 +146,7 @@ function validatePayment() {
             paymentModal.hide();
 
             setTimeout(() => {
-                window.location.hash = "#products";
+                window.location.hash = `#order-confirmation?orderId=${orderId}`;
             }, 2000);
         })
         .catch(error => {

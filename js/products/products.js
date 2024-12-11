@@ -1,20 +1,16 @@
+// products.js
 import { attachActionListeners, attachFilterActionListeners } from './attach-listeners.js';
 import { createProductModal } from './create-products.js';
 import { deleteProduct } from './delete-products.js';
 import { openEditStockModal } from './update-stock.js';
 import { checkAdmin } from "../admin.js";
 import { baseUrl } from "../config.js";
+import { filtersState } from './filtersState.js';
 
-export function loadProducts(
-    page = 0,
-    size = 12,
-    sortOrder = 'asc',
-    lowStock = false,
-    outOfStock = false,
-    categoryId = null,
-    categories = [],
-    searchTerm = null
-) {
+export function loadProducts() {
+    const { page, size, sortOrder, lowStock, outOfStock, categoryId, categories, searchTerm, minPrice, maxPrice } = filtersState;
+
+    // Show loading spinner
     const app = document.getElementById('app');
     app.innerHTML = `
         <div class="text-center my-4">
@@ -24,20 +20,32 @@ export function loadProducts(
         </div>
     `;
 
-    let endpoint;
+    // Build endpoint with all filters and search term
+    let endpoint = `${baseUrl()}/products?page=${page}&size=${size}&sort=discountPrice,${sortOrder}`;
 
-    if (categoryId) {
-        // Category filter
-        endpoint = `${baseUrl()}/products/categories/${categoryId}?page=${page}&size=${size}&sort=discountPrice,${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}`;
-    } else {
-        // General products
-        endpoint = `${baseUrl()}/products?page=${page}&size=${size}&sort=discountPrice,${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}`;
+    if (categoryId && categories.length > 0) {
+        const selectedCategory = categories.find(cat => String(cat.categoryId) === String(categoryId));
+        if (selectedCategory) {
+            endpoint += `&category=${encodeURIComponent(selectedCategory.categoryName)}`;
+        }
     }
+
+    endpoint += `&lowStock=${lowStock}&outOfStock=${outOfStock}`;
 
     if (searchTerm) {
         endpoint += `&search=${encodeURIComponent(searchTerm)}`;
     }
 
+    // Include minPrice and maxPrice if they are set
+    if (minPrice !== null && minPrice !== undefined) {
+        endpoint += `&minPrice=${minPrice}`;
+    }
+
+    if (maxPrice !== null && maxPrice !== undefined) {
+        endpoint += `&maxPrice=${maxPrice}`;
+    }
+
+    // Fetch products
     fetch(endpoint)
         .then(response => {
             if (!response.ok) {
@@ -46,9 +54,8 @@ export function loadProducts(
             return response.json();
         })
         .then(data => {
-            if (categories.length === 0) {
-                // Fetch categories if not provided
-                fetch(`${baseUrl()}/category/categories`)
+            if (filtersState.categories.length === 0) {
+                return fetch(`${baseUrl()}/category/categories`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Failed to fetch categories');
@@ -56,22 +63,15 @@ export function loadProducts(
                         return response.json();
                     })
                     .then(fetchedCategories => {
-                        renderProducts(data, {
-                            page,
-                            sortOrder,
-                            lowStock,
-                            outOfStock,
-                            categoryId,
-                            categories: fetchedCategories,
-                            searchTerm,
-                        });
+                        filtersState.categories = fetchedCategories;
+                        renderProducts(data, filtersState);
                     })
                     .catch(error => {
                         console.error('Error fetching categories:', error);
-                        renderProducts(data, { page, sortOrder, lowStock, outOfStock, categoryId, categories: [], searchTerm });
+                        renderProducts(data, { ...filtersState, categories: [] });
                     });
             } else {
-                renderProducts(data, { page, sortOrder, lowStock, outOfStock, categoryId, categories, searchTerm });
+                renderProducts(data, filtersState);
             }
         })
         .catch(handleProductError);
@@ -84,6 +84,14 @@ function renderProducts(responseData, filters) {
         throw new Error('Invalid product data');
     }
 
+    let lowStockFilter = false;
+    let outOfStockFilter = false;
+
+    if (checkAdmin() === true) {
+        lowStockFilter = filters.lowStock;
+        outOfStockFilter = filters.outOfStock;
+    }
+
     const productsHTML = createProductsHTML(
         products,
         currentPage,
@@ -93,7 +101,9 @@ function renderProducts(responseData, filters) {
         filters.outOfStock,
         filters.categories,
         filters.categoryId,
-        filters.searchTerm
+        filters.searchTerm,
+        filters.minPrice,
+        filters.maxPrice
     );
 
     const app = document.getElementById('app');
@@ -102,89 +112,130 @@ function renderProducts(responseData, filters) {
     attachFilterActionListeners(filters);
     attachActionListeners();
 }
-
-function createProductsHTML(products, currentPage, totalPages, sortOrder, lowStock, outOfStock, categories = [], categoryId = null, searchTerm = null) {
+function createProductsHTML(
+    products,
+    currentPage,
+    totalPages,
+    sortOrder,
+    lowStock,
+    outOfStock,
+    categories = [],
+    categoryId = null,
+    searchTerm = null,
+    minPrice = null,
+    maxPrice = null
+) {
     return `
-        <h1 class="text-center my-4">Our Products</h1>
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <input type="checkbox" id="lowStockFilter" class="form-check-input" ${lowStock ? 'checked' : ''}>
-                    <label for="lowStockFilter" class="form-check-label">Low Stock</label>
-                    <input type="checkbox" id="outOfStockFilter" class="form-check-input ms-3" ${outOfStock ? 'checked' : ''}>
-                    <label for="outOfStockFilter" class="form-check-label">Out of Stock</label>
+        <div>
+            <br>
+            <br>
+            <div class="container"> 
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                    
+                    <div class="d-flex flex-wrap align-items-center">
+                        <!-- Category Filter -->
+                        <select id="categoryFilter" class="form-select d-inline-block w-auto me-2">
+                            <option value="" ${categoryId === null ? 'selected' : ''}>All Categories</option>
+                            ${categories.map(category => {
+        const formattedName = category.categoryName
+            .split('-') // split by dash
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // capitalize each word
+            .join(' '); // join back with space
+
+        return `
+                                    <option value="${category.categoryId}" ${String(categoryId) === String(category.categoryId) ? 'selected' : ''}>
+                                        ${formattedName}
+                                    </option>
+                                `;
+    }).join('')}
+                        </select>            
+                    
+                        <!-- Sort Price Filter -->
+                        <select id="sortPriceFilter" class="form-select d-inline-block w-auto me-2">
+                            <option value="asc" ${sortOrder === 'asc' ? 'selected' : ''}>Price: Low to High</option>
+                            <option value="desc" ${sortOrder === 'desc' ? 'selected' : ''}>Price: High to Low</option>
+                        </select>
+
+                        <!-- Min Price Input -->
+                        <div class="me-3">
+                            <input type="number" id="minPrice" class="form-control" placeholder="Min Price" min="0" value="${minPrice !== null ? minPrice : ''}">
+                        </div>
+
+                        <!-- Max Price Input -->
+                        <div class="me-3">
+                            <input type="number" id="maxPrice" class="form-control" placeholder="Max Price" min="0" value="${maxPrice !== null ? maxPrice : ''}">
+                        </div>
+
+                    </div>
+                    
+                    ${checkAdmin() ? ` 
+                        <div class="d-flex flex-wrap align-items-center">     
+                            <div class="form-check me-3">
+                                <input type="checkbox" id="lowStockFilter" class="form-check-input" ${lowStock ? 'checked' : ''}>
+                                <label for="lowStockFilter" class="form-check-label">Low Stock</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" id="outOfStockFilter" class="form-check-input ms-3" ${outOfStock ? 'checked' : ''}>
+                                <label for="outOfStockFilter" class="form-check-label">Out of Stock</label>
+                            </div>
+                        </div>
+                    ` : ''}
+                
+                    <div class="d-flex flex-wrap align-items-center mb-3">
+                        ${checkAdmin() ? `<button class="btn btn-success me-2" id="createProductButton">Add New Product</button>` : ''}                
+                        <button class="btn btn-secondary" id="resetFilters">Reset Filters</button>
+                    </div>
                 </div>
-
-                <div>
-                    <select id="categoryFilter" class="form-select d-inline-block w-auto me-2">
-                        <option value="" ${categoryId === null ? 'selected' : ''}>All Categories</option>
-                        ${categories.map(category => `
-                            <option value="${category.categoryId}" ${categoryId === category.categoryId ? 'selected' : ''}>
-                                ${category.categoryName}
-                            </option>
-                        `).join('')}
-                    </select>
-                    <button class="btn btn-primary" id="applyCategoryFilterButton">Filter</button>
-                </div>
-
-                ${checkAdmin() ? `<button class="btn btn-success" id="createProductButton">Add New Product</button>` : ''}
-
-                <div>
-                    <select id="sortPriceFilter" class="form-select d-inline-block w-auto me-2">
-                        <option value="asc" ${sortOrder === 'asc' ? 'selected' : ''}>Price: Low to High</option>
-                        <option value="desc" ${sortOrder === 'desc' ? 'selected' : ''}>Price: High to Low</option>
-                    </select>
-                    <button class="btn btn-primary" id="applySortButton">Sort</button>
+                
+                <div id="product-container" class="row">
+                    ${products.map(product => createProductCard(product)).join('')}
                 </div>
             </div>
-            <div id="product-container" class="row">
-                ${products.map(product => createProductCard(product)).join('')}
-            </div>
-        </div>
-        ${createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId, searchTerm)}
-    `;
+            ${createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId, searchTerm, minPrice, maxPrice)}
+        </div>`;
 }
+
 
 export function createProductCard(product) {
     const stockStatus = getStockStatus(product.stockCount);
     const isDiscounted = product.discountPrice !== product.price;
 
     return `
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 d-flex flex-column">
-                ${product.images && product.images.length > 0 ? `
-                    <img src="${product.images[0]}" class="card-img-top product-image" alt="${product.title}" data-id="${product.productId}">
+<div class="col-md-4 mb-4">
+    <div class="card h-100 d-flex flex-column">
+        ${product.images && product.images.length > 0 ? `
+            <div class="image-container">
+                <img src="${product.images[0]}" class="card-img-top product-image" alt="${product.title}" data-id="${product.productId}">
+            </div>
+        ` : ''}
+        <div class="card-body d-flex flex-column">
+            <h5 class="card-title">${product.title}</h5>
+            <p class="card-text"><strong>Price:</strong> 
+                ${isDiscounted ? `
+                    <span style="text-decoration: line-through; color: red;">$${product.price.toFixed(2)}</span>
+                    <span style="font-weight: bold; color: green;">$${product.discountPrice.toFixed(2)}</span>
+                ` : `<span>$${product.price}</span>`}
+            </p>
+            <p class="card-text">
+                <strong>Stock Status:</strong> 
+                <span style="color: ${stockStatus.color}; font-weight: bold;">${stockStatus.message}</span>
+                ${checkAdmin() ? `<button class="btn btn-sm btn-link edit-stock-button" data-id="${product.productId}" data-stock="${product.stockCount}">Edit</button>` : ''}
+            </p>
+            <div class="mt-auto">
+                <a href="#" class="btn btn-primary me-2 add-to-cart-button" data-product-id="${product.productId}">Add to cart</a>
+                ${checkAdmin() ? `
+                    <button class="btn btn-warning update-button me-2" data-id="${product.productId}">Update</button>
+                    <button class="btn btn-danger delete-button" data-id="${product.productId}">Delete</button>
                 ` : ''}
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">${product.title}</h5>
-                    <p class="card-text"><strong>Price:</strong> 
-                        ${isDiscounted ? `
-                            <span style="text-decoration: line-through; color: red;">$${product.price.toFixed(2)}</span>
-                            <span style="font-weight: bold; color: green;">$${product.discountPrice.toFixed(2)}</span>
-                        ` : `<span>$${product.price}</span>`}
-                    </p>
-                    <p class="card-text">
-                        <strong>Stock Status:</strong> 
-                        <span style="color: ${stockStatus.color}; font-weight: bold;">${stockStatus.message}</span>
-                        ${checkAdmin() ? `<button class="btn btn-sm btn-link edit-stock-button" data-id="${product.productId}" data-stock="${product.stockCount}">Edit</button>` : ''}
-                    </p>
-                    <div class="mt-auto">
-                        <a href="#" class="btn btn-primary me-2 add-to-cart-button" data-product-id="${product.productId}">Buy Now</a>
-                        ${checkAdmin() ? `
-                            <button class="btn btn-warning update-button me-2" data-id="${product.productId}">Update</button>
-                            <button class="btn btn-danger delete-button" data-id="${product.productId}">Delete</button>
-                        ` : ''}
-                    </div>
-                </div>
             </div>
         </div>
+    </div>
+</div>
     `;
 }
 
-function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId = null, searchTerm = null) {
-    const categoryParam = categoryId ? `&categoryId=${categoryId}` : '';
-    const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
-    const baseParams = `&sort=${sortOrder}&lowStock=${lowStock}&outOfStock=${outOfStock}${categoryParam}${searchParam}`;
+function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId = null, searchTerm = null, minPrice = null, maxPrice = null) {
+    const baseParams = ''; // Filters are managed via filtersState
 
     const maxVisiblePages = 7;
     let startPage = Math.max(0, currentPage - 3);
@@ -207,42 +258,15 @@ function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outO
         <nav aria-label="Page navigation">
             <ul class="pagination justify-content-center">
                 <li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
-                    <a class="page-link"
-                       href="#products?page=0${baseParams}"
-                       data-page="0"
-                       data-sort="${sortOrder}"
-                       data-low-stock="${lowStock}"
-                       data-out-of-stock="${outOfStock}"
-                       ${categoryId ? `data-category-id="${categoryId}"` : ''}
-                       ${searchTerm ? `data-search-term="${searchTerm}"` : ''}>
-                       First
-                    </a>
+                    <a class="page-link search-page-link" href="#" data-page="0">First</a>
                 </li>
                 ${pages.map(i => `
                     <li class="page-item ${currentPage === i ? 'active' : ''}">
-                        <a class="page-link"
-                           href="#products?page=${i}${baseParams}"
-                           data-page="${i}"
-                           data-sort="${sortOrder}"
-                           data-low-stock="${lowStock}"
-                           data-out-of-stock="${outOfStock}"
-                           ${categoryId ? `data-category-id="${categoryId}"` : ''}
-                           ${searchTerm ? `data-search-term="${searchTerm}"` : ''}>
-                           ${i + 1}
-                        </a>
+                        <a class="page-link search-page-link" href="#" data-page="${i}">${i + 1}</a>
                     </li>
                 `).join('')}
                 <li class="page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}">
-                    <a class="page-link"
-                       href="#products?page=${totalPages - 1}${baseParams}"
-                       data-page="${totalPages - 1}"
-                       data-sort="${sortOrder}"
-                       data-low-stock="${lowStock}"
-                       data-out-of-stock="${outOfStock}"
-                       ${categoryId ? `data-category-id="${categoryId}"` : ''}
-                       ${searchTerm ? `data-search-term="${searchTerm}"` : ''}>
-                       Last
-                    </a>
+                    <a class="page-link search-page-link" href="#" data-page="${totalPages - 1}">Last</a>
                 </li>
             </ul>
         </nav>
@@ -344,7 +368,7 @@ function submitProductForm() {
         return;
     }
     if (discountPrice > price) {
-        showProductError('Please make a discountprice lower than the price or equal.');
+        showProductError('Please make a discount price lower than the price or equal.');
         return;
     }
 
@@ -363,7 +387,7 @@ function submitProductForm() {
         tags
     };
 
-    const endpoint = isUpdate ? `${baseUrl()}/products/${productId}/update` : `${baseUrl()}/api/v1/products/create`;
+    const endpoint = isUpdate ? `${baseUrl()}/products/${productId}/update` : `${baseUrl()}/products/create`;
     const method = isUpdate ? 'PUT' : 'POST';
 
     const submitButton = document.getElementById('productSubmitButton');
@@ -414,7 +438,8 @@ export function refreshProducts() {
     const hash = window.location.hash;
     const params = new URLSearchParams(hash.split('?')[1]);
     const currentPage = parseInt(params.get('page')) || 0;
-    loadProducts(currentPage, 12);
+    filtersState.page = currentPage; // Update the global state
+    loadProducts(); // Call without arguments
 }
 
 function getStockStatus(stockCount) {

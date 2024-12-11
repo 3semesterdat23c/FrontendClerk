@@ -72,8 +72,7 @@ export function showOrderModal(order) {
     `;
     orderProductsList.insertAdjacentHTML('beforeend', totalRow);
 
-    // Debug: Log the total price and ensure the table is being updated
-    console.log('Total Price:', totalPrice);
+
 
     // Ensure the modal is shown properly using Bootstrap
     const myOrderModal = new bootstrap.Modal(document.getElementById('myOrderModal'));

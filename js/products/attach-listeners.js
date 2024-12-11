@@ -1,38 +1,118 @@
+// attach-listeners.js
 import { loadProducts, openProductModal } from './products.js';
 import { addToCart } from '../cart.js';
 import { openEditStockModal } from './update-stock.js';
 import { deleteProduct } from './delete-products.js';
+import { checkAdmin } from "../admin.js";
+import { filtersState } from './filtersState.js'; // Corrected import path
 
-export function attachFilterActionListeners(filters) {
-    // Helper function to read all filter states from the DOM
-    function getAllFilters() {
-        const sortOrder = document.getElementById('sortPriceFilter').value;
-        const lowStock = document.getElementById('lowStockFilter').checked;
-        const outOfStock = document.getElementById('outOfStockFilter').checked;
-        const categoryId = document.getElementById('categoryFilter').value || null;
-        return { sortOrder, lowStock, outOfStock, categoryId };
+
+export function attachFilterActionListeners() {
+    function updateFilters() {
+        filtersState.categoryId = document.getElementById('categoryFilter').value || null;
+        filtersState.sortOrder = document.getElementById('sortPriceFilter').value;
+
+        if (checkAdmin() === true) {
+            filtersState.lowStock = document.getElementById('lowStockFilter').checked;
+            filtersState.outOfStock = document.getElementById('outOfStockFilter').checked;
+        }
     }
 
-    document.getElementById('applyCategoryFilterButton').addEventListener('click', () => {
-        const { sortOrder, lowStock, outOfStock, categoryId } = getAllFilters();
-        loadProducts(0, 12, sortOrder, lowStock, outOfStock, categoryId, filters.categories);
+    document.getElementById('categoryFilter').addEventListener('change', () => {
+        updateFilters();
+        filtersState.page = 0;
+        loadProducts();
     });
 
-    document.getElementById('applySortButton').addEventListener('click', () => {
-        const { sortOrder, lowStock, outOfStock, categoryId } = getAllFilters();
-        loadProducts(0, 12, sortOrder, lowStock, outOfStock, categoryId, filters.categories);
+    document.getElementById('sortPriceFilter').addEventListener('change', () => {
+        updateFilters();
+        filtersState.page = 0;
+        loadProducts();
     });
 
-    document.getElementById('lowStockFilter').addEventListener('change', () => {
-        const { sortOrder, lowStock, outOfStock, categoryId } = getAllFilters();
-        loadProducts(0, 12, sortOrder, lowStock, outOfStock, categoryId, filters.categories);
-    });
+    if (checkAdmin() === true) {
+        document.getElementById('lowStockFilter').addEventListener('change', () => {
+            updateFilters();
+            filtersState.page = 0;
+            loadProducts();
+        });
 
-    document.getElementById('outOfStockFilter').addEventListener('change', () => {
-        const { sortOrder, lowStock, outOfStock, categoryId } = getAllFilters();
-        loadProducts(0, 12, sortOrder, lowStock, outOfStock, categoryId, filters.categories);
+        document.getElementById('outOfStockFilter').addEventListener('change', () => {
+            updateFilters();
+            filtersState.page = 0;
+            loadProducts();
+        });
+    }
+
+    // Implement Debounced Price Filters
+    const minPriceInput = document.getElementById('minPrice');
+    const maxPriceInput = document.getElementById('maxPrice');
+
+    if (minPriceInput && maxPriceInput) {
+        let debounceTimeout;
+
+        function handlePriceInput() {
+            const minPriceValue = parseInt(minPriceInput.value, 10);
+            const maxPriceValue = parseInt(maxPriceInput.value, 10);
+
+            // Validate inputs
+            if (minPriceInput.value && isNaN(minPriceValue)) {
+                alert('Please enter a valid minimum price.');
+                return;
+            }
+            if (maxPriceInput.value && isNaN(maxPriceValue)) {
+                alert('Please enter a valid maximum price.');
+                return;
+            }
+            if (minPriceInput.value && maxPriceInput.value && minPriceValue > maxPriceValue) {
+                alert('Minimum price cannot be greater than maximum price.');
+                return;
+            }
+
+            filtersState.minPrice = isNaN(minPriceValue) ? null : minPriceValue;
+            filtersState.maxPrice = isNaN(maxPriceValue) ? null : maxPriceValue;
+            filtersState.page = 0; // Reset to first page when filters change
+
+            loadProducts();
+        }
+
+        minPriceInput.addEventListener('input', () => {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(handlePriceInput, 300);
+        });
+
+        maxPriceInput.addEventListener('input', () => {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(handlePriceInput, 300);
+        });
+    }
+
+    // Handle Reset Filters Button
+    document.getElementById('resetFilters').addEventListener('click', () => {
+        filtersState.categoryId = null;
+        filtersState.sortOrder = 'asc';
+        if (checkAdmin() === true) {
+            filtersState.lowStock = false;
+            filtersState.outOfStock = false;
+        }
+        filtersState.searchTerm = null;
+        filtersState.minPrice = null;
+        filtersState.maxPrice = null;
+
+        // Reset UI elements
+        document.getElementById('categoryFilter').value = '';
+        document.getElementById('sortPriceFilter').value = 'asc';
+        if (checkAdmin() === true) {
+            document.getElementById('lowStockFilter').checked = false;
+            document.getElementById('outOfStockFilter').checked = false;
+        }
+        document.getElementById('minPrice').value = '';
+        document.getElementById('maxPrice').value = '';
+
+        loadProducts();
     });
 }
+
 
 export function attachActionListeners() {
     // Edit stock
@@ -50,12 +130,8 @@ export function attachActionListeners() {
         if (e.target.classList.contains('page-link') && !e.target.classList.contains('search-page-link')) {
             e.preventDefault();
             const page = parseInt(e.target.getAttribute('data-page'), 10);
-            const sortOrder = e.target.getAttribute('data-sort');
-            const lowStock = e.target.getAttribute('data-low-stock') === 'true';
-            const outOfStock = e.target.getAttribute('data-out-of-stock') === 'true';
-            const categoryId = e.target.getAttribute('data-category-id') || null;
-            const searchTerm = e.target.getAttribute('data-search-term') || null;
-            loadProducts(page, 12, sortOrder, lowStock, outOfStock, categoryId, [], searchTerm);
+            filtersState.page = page;
+            loadProducts();
         }
     });
 
@@ -101,6 +177,7 @@ export function attachActionListeners() {
             const productId = e.target.getAttribute('data-id');
             if (productId) {
                 window.location.hash = `product?id=${productId}`;
+                window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top with smooth animation
             } else {
                 console.error('Product ID is missing.');
             }
@@ -113,6 +190,7 @@ export function attachActionListeners() {
             const productId = e.target.getAttribute('data-id');
             if (productId) {
                 window.location.hash = `product?id=${productId}`;
+                window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top with smooth animation
             } else {
                 console.error('Product ID is missing.');
             }

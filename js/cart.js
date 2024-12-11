@@ -1,7 +1,5 @@
-// Function to add a product to the cart
-// cart.js
-import {baseUrl} from "./config.js";
-import {renderPaymentForm} from "./checkout.js";
+import { baseUrl } from "./config.js";
+import { renderPaymentForm } from "./checkout.js";
 
 export async function addToCart(productId, quantity) {
     try {
@@ -22,14 +20,15 @@ export async function addToCart(productId, quantity) {
             headers: headers,
             body: JSON.stringify({
                 productId: productId,
-                quantity: quantity, // Use the quantity parameter
+                quantity: quantity,
             }),
         });
 
         if (response.ok) {
             alert(`Added ${quantity} item(s) to your cart successfully!`);
             const data = await response.json();
-            console.log('Server response:', data);
+            // Update the cart item count after adding
+            updateCartItemCount();
         } else {
             let errorMessage = 'Unknown error occurred.';
             try {
@@ -47,7 +46,6 @@ export async function addToCart(productId, quantity) {
 }
 
 export async function loadCart() {
-    // Function to load and display the cart contents
     try {
         const token = localStorage.getItem('token');
         const response = await fetch('http://localhost:8080/api/v1/order/cart', {
@@ -71,31 +69,72 @@ export async function loadCart() {
     }
 }
 
-// Function to render the cart data
-function renderCart(cartData) {
-    console.log('cartdata: ', cartData);
-    const mainContent = document.getElementById('app'); // Using 'app' as the container
+// New function to update cart item count
+export async function updateCartItemCount() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        // If not logged in, just hide the number
+        setCartItemCount(0);
+        return;
+    }
 
-    // Clear existing content
+    try {
+        const response = await fetch('http://localhost:8080/api/v1/order/cart', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (response.ok) {
+            const cartData = await response.json();
+            // Count total items
+            const totalItems = cartData.reduce((sum, item) => sum + item.quantity, 0);
+            setCartItemCount(totalItems);
+        } else {
+            setCartItemCount(0);
+        }
+    } catch (error) {
+        console.error('Error updating cart item count:', error);
+        setCartItemCount(0);
+    }
+}
+
+// Helper function to set the cart item count in the UI
+function setCartItemCount(count) {
+    const cartCountElement = document.getElementById('cartItemCount');
+    if (!cartCountElement) return;
+
+    if (count > 0) {
+        cartCountElement.textContent = count;
+        cartCountElement.style.display = 'inline-block';
+    } else {
+        cartCountElement.style.display = 'none';
+    }
+}
+
+function renderCart(cartData) {
+    const mainContent = document.getElementById('app');
+
     mainContent.innerHTML = '';
 
     if (!cartData || cartData.length === 0) {
         mainContent.innerHTML = '<h2 class="my-4">Your Cart is Empty</h2>';
+        // Update count to 0 if empty
+        setCartItemCount(0);
         return;
     }
 
-    // Calculate total price
     const totalPrice = cartData.reduce((total, item) => {
         return total + item.priceAtTimeOfOrder * item.quantity;
     }, 0);
 
-    // Start building the cart content
     let cartContent = `
         <h2 class="my-4">Your Cart</h2>
         <div id="cart-items" class="row">
     `;
 
-    // Iterate over cart items and build the HTML for each
     cartData.forEach(item => {
         const isDiscounted = item.priceAtTimeOfOrder < item.originalPrice;
         cartContent += `
@@ -105,12 +144,10 @@ function renderCart(cartData) {
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title">${item.productName}</h5>
                         <p class="card-text mb-1"><strong>Price:</strong> ${
-            isDiscounted ? `
-                                <span style="text-decoration: line-through; color: red;">$${item.originalPrice.toFixed(2)}</span>
-                                <span style="font-weight: bold; color: green;">$${item.priceAtTimeOfOrder.toFixed(2)}</span>
-                            ` : `
-                                <span>$${item.priceAtTimeOfOrder.toFixed(2)}</span>
-                            `
+            isDiscounted ?
+                `<span style="text-decoration: line-through; color: red;">$${item.originalPrice.toFixed(2)}</span>
+                 <span style="font-weight: bold; color: green;">$${item.priceAtTimeOfOrder.toFixed(2)}</span>`
+                : `<span>$${item.priceAtTimeOfOrder.toFixed(2)}</span>`
         }</p>
                         <p class="card-text mb-1"><strong>Quantity:</strong> ${item.quantity}</p>
                         <p class="card-text mb-3"><strong>Subtotal:</strong> $${(item.priceAtTimeOfOrder * item.quantity).toFixed(2)}</p>
@@ -121,10 +158,8 @@ function renderCart(cartData) {
         `;
     });
 
-    // Close the cart items container
     cartContent += '</div>';
 
-    // Add total price and checkout button
     cartContent += `
         <div class="row">
             <div class="col text-end">
@@ -134,34 +169,26 @@ function renderCart(cartData) {
         </div>
     `;
 
-    // Insert the cart content into the mainContent
     mainContent.innerHTML = cartContent;
 
-    // Attach event listeners to "Remove" buttons
     attachRemoveFromCartListeners();
-    // Attach event listeners to quantity change buttons
     attachQuantityChangeListeners();
-
     attachToCheckoutListener();
 
-
+    // Update the cart count after rendering the cart
+    const totalItems = cartData.reduce((sum, item) => sum + item.quantity, 0);
+    setCartItemCount(totalItems);
 }
 
 function attachToCheckoutListener() {
     const checkoutButton = document.getElementById("checkout");
-
     checkoutButton.addEventListener("click", function () {
-        renderPaymentForm(); // Render and open the payment modal
+        renderPaymentForm();
     });
 }
 
-
-
-
-// Function to attach event listeners to the "Remove" buttons
 function attachRemoveFromCartListeners() {
     const cartItemsContainer = document.getElementById('cart-items');
-
     cartItemsContainer.addEventListener('click', function (event) {
         if (event.target && event.target.classList.contains('remove-from-cart-button')) {
             event.preventDefault();
@@ -171,7 +198,6 @@ function attachRemoveFromCartListeners() {
     });
 }
 
-// Function to handle removing a product from the cart
 export async function removeFromCart(productId) {
     try {
         const token = localStorage.getItem('token');
@@ -187,11 +213,10 @@ export async function removeFromCart(productId) {
         });
 
         if (response.ok) {
-            // Refresh the cart display
             loadCart();
         } else {
             const errorData = await response.json();
-                alert(`Failed to remove product from cart: ${errorData.message}`);
+            alert(`Failed to remove product from cart: ${errorData.message}`);
         }
     } catch (error) {
         console.error('Error removing product from cart:', error);
@@ -199,10 +224,8 @@ export async function removeFromCart(productId) {
     }
 }
 
-// Function to attach event listeners for quantity changes
 function attachQuantityChangeListeners() {
     const cartItemsContainer = document.getElementById('cart-items');
-
     cartItemsContainer.addEventListener('click', async function (event) {
         if (event.target && event.target.classList.contains('change-quantity-button')) {
             event.preventDefault();
@@ -212,21 +235,17 @@ function attachQuantityChangeListeners() {
             let currentQuantity = parseInt(quantityDisplay.textContent);
 
             if (action === 'increase') {
-                currentQuantity += 1; // Increase quantity
+                currentQuantity += 1;
             } else if (action === 'decrease' && currentQuantity > 1) {
-                currentQuantity -= 1; // Decrease quantity, but not below 1
+                currentQuantity -= 1;
             }
 
-            // Update the displayed quantity
             quantityDisplay.textContent = currentQuantity;
-
-            // Send the updated quantity to the backend
             await updateQuantity(productId, currentQuantity);
         }
     });
 }
 
-// Function to update the product quantity in the cart (frontend only)
 async function updateQuantity(productId, quantity) {
     try {
         const token = localStorage.getItem('token');
@@ -244,7 +263,7 @@ async function updateQuantity(productId, quantity) {
 
         if (response.ok) {
             console.log(`Updated product ${productId} quantity to ${quantity}`);
-            loadCart(); // Refresh the cart to show updated data
+            loadCart();
         } else {
             const errorData = await response.json();
             alert(`Failed to update quantity: ${errorData.message}`);
@@ -254,7 +273,3 @@ async function updateQuantity(productId, quantity) {
         alert('An error occurred while updating the product quantity.');
     }
 }
-
-
-
-//Edit here

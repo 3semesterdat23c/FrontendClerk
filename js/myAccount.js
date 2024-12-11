@@ -120,7 +120,7 @@ export function loadmyAccount() {
                     const updatedUser = {
                         password: password,
                     };
-                    fetch(`${baseUrl()}/users/${id}/updatepassword`, {
+                    fetch(`${baseUrl()}/users/${id}/update`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
