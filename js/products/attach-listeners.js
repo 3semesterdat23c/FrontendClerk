@@ -9,16 +9,12 @@ import { filtersState } from './filtersState.js'; // Corrected import path
 export function attachFilterActionListeners() {
     function updateFilters() {
         filtersState.categoryId = document.getElementById('categoryFilter').value || null;
-
         filtersState.sortOrder = document.getElementById('sortPriceFilter').value;
-        if (checkAdmin()===true){
 
+        if (checkAdmin() === true) {
             filtersState.lowStock = document.getElementById('lowStockFilter').checked;
-        filtersState.outOfStock = document.getElementById('outOfStockFilter').checked;
-            return { sortOrder, lowStock, outOfStock, categoryId }}
-        return  {sortOrder,  categoryId }
-        }
-
+            filtersState.outOfStock = document.getElementById('outOfStockFilter').checked;
+        }}
     document.getElementById('applyCategoryFilterButton').addEventListener('click', () => {
         updateFilters();
         filtersState.page = 0;
@@ -31,21 +27,21 @@ export function attachFilterActionListeners() {
         loadProducts();
     });
 
-    if (checkAdmin()===true) {
+    if (checkAdmin() === true) {
 
         document.getElementById('lowStockFilter').addEventListener('change', () => {
-        updateFilters();
-        filtersState.page = 0;
-        loadProducts();
-    });
+            updateFilters();
+            filtersState.page = 0;
+            loadProducts();
+        });
 
-    document.getElementById('outOfStockFilter').addEventListener('change', () => {
-        updateFilters();
-        filtersState.page = 0;
-        loadProducts();
-    });
+        document.getElementById('outOfStockFilter').addEventListener('change', () => {
+            updateFilters();
+            filtersState.page = 0;
+            loadProducts();
+        });
+    }
 }
-
 export function attachActionListeners() {
     // Edit stock
     document.querySelectorAll('.edit-stock-button').forEach(button => {

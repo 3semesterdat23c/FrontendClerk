@@ -363,7 +363,7 @@ function submitProductForm() {
         tags
     };
 
-    const endpoint = isUpdate ? `${baseUrl()}/products/${productId}/update` : `${baseUrl()}/api/v1/products/create`;
+    const endpoint = isUpdate ? `${baseUrl()}/products/${productId}/update` : `${baseUrl()}/products/create`;
     const method = isUpdate ? 'PUT' : 'POST';
 
     const submitButton = document.getElementById('productSubmitButton');
