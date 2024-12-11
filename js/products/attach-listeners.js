@@ -15,13 +15,13 @@ export function attachFilterActionListeners() {
             filtersState.lowStock = document.getElementById('lowStockFilter').checked;
             filtersState.outOfStock = document.getElementById('outOfStockFilter').checked;
         }}
-    document.getElementById('applyCategoryFilterButton').addEventListener('click', () => {
+    document.getElementById('categoryFilter').addEventListener('change', () => {
         updateFilters();
         filtersState.page = 0;
         loadProducts();
     });
 
-    document.getElementById('applySortButton').addEventListener('click', () => {
+    document.getElementById('sortPriceFilter').addEventListener('change', () => {
         updateFilters();
         filtersState.page = 0;
         loadProducts();
