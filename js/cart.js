@@ -27,7 +27,6 @@ export async function addToCart(productId, quantity) {
         if (response.ok) {
             alert(`Added ${quantity} item(s) to your cart successfully!`);
             const data = await response.json();
-            console.log('Server response:', data);
             // Update the cart item count after adding
             updateCartItemCount();
         } else {
@@ -116,7 +115,6 @@ function setCartItemCount(count) {
 }
 
 function renderCart(cartData) {
-    console.log('cartdata: ', cartData);
     const mainContent = document.getElementById('app');
 
     mainContent.innerHTML = '';

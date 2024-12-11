@@ -7,5 +7,7 @@ export const filtersState = {
     outOfStock: false,
     categoryId: null,
     categories: [],
-    searchTerm: null
+    searchTerm: null,
+    minPrice: null,
+    maxPrice: null,
 };

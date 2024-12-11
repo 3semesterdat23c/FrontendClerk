@@ -6,6 +6,7 @@ import { deleteProduct } from './delete-products.js';
 import { checkAdmin } from "../admin.js";
 import { filtersState } from './filtersState.js'; // Corrected import path
 
+
 export function attachFilterActionListeners() {
     function updateFilters() {
         filtersState.categoryId = document.getElementById('categoryFilter').value || null;
@@ -14,7 +15,9 @@ export function attachFilterActionListeners() {
         if (checkAdmin() === true) {
             filtersState.lowStock = document.getElementById('lowStockFilter').checked;
             filtersState.outOfStock = document.getElementById('outOfStockFilter').checked;
-        }}
+        }
+    }
+
     document.getElementById('categoryFilter').addEventListener('change', () => {
         updateFilters();
         filtersState.page = 0;
@@ -28,7 +31,6 @@ export function attachFilterActionListeners() {
     });
 
     if (checkAdmin() === true) {
-
         document.getElementById('lowStockFilter').addEventListener('change', () => {
             updateFilters();
             filtersState.page = 0;
@@ -42,15 +44,76 @@ export function attachFilterActionListeners() {
         });
     }
 
+    // Implement Debounced Price Filters
+    const minPriceInput = document.getElementById('minPrice');
+    const maxPriceInput = document.getElementById('maxPrice');
+
+    if (minPriceInput && maxPriceInput) {
+        let debounceTimeout;
+
+        function handlePriceInput() {
+            const minPriceValue = parseInt(minPriceInput.value, 10);
+            const maxPriceValue = parseInt(maxPriceInput.value, 10);
+
+            // Validate inputs
+            if (minPriceInput.value && isNaN(minPriceValue)) {
+                alert('Please enter a valid minimum price.');
+                return;
+            }
+            if (maxPriceInput.value && isNaN(maxPriceValue)) {
+                alert('Please enter a valid maximum price.');
+                return;
+            }
+            if (minPriceInput.value && maxPriceInput.value && minPriceValue > maxPriceValue) {
+                alert('Minimum price cannot be greater than maximum price.');
+                return;
+            }
+
+            filtersState.minPrice = isNaN(minPriceValue) ? null : minPriceValue;
+            filtersState.maxPrice = isNaN(maxPriceValue) ? null : maxPriceValue;
+            filtersState.page = 0; // Reset to first page when filters change
+
+            loadProducts();
+        }
+
+        minPriceInput.addEventListener('input', () => {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(handlePriceInput, 300);
+        });
+
+        maxPriceInput.addEventListener('input', () => {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(handlePriceInput, 300);
+        });
+    }
+
+    // Handle Reset Filters Button
     document.getElementById('resetFilters').addEventListener('click', () => {
-        filtersState.categoryId = null
-        filtersState.sortOrder = 'asc'
-        if (checkAdmin()===true){
-        filtersState.lowStock = false
-        filtersState.outOfStock = false}
+        filtersState.categoryId = null;
+        filtersState.sortOrder = 'asc';
+        if (checkAdmin() === true) {
+            filtersState.lowStock = false;
+            filtersState.outOfStock = false;
+        }
+        filtersState.searchTerm = null;
+        filtersState.minPrice = null;
+        filtersState.maxPrice = null;
+
+        // Reset UI elements
+        document.getElementById('categoryFilter').value = '';
+        document.getElementById('sortPriceFilter').value = 'asc';
+        if (checkAdmin() === true) {
+            document.getElementById('lowStockFilter').checked = false;
+            document.getElementById('outOfStockFilter').checked = false;
+        }
+        document.getElementById('minPrice').value = '';
+        document.getElementById('maxPrice').value = '';
+
         loadProducts();
     });
 }
+
+
 export function attachActionListeners() {
     // Edit stock
     document.querySelectorAll('.edit-stock-button').forEach(button => {

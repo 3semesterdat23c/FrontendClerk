@@ -37,7 +37,6 @@ export async function renderProductDetails(product) {
         const response = await fetch(`${baseUrl()}/products?category=${product.category.categoryName}`);
         if (response.ok) {
             relatedProducts = await response.json();
-            console.log('Fetched related products:', relatedProducts); // Log to inspect the data
         } else {
             console.error('Failed to fetch related products:', response.statusText);
         }
