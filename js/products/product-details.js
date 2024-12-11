@@ -115,12 +115,18 @@ export function createProductDetailsHTML(product, relatedProducts) {
                                     ${group.map(p => `
                                         <div class="col-md-3">
                                             <div class="card mb-3">
-                                                ${p.images && p.images.length > 0 ? `<img src="${p.images[0]}" class="card-img-top" alt="${p.name}">` : ''}
+                                          <a href="#product?id=${p.productId}">
+                                                ${p.images && p.images.length > 0
+                                                ? `<img src="${p.images[0]}" class="card-img-top product-image" alt="${p.name}" data-id="${p.productId}">`
+                                                     : ''
+                                                 }
+                                                </a>
                                                 <div class="card-body">
-                                                    <h5 class="card-title">${p.title}</h5>
+                                                    <h5 class="card-title">${p.title}</h5> 
                                                     <p class="card-text">${formatPrice(p.price, p.discountPrice)}</p>
-                                                    <a href="#product?id=${p.productId}" class="btn btn-secondary">View Details</a>
+                                                 
                                                 </div>
+                                                
                                             </div>
                                         </div>
                                     `).join('')}

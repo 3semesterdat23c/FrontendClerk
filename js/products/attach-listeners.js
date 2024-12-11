@@ -177,6 +177,7 @@ export function attachActionListeners() {
             const productId = e.target.getAttribute('data-id');
             if (productId) {
                 window.location.hash = `product?id=${productId}`;
+                window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top with smooth animation
             } else {
                 console.error('Product ID is missing.');
             }
@@ -189,6 +190,7 @@ export function attachActionListeners() {
             const productId = e.target.getAttribute('data-id');
             if (productId) {
                 window.location.hash = `product?id=${productId}`;
+                window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top with smooth animation
             } else {
                 console.error('Product ID is missing.');
             }
