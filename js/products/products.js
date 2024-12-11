@@ -112,72 +112,91 @@ function renderProducts(responseData, filters) {
     attachFilterActionListeners(filters);
     attachActionListeners();
 }
-
-function createProductsHTML(products, currentPage, totalPages, sortOrder, lowStock, outOfStock, categories = [], categoryId = null, searchTerm = null, minPrice = null, maxPrice = null) {
+function createProductsHTML(
+    products,
+    currentPage,
+    totalPages,
+    sortOrder,
+    lowStock,
+    outOfStock,
+    categories = [],
+    categoryId = null,
+    searchTerm = null,
+    minPrice = null,
+    maxPrice = null
+) {
     return `
         <div>
-        <br>
-        <br>
-        <div class="container"> 
-            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-                
-                <div class="d-flex flex-wrap align-items-center">
-                    <select id="categoryFilter" class="form-select d-inline-block w-auto me-2 mb-2">
-                        <option value="" ${categoryId === null ? 'selected' : ''}>All Categories</option>
-                      ${categories.map(category => {
+            <br>
+            <br>
+            <div class="container"> 
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                    
+                    <div class="d-flex flex-wrap align-items-center">
+                        <!-- Category Filter -->
+                        <select id="categoryFilter" class="form-select d-inline-block w-auto me-2 mb-2">
+                            <option value="" ${categoryId === null ? 'selected' : ''}>All Categories</option>
+                            ${categories.map(category => {
         const formattedName = category.categoryName
             .split('-') // split by dash
             .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // capitalize each word
             .join(' '); // join back with space
 
         return `
-        <option value="${category.categoryId}" ${String(categoryId) === String(category.categoryId) ? 'selected' : ''}>
-            ${formattedName}
-        </option>
-    `;
+                                    <option value="${category.categoryId}" ${String(categoryId) === String(category.categoryId) ? 'selected' : ''}>
+                                        ${formattedName}
+                                    </option>
+                                `;
     }).join('')}
-                    </select>            
-                
-                    <select id="sortPriceFilter" class="form-select d-inline-block w-auto me-2 mb-2">
-                        <option value="asc" ${sortOrder === 'asc' ? 'selected' : ''}>Price: Low to High</option>
-                        <option value="desc" ${sortOrder === 'desc' ? 'selected' : ''}>Price: High to Low</option>
-                    </select>
-                </div>
-                
-            ${checkAdmin() ? ` 
-                <div class="d-flex flex-wrap align-items-center mb-2">     
-                    <div class="form-check me-3">
-                        <input type="checkbox" id="lowStockFilter" class="form-check-input" ${lowStock ? 'checked' : ''}>
-                        <label for="lowStockFilter" class="form-check-label">Low Stock</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" id="outOfStockFilter" class="form-check-input ms-3" ${outOfStock ? 'checked' : ''}>
-                        <label for="outOfStockFilter" class="form-check-label">Out of Stock</label>
-                    </div>
-                </div>
-                `: ''}
-            
-            <div class="d-flex flex-wrap align-items-center mb-2">
-                <div class="me-3">
-                    <input type="number" id="minPrice" class="form-control" placeholder="Min Price" min="0" value="${minPrice !== null ? minPrice : ''}">
-                </div>
-                <div class="me-3">
-                    <input type="number" id="maxPrice" class="form-control" placeholder="Max Price" min="0" value="${maxPrice !== null ? maxPrice : ''}">
-                </div>
-            </div>
+                        </select>            
+                    
+                        <!-- Sort Price Filter -->
+                        <select id="sortPriceFilter" class="form-select d-inline-block w-auto me-2 mb-2">
+                            <option value="asc" ${sortOrder === 'asc' ? 'selected' : ''}>Price: Low to High</option>
+                            <option value="desc" ${sortOrder === 'desc' ? 'selected' : ''}>Price: High to Low</option>
+                        </select>
 
-            <div class="d-flex flex-wrap align-items-center mb-3">
-                ${checkAdmin() ? `<button class="btn btn-success me-2" id="createProductButton">Add New Product</button>` : ''}                
-                <button class="btn btn-secondary" id="resetFilters">Reset Filters</button>
-            </div>
+                        <!-- Min Price Input -->
+                        <div class="me-3">
+                            <input type="number" id="minPrice" class="form-control" placeholder="Min Price" min="0" value="${minPrice !== null ? minPrice : ''}">
+                        </div>
 
-            <div id="product-container" class="row">
-                ${products.map(product => createProductCard(product)).join('')}
+                        <!-- Max Price Input -->
+                        <div class="me-3">
+                            <input type="number" id="maxPrice" class="form-control" placeholder="Max Price" min="0" value="${maxPrice !== null ? maxPrice : ''}">
+                        </div>
+
+                        <!-- Apply Price Filter Button (Optional) -->
+                        <button class="btn btn-primary mb-2" id="applyPriceFilter">Apply Price Filter</button>
+                    </div>
+                    
+                    ${checkAdmin() ? ` 
+                        <div class="d-flex flex-wrap align-items-center mb-2">     
+                            <div class="form-check me-3">
+                                <input type="checkbox" id="lowStockFilter" class="form-check-input" ${lowStock ? 'checked' : ''}>
+                                <label for="lowStockFilter" class="form-check-label">Low Stock</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" id="outOfStockFilter" class="form-check-input ms-3" ${outOfStock ? 'checked' : ''}>
+                                <label for="outOfStockFilter" class="form-check-label">Out of Stock</label>
+                            </div>
+                        </div>
+                    ` : ''}
+                
+                    <div class="d-flex flex-wrap align-items-center mb-3">
+                        ${checkAdmin() ? `<button class="btn btn-success me-2" id="createProductButton">Add New Product</button>` : ''}                
+                        <button class="btn btn-secondary" id="resetFilters">Reset Filters</button>
+                    </div>
+                </div>
+                
+                <div id="product-container" class="row">
+                    ${products.map(product => createProductCard(product)).join('')}
+                </div>
             </div>
-        </div>
-        ${createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId, searchTerm, minPrice, maxPrice)}
-    </div>`;
+            ${createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId, searchTerm, minPrice, maxPrice)}
+        </div>`;
 }
+
 
 export function createProductCard(product) {
     const stockStatus = getStockStatus(product.stockCount);
