@@ -105,8 +105,9 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
         <div>
         <br>
         <br>
-        <div class="container">
+        <div class="container"> 
             <div class="d-flex justify-content-between align-items-center mb-3">
+            <button class="btn btn-primary" id="resetFilters">Reset filters</button>
               ${checkAdmin() ? ` 
                 <div>     
                             <input type="checkbox" id="lowStockFilter" class="form-check-input" ${lowStock ? 'checked' : ''}>
