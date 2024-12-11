@@ -134,7 +134,7 @@ function createProductsHTML(
                     
                     <div class="d-flex flex-wrap align-items-center">
                         <!-- Category Filter -->
-                        <select id="categoryFilter" class="form-select d-inline-block w-auto me-2 mb-2">
+                        <select id="categoryFilter" class="form-select d-inline-block w-auto me-2">
                             <option value="" ${categoryId === null ? 'selected' : ''}>All Categories</option>
                             ${categories.map(category => {
         const formattedName = category.categoryName
@@ -151,7 +151,7 @@ function createProductsHTML(
                         </select>            
                     
                         <!-- Sort Price Filter -->
-                        <select id="sortPriceFilter" class="form-select d-inline-block w-auto me-2 mb-2">
+                        <select id="sortPriceFilter" class="form-select d-inline-block w-auto me-2">
                             <option value="asc" ${sortOrder === 'asc' ? 'selected' : ''}>Price: Low to High</option>
                             <option value="desc" ${sortOrder === 'desc' ? 'selected' : ''}>Price: High to Low</option>
                         </select>
@@ -169,7 +169,7 @@ function createProductsHTML(
                     </div>
                     
                     ${checkAdmin() ? ` 
-                        <div class="d-flex flex-wrap align-items-center mb-2">     
+                        <div class="d-flex flex-wrap align-items-center">     
                             <div class="form-check me-3">
                                 <input type="checkbox" id="lowStockFilter" class="form-check-input" ${lowStock ? 'checked' : ''}>
                                 <label for="lowStockFilter" class="form-check-label">Low Stock</label>
