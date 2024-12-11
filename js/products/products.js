@@ -113,12 +113,18 @@ function createProductsHTML(products, currentPage, totalPages, sortOrder, lowSto
                 <div>
                     <select id="categoryFilter" class="form-select d-inline-block w-auto me-2">
                         <option value="" ${categoryId === null ? 'selected' : ''}>All Categories</option>
-                        ${categories.map(category => `
-                           <option value="${category.categoryId}" ${String(categoryId) === String(category.categoryId) ? 'selected' : ''}>
-                     ${category.categoryName}
-                </option>
-    
-                        `).join('')}
+                      ${categories.map(category => {
+        const formattedName = category.categoryName
+            .split('-') // split by dash
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // capitalize each word
+            .join(' '); // join back with space
+
+        return `
+        <option value="${category.categoryId}" ${String(categoryId) === String(category.categoryId) ? 'selected' : ''}>
+            ${formattedName}
+        </option>
+    `;
+    }).join('')}
                     </select>            
                 
                     <select id="sortPriceFilter" class="form-select d-inline-block w-auto me-2">
