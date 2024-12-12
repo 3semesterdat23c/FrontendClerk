@@ -70,7 +70,6 @@ function logoutUser() {
     localStorage.removeItem('user');
     localStorage.clear();
     updateDropdownForLoggedOutState();
-    alert('You have been logged out.');
     reroute();
 
 }
@@ -183,7 +182,6 @@ function attachLoginFormListener() {
                     localStorage.setItem('user', JSON.stringify(resData));
                     localStorage.setItem('token', resData.token);
 
-                    alert('Login successful! Welcome, ' + loginRequestDTO.email);
                     const mail = loginRequestDTO.email
                     updateUIForLoggedInUser(mail);
 

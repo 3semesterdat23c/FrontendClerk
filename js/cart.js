@@ -25,7 +25,6 @@ export async function addToCart(productId, quantity) {
         });
 
         if (response.ok) {
-            alert(`Added ${quantity} item(s) to your cart successfully!`);
             const data = await response.json();
             updateCartItemCount();
         } else {
