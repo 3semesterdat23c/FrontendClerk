@@ -1,5 +1,6 @@
 import { attachActionListeners, attachFilterActionListeners } from './attach-listeners.js';
 import { checkAdmin } from "../admin.js";
+import { createProductModal } from './create-products.js'; //MÅ IKKE SLETTES - BLIVER BRUGT
 import { baseUrl } from "../config.js";
 import { filtersState } from './filtersState.js';
 
@@ -129,7 +130,7 @@ function createProductsHTML(
                             <option value="" ${categoryId === null ? 'selected' : ''}>All Categories</option>
                             ${categories.map(category => {
         const formattedName = category.categoryName
-            .split('-') 
+            .split('-')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
 
