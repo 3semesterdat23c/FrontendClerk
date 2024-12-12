@@ -4,8 +4,7 @@ import { addToCart } from '../cart.js';
 import { openEditStockModal } from './update-stock.js';
 import { deleteProduct } from './delete-products.js';
 import { checkAdmin } from "../admin.js";
-import { filtersState } from './filtersState.js'; // Corrected import path
-
+import { filtersState } from './filtersState.js';
 
 export function attachFilterActionListeners() {
     function updateFilters() {
@@ -55,7 +54,6 @@ export function attachFilterActionListeners() {
             const minPriceValue = parseInt(minPriceInput.value, 10);
             const maxPriceValue = parseInt(maxPriceInput.value, 10);
 
-            // Validate inputs
             if (minPriceInput.value && isNaN(minPriceValue)) {
                 alert('Please enter a valid minimum price.');
                 return;
@@ -71,7 +69,7 @@ export function attachFilterActionListeners() {
 
             filtersState.minPrice = isNaN(minPriceValue) ? null : minPriceValue;
             filtersState.maxPrice = isNaN(maxPriceValue) ? null : maxPriceValue;
-            filtersState.page = 0; // Reset to first page when filters change
+            filtersState.page = 0;
 
             loadProducts();
         }
@@ -177,7 +175,7 @@ export function attachActionListeners() {
             const productId = e.target.getAttribute('data-id');
             if (productId) {
                 window.location.hash = `product?id=${productId}`;
-                window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top with smooth animation
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
                 console.error('Product ID is missing.');
             }
@@ -190,7 +188,7 @@ export function attachActionListeners() {
             const productId = e.target.getAttribute('data-id');
             if (productId) {
                 window.location.hash = `product?id=${productId}`;
-                window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top with smooth animation
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
                 console.error('Product ID is missing.');
             }

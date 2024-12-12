@@ -25,7 +25,6 @@ export function createEditStockModal() {
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
 
-// Initialize the modal on page load
 (function initializeEditStockModal() {
     createEditStockModal();
 })();
@@ -33,7 +32,7 @@ export function createEditStockModal() {
 export function openEditStockModal(productId, currentStock) {
     const modal = new bootstrap.Modal(document.getElementById('editStockModal'));
     const newStockInput = document.getElementById('newStockCount');
-    newStockInput.value = currentStock; // Pre-fill with the current stock count
+    newStockInput.value = currentStock;
 
     const form = document.getElementById('editStockForm');
     form.onsubmit = (e) => {
@@ -67,7 +66,7 @@ export function updateStock(productId, newStock, modal) {
         .then(updatedProduct => {
             alert('Stock updated successfully!');
             modal.hide();
-            refreshProducts(); // Reload products to reflect the updated stock
+            refreshProducts();
         })
         .catch(error => {
             alert(`Error updating stock: ${error.message}`);

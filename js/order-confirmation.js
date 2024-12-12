@@ -6,7 +6,6 @@ export async function loadOrderConfirmationView(orderId) {
     const token = localStorage.getItem('token');
     updateCartItemCount()
     if (!token) {
-        // No user token, redirect back
         window.location.hash = '#products';
         return;
     }

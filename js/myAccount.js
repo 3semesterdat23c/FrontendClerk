@@ -7,30 +7,27 @@ export function loadmyAccount() {
     const token = localStorage.getItem('token')
     const string = parseJwt(user);
     const email = string["sub"];
-    fetch(`${baseUrl()}/users/${email}/user`) // Fetch user information
+    fetch(`${baseUrl()}/users/${email}/user`)
         .then(response => response.json())
         .then(user => {
             const id = user.userId;
             displayUserForm(user, id);
-            loadOrders();  // Load orders without passing id, since it's tied to the logged-in user
+            loadOrders();
         })
         .catch(error => {
-            // Handle errors, e.g., user not found
             console.error('Error fetching user:', error);
             resultMessage.textContent = 'User not found or an error occurred.';
         });
 
     function displayUserForm(user, id) {
-        const app = document.getElementById('app'); // Assuming the main container has the ID 'app'
+        const app = document.getElementById('app');
 
-        // Create the form dynamically
         app.innerHTML = `
 <link rel="stylesheet" href="css/myAccount.css">
 <br>
 <br>
 <br>
 <div class="container">
-    <!-- Edit User Information -->
     <div class="form-section"><h3>Edit User Information</h3>
         <form id="user-edit-form">
             <label for="firstName">First Name:</label>
@@ -48,7 +45,6 @@ export function loadmyAccount() {
         <p id="form-message"></p>
     </div>
 
-    <!-- Edit Your Password -->
     <div class="form-section">
          <h3>Edit Your Password</h3>
         <form id="password-edit-form">
@@ -66,7 +62,7 @@ export function loadmyAccount() {
    
    <div class="form-section" id="myOrders">
        <h3>My Orders</h3>
-       <ul id="orderList"></ul> <!-- Added a list to hold the orders -->
+       <ul id="orderList"></ul>
    </div>
 </div>
 
@@ -77,7 +73,6 @@ export function loadmyAccount() {
             searchNextAdmin();
         }
 
-        // Add a save button listener
         const saveButton = document.getElementById('save-button');
         const saveButtonPassword = document.getElementById('save-button-password');
         const formMessage = document.getElementById('form-message');
@@ -90,7 +85,6 @@ export function loadmyAccount() {
                 email: document.getElementById('email').value,
             };
 
-            // Call an API to update the user (if implemented)
             fetch(`${baseUrl()}/users/${id}/update`, {
                 method: 'PUT',
                 headers: {
@@ -172,7 +166,6 @@ export function loadmyAccount() {
 
     }
 
-    // Fetch and display the orders
     function loadOrders() {
         fetch(`${baseUrl()}/order/myOrders`, {
             method: 'GET',
@@ -184,20 +177,17 @@ export function loadmyAccount() {
             .then(response => response.json())
             .then(orders => {
                 const orderList = document.getElementById('orderList');
-                orderList.innerHTML = ''; // Clear any existing content
+                orderList.innerHTML = '';
 
                 if (orders.length > 0) {
                     orders.forEach(order => {
                         const listItem = document.createElement('li');
                         listItem.textContent = `Order ID: ${order.id} | Order date: ${formatDate(order.orderDate)} | Total: ${getOrderTotalPrice(order)} | No. of items: ${getOrderTotalItems(order)}`;
 
-                        // Add a click event to open the modal when an order is clicked
                         listItem.addEventListener('click', function() {
-                            // Pass the selected order to the showOrderModal function
                             showOrderModal(order);
                         });
 
-                        // Add the 'clickable' class for styling
                         listItem.classList.add('clickable');
                         orderList.appendChild(listItem);
 
