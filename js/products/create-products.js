@@ -57,7 +57,6 @@ export function createProductModal() {
     return modalHTML;
 }
 
-// Append the Product Modal to the body
 (function initializeProductModal() {
     const modalHTML = createProductModal();
     document.body.insertAdjacentHTML('beforeend', modalHTML);

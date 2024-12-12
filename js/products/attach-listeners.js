@@ -4,7 +4,7 @@ import { addToCart } from '../cart.js';
 import { openEditStockModal } from './update-stock.js';
 import { deleteProduct } from './delete-products.js';
 import { checkAdmin } from "../admin.js";
-import { filtersState } from './filtersState.js'; // Corrected import path
+import { filtersState } from './filtersState.js';
 
 
 export function attachFilterActionListeners() {
@@ -17,7 +17,6 @@ export function attachFilterActionListeners() {
             filtersState.outOfStock = document.getElementById('outOfStockFilter').checked;
         }
     }
-
     document.getElementById('categoryFilter').addEventListener('change', () => {
         updateFilters();
         filtersState.page = 0;
@@ -44,7 +43,6 @@ export function attachFilterActionListeners() {
         });
     }
 
-    // Implement Debounced Price Filters
     const minPriceInput = document.getElementById('minPrice');
     const maxPriceInput = document.getElementById('maxPrice');
 
@@ -55,7 +53,6 @@ export function attachFilterActionListeners() {
             const minPriceValue = parseInt(minPriceInput.value, 10);
             const maxPriceValue = parseInt(maxPriceInput.value, 10);
 
-            // Validate inputs
             if (minPriceInput.value && isNaN(minPriceValue)) {
                 alert('Please enter a valid minimum price.');
                 return;
@@ -115,7 +112,6 @@ export function attachFilterActionListeners() {
 
 
 export function attachActionListeners() {
-    // Edit stock
     document.querySelectorAll('.edit-stock-button').forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();

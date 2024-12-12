@@ -1,4 +1,3 @@
-// filtersState.js
 export const filtersState = {
     page: 0,
     size: 12,

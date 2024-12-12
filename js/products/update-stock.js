@@ -25,7 +25,6 @@ export function createEditStockModal() {
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
 
-// Initialize the modal on page load
 (function initializeEditStockModal() {
     createEditStockModal();
 })();

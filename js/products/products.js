@@ -1,8 +1,5 @@
-// products.js
 import { attachActionListeners, attachFilterActionListeners } from './attach-listeners.js';
 import { createProductModal } from './create-products.js';
-import { deleteProduct } from './delete-products.js';
-import { openEditStockModal } from './update-stock.js';
 import { checkAdmin } from "../admin.js";
 import { baseUrl } from "../config.js";
 import { filtersState } from './filtersState.js';
@@ -10,7 +7,6 @@ import { filtersState } from './filtersState.js';
 export function loadProducts() {
     const { page, size, sortOrder, lowStock, outOfStock, categoryId, categories, searchTerm, minPrice, maxPrice } = filtersState;
 
-    // Show loading spinner
     const app = document.getElementById('app');
     app.innerHTML = `
         <div class="text-center my-4">
@@ -20,7 +16,6 @@ export function loadProducts() {
         </div>
     `;
 
-    // Build endpoint with all filters and search term
     let endpoint = `${baseUrl()}/products?page=${page}&size=${size}&sort=discountPrice,${sortOrder}`;
 
     if (categoryId && categories.length > 0) {
@@ -36,7 +31,6 @@ export function loadProducts() {
         endpoint += `&search=${encodeURIComponent(searchTerm)}`;
     }
 
-    // Include minPrice and maxPrice if they are set
     if (minPrice !== null && minPrice !== undefined) {
         endpoint += `&minPrice=${minPrice}`;
     }
@@ -44,9 +38,11 @@ export function loadProducts() {
     if (maxPrice !== null && maxPrice !== undefined) {
         endpoint += `&maxPrice=${maxPrice}`;
     }
+    const token = localStorage.getItem('token')
 
-    // Fetch products
-    fetch(endpoint)
+    fetch(endpoint, {
+        method: 'GET',
+    })
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -55,7 +51,8 @@ export function loadProducts() {
         })
         .then(data => {
             if (filtersState.categories.length === 0) {
-                return fetch(`${baseUrl()}/category/categories`)
+                return fetch(`${baseUrl()}/products/categories`)
+
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Failed to fetch categories');
@@ -76,7 +73,6 @@ export function loadProducts() {
         })
         .catch(handleProductError);
 }
-
 function renderProducts(responseData, filters) {
     const { content: products, totalPages, number: currentPage } = responseData;
 
@@ -150,18 +146,15 @@ function createProductsHTML(
     }).join('')}
                         </select>            
                     
-                        <!-- Sort Price Filter -->
                         <select id="sortPriceFilter" class="form-select d-inline-block w-auto me-2">
                             <option value="asc" ${sortOrder === 'asc' ? 'selected' : ''}>Price: Low to High</option>
                             <option value="desc" ${sortOrder === 'desc' ? 'selected' : ''}>Price: High to Low</option>
                         </select>
 
-                        <!-- Min Price Input -->
                         <div class="me-3">
                             <input type="number" id="minPrice" class="form-control" placeholder="Min Price" min="0" value="${minPrice !== null ? minPrice : ''}">
                         </div>
 
-                        <!-- Max Price Input -->
                         <div class="me-3">
                             <input type="number" id="maxPrice" class="form-control" placeholder="Max Price" min="0" value="${maxPrice !== null ? maxPrice : ''}">
                         </div>
@@ -235,7 +228,7 @@ export function createProductCard(product) {
 }
 
 function createPaginationHTML(currentPage, totalPages, sortOrder, lowStock, outOfStock, categoryId = null, searchTerm = null, minPrice = null, maxPrice = null) {
-    const baseParams = ''; // Filters are managed via filtersState
+    const baseParams = '';
 
     const maxVisiblePages = 7;
     let startPage = Math.max(0, currentPage - 3);
@@ -395,10 +388,11 @@ function submitProductForm() {
     submitButton.innerHTML = isUpdate
         ? `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...`
         : `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...`;
-
+const token = localStorage.getItem('token');
     fetch(endpoint, {
         method: method,
         headers: {
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(productPayload)

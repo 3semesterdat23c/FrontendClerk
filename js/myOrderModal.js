@@ -1,5 +1,4 @@
 export function createMyOrderModal() {
-    // Modal HTML structure with a table for displaying products, quantities, and prices
     const myOrderModal = `
         <div class="modal fade" id="myOrderModal" tabindex="-1" aria-labelledby="myOrderModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -18,7 +17,6 @@ export function createMyOrderModal() {
                                 </tr>
                             </thead>
                             <tbody id="orderProductsList">
-                                <!-- Products will be dynamically added here -->
                             </tbody>
                         </table>
                     </div>
@@ -32,25 +30,21 @@ export function createMyOrderModal() {
     return myOrderModal;
 }
 
-// Append the Product Modal to the body
 (function initializeMyOrderModal() {
     const modalHTML = createMyOrderModal();
     document.body.insertAdjacentHTML('beforeend', modalHTML);
 })();
 
-// Function to populate the modal with order data
 export function showOrderModal(order) {
     const orderProductsList = document.getElementById('orderProductsList');
     orderProductsList.innerHTML = ''; // Clear existing products
     let totalPrice = 0;
 
-    // Ensure that order.orderProducts contains data
     if (!order.orderProducts || order.orderProducts.length === 0) {
         console.error("No products found in this order");
         return;
     }
 
-    // Loop through the order products and add rows to the table
     order.orderProducts.forEach(orderProduct => {
         const productRow = `
             <tr>
@@ -63,7 +57,6 @@ export function showOrderModal(order) {
         totalPrice += orderProduct.priceAtTimeOfOrder * orderProduct.quantity;
     });
 
-    // Add the total row at the bottom
     const totalRow = `
         <tr>
             <td colspan="2" class="text-end"><strong>Total:</strong></td>
@@ -74,7 +67,6 @@ export function showOrderModal(order) {
 
 
 
-    // Ensure the modal is shown properly using Bootstrap
     const myOrderModal = new bootstrap.Modal(document.getElementById('myOrderModal'));
     myOrderModal.show();
 }

@@ -1,7 +1,6 @@
-// cart.js
-import { baseUrl } from "./config.js";
-import { filtersState } from "./products/filtersState.js"; // Adjust the path as needed
-import { loadProducts } from "./products/products.js"; // Ensure loadProducts is exported
+
+import { filtersState } from "./products/filtersState.js";
+import { loadProducts } from "./products/products.js";
 
 function setupSearchBar() {
     const searchInput = document.getElementById('searchInput');
@@ -21,18 +20,17 @@ function setupSearchBar() {
 }
 
 function performSearch(query) {
-    filtersState.searchTerm = query; // Update search term in centralized state
-    filtersState.page = 0; // Reset to first page on new search
-    loadProducts(); // Fetch and render products with updated filters
+    filtersState.searchTerm = query;
+    filtersState.page = 0;
+    loadProducts();
 }
 
-// Handle pagination clicks to maintain search and filter states
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('search-page-link')) {
         e.preventDefault();
         const page = parseInt(e.target.getAttribute('data-page'), 10);
-        filtersState.page = page; // Update the current page in the state
-        loadProducts(); // Fetch and render products with updated page
+        filtersState.page = page;
+        loadProducts();
     }
 });
 

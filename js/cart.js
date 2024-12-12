@@ -25,9 +25,7 @@ export async function addToCart(productId, quantity) {
         });
 
         if (response.ok) {
-            alert(`Added ${quantity} item(s) to your cart successfully!`);
             const data = await response.json();
-            // Update the cart item count after adding
             updateCartItemCount();
         } else {
             let errorMessage = 'Unknown error occurred.';
@@ -69,11 +67,9 @@ export async function loadCart() {
     }
 }
 
-// New function to update cart item count
 export async function updateCartItemCount() {
     const token = localStorage.getItem('token');
     if (!token) {
-        // If not logged in, just hide the number
         setCartItemCount(0);
         return;
     }
@@ -89,7 +85,6 @@ export async function updateCartItemCount() {
 
         if (response.ok) {
             const cartData = await response.json();
-            // Count total items
             const totalItems = cartData.reduce((sum, item) => sum + item.quantity, 0);
             setCartItemCount(totalItems);
         } else {
@@ -101,7 +96,6 @@ export async function updateCartItemCount() {
     }
 }
 
-// Helper function to set the cart item count in the UI
 function setCartItemCount(count) {
     const cartCountElement = document.getElementById('cartItemCount');
     if (!cartCountElement) return;
@@ -121,7 +115,6 @@ function renderCart(cartData) {
 
     if (!cartData || cartData.length === 0) {
         mainContent.innerHTML = '<h2 class="my-4">Your Cart is Empty</h2>';
-        // Update count to 0 if empty
         setCartItemCount(0);
         return;
     }
@@ -175,7 +168,6 @@ function renderCart(cartData) {
     attachQuantityChangeListeners();
     attachToCheckoutListener();
 
-    // Update the cart count after rendering the cart
     const totalItems = cartData.reduce((sum, item) => sum + item.quantity, 0);
     setCartItemCount(totalItems);
 }
