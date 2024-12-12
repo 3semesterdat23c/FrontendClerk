@@ -46,7 +46,7 @@ export async function addToCart(productId, quantity) {
 export async function loadCart() {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:8080/api/v1/order/cart', {
+        const response = await fetch(`${baseUrl()}/order/cart`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -75,7 +75,7 @@ export async function updateCartItemCount() {
     }
 
     try {
-        const response = await fetch('http://localhost:8080/api/v1/order/cart', {
+        const response = await fetch(`${baseUrl()}/order/cart`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -241,7 +241,7 @@ function attachQuantityChangeListeners() {
 async function updateQuantity(productId, quantity) {
     try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:8080/api/v1/order/cart/quantity', {
+        const response = await fetch(`${baseUrl()}/order/cart/quantity`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
