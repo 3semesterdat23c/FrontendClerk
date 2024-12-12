@@ -52,9 +52,12 @@ export function openEditStockModal(productId, currentStock) {
 
 
 export function updateStock(productId, newStock, modal) {
+    const token = localStorage.getItem("token")
     fetch(`${baseUrl()}/products/${productId}/update/stock`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(newStock)
     })
         .then(response => {
