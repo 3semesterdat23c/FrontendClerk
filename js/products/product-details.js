@@ -1,4 +1,6 @@
 import { attachFilterActionListeners,attachActionListeners } from './attach-listeners.js';
+
+
 import {baseUrl} from "../config.js";
 export function loadProductDetails(productId) {
     const app = document.getElementById('app');
@@ -61,8 +63,9 @@ export async function renderProductDetails(product) {
 
 export function createProductDetailsHTML(product, relatedProducts) {
     const relatedProductContent = Array.isArray(relatedProducts.content) ? relatedProducts.content : [];
-    const itemsPerSlide = 4;
+    const itemsPerSlide = 4; // Number of items per slide in the carousel
     const totalSlides = Math.ceil(relatedProductContent.length / itemsPerSlide);
+
     const groupedItems = [];
     for (let i = 0; i < totalSlides; i++) {
         groupedItems.push(relatedProductContent.slice(i * itemsPerSlide, (i + 1) * itemsPerSlide));
@@ -78,7 +81,7 @@ export function createProductDetailsHTML(product, relatedProducts) {
 
     return `
     <div class="container my-4">
-        <a href="#products?page=0" id="backButton" class="btn btn-secondary mb-3">Back to Products</a>
+        <a href="#products?page=0" id="backButton" class="btn btn-secondary mb-3">Back</a>
         <div class="row">
             <div class="col-md-6">
                 ${product.images && product.images.length > 0 ? `<img src="${product.images[0]}" class="img-fluid" alt="${product.title}">` : ''}

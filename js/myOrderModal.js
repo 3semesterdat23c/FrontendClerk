@@ -37,7 +37,7 @@ export function createMyOrderModal() {
 
 export function showOrderModal(order) {
     const orderProductsList = document.getElementById('orderProductsList');
-    orderProductsList.innerHTML = '';
+    orderProductsList.innerHTML = ''; // Clear existing products
     let totalPrice = 0;
 
     if (!order.orderProducts || order.orderProducts.length === 0) {
@@ -64,6 +64,8 @@ export function showOrderModal(order) {
         </tr>
     `;
     orderProductsList.insertAdjacentHTML('beforeend', totalRow);
+
+
 
     const myOrderModal = new bootstrap.Modal(document.getElementById('myOrderModal'));
     myOrderModal.show();

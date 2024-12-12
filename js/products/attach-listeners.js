@@ -6,6 +6,7 @@ import { deleteProduct } from './delete-products.js';
 import { checkAdmin } from "../admin.js";
 import { filtersState } from './filtersState.js';
 
+
 export function attachFilterActionListeners() {
     function updateFilters() {
         filtersState.categoryId = document.getElementById('categoryFilter').value || null;
@@ -16,7 +17,6 @@ export function attachFilterActionListeners() {
             filtersState.outOfStock = document.getElementById('outOfStockFilter').checked;
         }
     }
-
     document.getElementById('categoryFilter').addEventListener('change', () => {
         updateFilters();
         filtersState.page = 0;
@@ -43,7 +43,6 @@ export function attachFilterActionListeners() {
         });
     }
 
-    // Implement Debounced Price Filters
     const minPriceInput = document.getElementById('minPrice');
     const maxPriceInput = document.getElementById('maxPrice');
 
@@ -69,7 +68,7 @@ export function attachFilterActionListeners() {
 
             filtersState.minPrice = isNaN(minPriceValue) ? null : minPriceValue;
             filtersState.maxPrice = isNaN(maxPriceValue) ? null : maxPriceValue;
-            filtersState.page = 0;
+            filtersState.page = 0; // Reset to first page when filters change
 
             loadProducts();
         }
@@ -113,7 +112,6 @@ export function attachFilterActionListeners() {
 
 
 export function attachActionListeners() {
-    // Edit stock
     document.querySelectorAll('.edit-stock-button').forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
@@ -175,7 +173,7 @@ export function attachActionListeners() {
             const productId = e.target.getAttribute('data-id');
             if (productId) {
                 window.location.hash = `product?id=${productId}`;
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top with smooth animation
             } else {
                 console.error('Product ID is missing.');
             }
@@ -188,7 +186,7 @@ export function attachActionListeners() {
             const productId = e.target.getAttribute('data-id');
             if (productId) {
                 window.location.hash = `product?id=${productId}`;
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top with smooth animation
             } else {
                 console.error('Product ID is missing.');
             }

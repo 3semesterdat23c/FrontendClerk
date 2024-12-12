@@ -1,4 +1,6 @@
 import {baseUrl} from "./config.js";
+const token = localStorage.getItem('token')
+
 export function checkAdmin(){
     const token =localStorage.getItem('user');
     if (token){
@@ -23,6 +25,10 @@ window.addEventListener('beforeunload', () => {
 function makeAdmin(email){
     fetch(`${baseUrl()}/users/${email}/setadmin`, {
         method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
     })
         .then(response => {
             if (response.ok) {
@@ -54,18 +60,25 @@ export function searchNextAdmin() {
             resultMessage.textContent = 'Please enter a valid email.';
             return;
         }
-
-        fetch(`${baseUrl()}/users/${email}/user`)
+        fetch(`${baseUrl()}/users/${email}/user`,{
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        }) // Fetch user information
             .then(response => response.json())
             .then(user => {
                 showModal(user);
 
+                // Only proceed with making the user admin if the user confirms
                 if (confirm(`Are you sure you want to make ${user.firstName} ${user.lastName} an admin?`)) {
                     resultMessage.textContent = 'User made admin.';
                     makeAdmin(email)
                 }
             })
             .catch(error => {
+                // Handle errors, e.g., user not found
                 console.error('Error fetching user:', error);
                 resultMessage.textContent = 'User not found or an error occurred.';
             });

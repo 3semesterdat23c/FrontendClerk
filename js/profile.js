@@ -1,3 +1,4 @@
+
 import { loadmyAccount } from "./myAccount.js";
 import { navigateToProducts } from "./main.js";
 import {baseUrl} from "./config.js";
@@ -38,6 +39,7 @@ function registerModalTemplate() {
     </div>`;
 }
 
+// Login Modal Template
 function loginModalTemplate() {
     return `
     <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
@@ -73,6 +75,7 @@ function logoutUser() {
     reroute();
 
 }
+
 function updateDropdownForLoggedOutState() {
     const accountDropdownContainer = document.getElementById('accountDropdownContainer');
     if (accountDropdownContainer) {
@@ -123,7 +126,6 @@ function attachRegisterFormListener() {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Collect input values
             const firstName = document.getElementById('registerFirstName').value;
             const lastName = document.getElementById('registerLastName').value;
             const email = document.getElementById('registerEmail').value;
@@ -164,7 +166,6 @@ function attachLoginFormListener() {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Collect input values
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
 

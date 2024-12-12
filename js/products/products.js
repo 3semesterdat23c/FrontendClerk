@@ -1,6 +1,6 @@
 import { attachActionListeners, attachFilterActionListeners } from './attach-listeners.js';
+import { createProductModal } from './create-products.js';
 import { checkAdmin } from "../admin.js";
-import { createProductModal } from './create-products.js'; //MÅ IKKE SLETTES - BLIVER BRUGT
 import { baseUrl } from "../config.js";
 import { filtersState } from './filtersState.js';
 
@@ -38,8 +38,11 @@ export function loadProducts() {
     if (maxPrice !== null && maxPrice !== undefined) {
         endpoint += `&maxPrice=${maxPrice}`;
     }
+    const token = localStorage.getItem('token')
 
-    fetch(endpoint)
+    fetch(endpoint, {
+        method: 'GET',
+    })
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -49,6 +52,7 @@ export function loadProducts() {
         .then(data => {
             if (filtersState.categories.length === 0) {
                 return fetch(`${baseUrl()}/products/categories`)
+
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Failed to fetch categories');
@@ -69,7 +73,6 @@ export function loadProducts() {
         })
         .catch(handleProductError);
 }
-
 function renderProducts(responseData, filters) {
     const { content: products, totalPages, number: currentPage } = responseData;
 
@@ -126,13 +129,14 @@ function createProductsHTML(
                 <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
                     
                     <div class="d-flex flex-wrap align-items-center">
+                        <!-- Category Filter -->
                         <select id="categoryFilter" class="form-select d-inline-block w-auto me-2">
                             <option value="" ${categoryId === null ? 'selected' : ''}>All Categories</option>
                             ${categories.map(category => {
         const formattedName = category.categoryName
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
+            .split('-') // split by dash
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // capitalize each word
+            .join(' '); // join back with space
 
         return `
                                     <option value="${category.categoryId}" ${String(categoryId) === String(category.categoryId) ? 'selected' : ''}>
@@ -272,6 +276,7 @@ export function openProductModal(mode, productId = null) {
         submitButton.classList.remove('btn-warning');
         submitButton.classList.add('btn-primary');
 
+        // Clear form
         document.getElementById('productForm').reset();
         document.getElementById('productId').value = '';
     } else if (mode === 'update' && productId) {
@@ -383,10 +388,11 @@ function submitProductForm() {
     submitButton.innerHTML = isUpdate
         ? `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...`
         : `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...`;
-
+const token = localStorage.getItem('token');
     fetch(endpoint, {
         method: method,
         headers: {
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(productPayload)
@@ -426,8 +432,8 @@ export function refreshProducts() {
     const hash = window.location.hash;
     const params = new URLSearchParams(hash.split('?')[1]);
     const currentPage = parseInt(params.get('page')) || 0;
-    filtersState.page = currentPage;
-    loadProducts();
+    filtersState.page = currentPage; // Update the global state
+    loadProducts(); // Call without arguments
 }
 
 function getStockStatus(stockCount) {
@@ -441,6 +447,7 @@ function getStockStatus(stockCount) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Handle the product form submission
     const productForm = document.getElementById('productForm');
     if (productForm) {
         productForm.addEventListener('submit', (e) => {
