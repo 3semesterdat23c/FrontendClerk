@@ -1,10 +1,7 @@
-// profile.js
-
 import { loadmyAccount } from "./myAccount.js";
 import { navigateToProducts } from "./main.js";
 import {baseUrl} from "./config.js";
 
-// Register Modal Template
 function registerModalTemplate() {
     return `
     <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
@@ -41,7 +38,6 @@ function registerModalTemplate() {
     </div>`;
 }
 
-// Login Modal Template
 function loginModalTemplate() {
     return `
     <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
@@ -70,7 +66,6 @@ function loginModalTemplate() {
     </div>`;
 }
 
-// Logout Function
 function logoutUser() {
     localStorage.removeItem('user');
     localStorage.clear();
@@ -79,8 +74,6 @@ function logoutUser() {
     reroute();
 
 }
-
-// Update Dropdown for Logged-Out State
 function updateDropdownForLoggedOutState() {
     const accountDropdownContainer = document.getElementById('accountDropdownContainer');
     if (accountDropdownContainer) {
@@ -96,7 +89,6 @@ function updateDropdownForLoggedOutState() {
     }
 }
 
-// Update Dropdown for Logged-In State
 function updateUIForLoggedInUser(mail) {
     const accountDropdownContainer = document.getElementById('accountDropdownContainer');
     if (accountDropdownContainer) {
@@ -111,13 +103,11 @@ function updateUIForLoggedInUser(mail) {
             </ul>
         `;
 
-        // Attach event listeners
         document.getElementById('logoutButton')?.addEventListener('click', logoutUser);
         document.getElementById('myAccountButton')?.addEventListener('click', loadmyAccount);
     }
 }
 
-// Dynamic Dropdown Changer
 export function uiDropdownDynamicChangerForLoginAndLogout() {
     const user = JSON.parse(localStorage.getItem('user'));
     if (user && user.email) {
@@ -128,7 +118,6 @@ export function uiDropdownDynamicChangerForLoginAndLogout() {
     }
 }
 
-// Register Form Listener
 function attachRegisterFormListener() {
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
@@ -170,7 +159,6 @@ function attachRegisterFormListener() {
         }
 }
 
-// Login Form Listener
 function attachLoginFormListener() {
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
@@ -220,21 +208,17 @@ function attachLoginFormListener() {
     }
 }
 
-// Inject Modals into the DOM
 export function injectModals() {
     const bodyElement = document.body;
 
-    // Append Register Modal
     const registerModal = document.createElement('div');
     registerModal.innerHTML = registerModalTemplate();
     bodyElement.appendChild(registerModal.firstElementChild);
 
-    // Append Login Modal
     const loginModal = document.createElement('div');
     loginModal.innerHTML = loginModalTemplate();
     bodyElement.appendChild(loginModal.firstElementChild);
 
-    // Attach event listeners for the forms
     attachRegisterFormListener();
     attachLoginFormListener();
 }

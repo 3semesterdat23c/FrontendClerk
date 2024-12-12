@@ -1,6 +1,3 @@
-// main.js
-
-import { loadHome } from './home.js';
 import { loadProducts } from './products/products.js';
 import { injectModals, uiDropdownDynamicChangerForLoginAndLogout } from './profile.js';
 import { loadCart } from './cart.js';
@@ -8,8 +5,6 @@ import { setupSearchBar } from './search.js';
 import {loadProductDetails} from "./products/product-details.js";
 import {renderPaymentForm} from "./checkout.js";
 import {loadOrderConfirmationView} from "./order-confirmation.js";
-
-// Function to parse hash and extract route and query parameters
 
 function parseHash(hash) {
     const [route, queryString] = hash.split('?');
@@ -21,15 +16,11 @@ export function navigateToProducts(){
     const page = parseInt(('page')) || 0;
     loadProducts(page);}
 
-// Function to handle navigation
 function navigate() {
     const hash = window.location.hash.substring(1) || 'home';
     const { route, params } = parseHash(hash);
 
     switch (route) {
-        case 'home':
-            loadProducts();
-            break;
         case 'products':
             const page = parseInt(params.get('page')) || 0;
             loadProducts(page);
@@ -40,7 +31,7 @@ function navigate() {
                 loadProductDetails(productId);
             } else {
                 console.error('Product ID is missing in the URL.');
-                loadProducts(); // Fallback to product list
+                loadProducts();
             }
             break;
 
@@ -53,21 +44,20 @@ function navigate() {
         case 'order-confirmation':
             const orderId = params.get('orderId');
             if (!orderId) {
-                // If no orderId provided, redirect to products or home
                 window.location.hash = '#products';
             } else {
                 loadOrderConfirmationView(orderId);
             }
             break;
         default:
-            loadHome();
+            loadProducts();
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    injectModals(); // Inject modals on page load
+    injectModals();
     uiDropdownDynamicChangerForLoginAndLogout();
     setupSearchBar();
-    navigate(); // Load the initial route
-    window.addEventListener('hashchange', navigate); // Listen for hash changes
+    navigate();
+    window.addEventListener('hashchange', navigate);
 });

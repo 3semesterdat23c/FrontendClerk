@@ -1,6 +1,4 @@
 import { attachFilterActionListeners,attachActionListeners } from './attach-listeners.js';
-
-
 import {baseUrl} from "../config.js";
 export function loadProductDetails(productId) {
     const app = document.getElementById('app');
@@ -33,7 +31,6 @@ export async function renderProductDetails(product) {
 
     let relatedProducts = [];
     try {
-        // Fetch related products from the backend
         const response = await fetch(`${baseUrl()}/products?category=${product.category.categoryName}`);
         if (response.ok) {
             relatedProducts = await response.json();
@@ -44,12 +41,10 @@ export async function renderProductDetails(product) {
         console.error('Error fetching related products:', error);
     }
 
-    // Ensure relatedProducts is always an array
     if (!Array.isArray(relatedProducts.content)) {
         relatedProducts.content = [];
     }
 
-    // Exclude the current product from the related products list
     relatedProducts.content = relatedProducts.content.filter(p => p.productId !== product.productId);
 
     const productDetailsHTML = createProductDetailsHTML(product, relatedProducts);
@@ -66,16 +61,13 @@ export async function renderProductDetails(product) {
 
 export function createProductDetailsHTML(product, relatedProducts) {
     const relatedProductContent = Array.isArray(relatedProducts.content) ? relatedProducts.content : [];
-    const itemsPerSlide = 4; // Number of items per slide in the carousel
+    const itemsPerSlide = 4;
     const totalSlides = Math.ceil(relatedProductContent.length / itemsPerSlide);
-
-    // Function to group related products into sets of 4 for each slide
     const groupedItems = [];
     for (let i = 0; i < totalSlides; i++) {
         groupedItems.push(relatedProductContent.slice(i * itemsPerSlide, (i + 1) * itemsPerSlide));
     }
 
-    // Function to format the price
     function formatPrice(price, discountPrice) {
         const isDiscounted = price !== discountPrice;
         return isDiscounted ? `

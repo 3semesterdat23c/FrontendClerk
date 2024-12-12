@@ -1,3 +1,5 @@
+import {baseUrl} from "./config.js";
+
 export function renderPaymentForm() {
     const modalDiv = document.createElement("div");
     modalDiv.innerHTML = `
@@ -37,7 +39,6 @@ export function renderPaymentForm() {
 
     document.body.appendChild(modalDiv);
 
-    // Add toast HTML for notifications
     const toastDiv = document.createElement("div");
     toastDiv.id = "toastContainer";
     toastDiv.className = "position-fixed bottom-0 end-0 p-3";
@@ -54,17 +55,14 @@ export function renderPaymentForm() {
     `;
     document.body.appendChild(toastDiv);
 
-    // Initialize modal
     const paymentModal = new bootstrap.Modal(document.getElementById("paymentModal"));
     paymentModal.show();
 
-    // Add the event listener after the modal has been added to the DOM
     document.getElementById('payButton').addEventListener('click', validatePayment);
 
-    // Reset the form when modal is closed
     document.getElementById('paymentModal').addEventListener('hidden.bs.modal', function () {
-        document.getElementById('payment-form').reset(); // Reset form fields
-        document.getElementById('paymentStatus').innerHTML = ''; // Clear any payment status message
+        document.getElementById('payment-form').reset();
+        document.getElementById('paymentStatus').innerHTML = '';
     });
 }
 
@@ -89,8 +87,7 @@ function validatePayment() {
 
     let orderId;
 
-    // Fetch the current order ID
-    fetch('http://localhost:8080/api/v1/order/active', {
+    fetch(`${baseUrl()}/order/active`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -106,8 +103,7 @@ function validatePayment() {
         .then(orderData => {
             orderId = orderData.id;
 
-            // Proceed with payment validation
-            return fetch('http://localhost:8080/api/v1/order/validatePayment', {
+            return fetch(`${baseUrl()}/order/validatePayment`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -122,7 +118,7 @@ function validatePayment() {
             }
         })
         .then(() => {
-            return fetch(`http://localhost:8080/api/v1/order/checkout/${orderId}`, {
+            return fetch(`${baseUrl()}/order/checkout/${orderId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
