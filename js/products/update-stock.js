@@ -32,7 +32,7 @@ export function createEditStockModal() {
 export function openEditStockModal(productId, currentStock) {
     const modal = new bootstrap.Modal(document.getElementById('editStockModal'));
     const newStockInput = document.getElementById('newStockCount');
-    newStockInput.value = currentStock;
+    newStockInput.value = currentStock; // Pre-fill with the current stock count
 
     const form = document.getElementById('editStockForm');
     form.onsubmit = (e) => {
@@ -66,7 +66,7 @@ export function updateStock(productId, newStock, modal) {
         .then(updatedProduct => {
             alert('Stock updated successfully!');
             modal.hide();
-            refreshProducts();
+            refreshProducts(); // Reload products to reflect the updated stock
         })
         .catch(error => {
             alert(`Error updating stock: ${error.message}`);

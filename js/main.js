@@ -1,3 +1,5 @@
+// main.js
+
 import { loadProducts } from './products/products.js';
 import { injectModals, uiDropdownDynamicChangerForLoginAndLogout } from './profile.js';
 import { loadCart } from './cart.js';
@@ -5,6 +7,7 @@ import { setupSearchBar } from './search.js';
 import {loadProductDetails} from "./products/product-details.js";
 import {renderPaymentForm} from "./checkout.js";
 import {loadOrderConfirmationView} from "./order-confirmation.js";
+
 
 function parseHash(hash) {
     const [route, queryString] = hash.split('?');
@@ -31,7 +34,7 @@ function navigate() {
                 loadProductDetails(productId);
             } else {
                 console.error('Product ID is missing in the URL.');
-                loadProducts();
+                loadProducts(); // Fallback to product list
             }
             break;
 
@@ -50,7 +53,7 @@ function navigate() {
             }
             break;
         default:
-            loadProducts();
+            loadProducts()
     }
 }
 

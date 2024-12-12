@@ -7,7 +7,15 @@ export function loadmyAccount() {
     const token = localStorage.getItem('token')
     const string = parseJwt(user);
     const email = string["sub"];
-    fetch(`${baseUrl()}/users/${email}/user`)
+    fetch(`${baseUrl()}/users/${email}/user`,{
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+    },})
+
+
+
         .then(response => response.json())
         .then(user => {
             const id = user.userId;
@@ -62,7 +70,7 @@ export function loadmyAccount() {
    
    <div class="form-section" id="myOrders">
        <h3>My Orders</h3>
-       <ul id="orderList"></ul>
+       <ul id="orderList"></ul> 
    </div>
 </div>
 
@@ -89,6 +97,9 @@ export function loadmyAccount() {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+
+
                 },
                 body: JSON.stringify(updatedUser),
             })
@@ -117,6 +128,8 @@ export function loadmyAccount() {
                     fetch(`${baseUrl()}/users/${id}/update`, {
                         method: 'PUT',
                         headers: {
+                            'Authorization': `Bearer ${token}`,
+
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify(updatedUser),
@@ -177,7 +190,7 @@ export function loadmyAccount() {
             .then(response => response.json())
             .then(orders => {
                 const orderList = document.getElementById('orderList');
-                orderList.innerHTML = '';
+                orderList.innerHTML = ''; // Clear any existing content
 
                 if (orders.length > 0) {
                     orders.forEach(order => {

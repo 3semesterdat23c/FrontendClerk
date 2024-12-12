@@ -1,4 +1,4 @@
-import {baseUrl} from "./config.js";
+import {baseUrl} from "./config.js"
 
 export function renderPaymentForm() {
     const modalDiv = document.createElement("div");
@@ -39,6 +39,7 @@ export function renderPaymentForm() {
 
     document.body.appendChild(modalDiv);
 
+    // Add toast HTML for notifications
     const toastDiv = document.createElement("div");
     toastDiv.id = "toastContainer";
     toastDiv.className = "position-fixed bottom-0 end-0 p-3";
@@ -47,7 +48,7 @@ export function renderPaymentForm() {
         <div id="paymentToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body">
-                    Payment successful! Redirecting to products...
+                    Payment successful! Redirecting to order confirmation...
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
@@ -61,8 +62,8 @@ export function renderPaymentForm() {
     document.getElementById('payButton').addEventListener('click', validatePayment);
 
     document.getElementById('paymentModal').addEventListener('hidden.bs.modal', function () {
-        document.getElementById('payment-form').reset();
-        document.getElementById('paymentStatus').innerHTML = '';
+        document.getElementById('payment-form').reset(); // Reset form fields
+        document.getElementById('paymentStatus').innerHTML = ''; // Clear any payment status message
     });
 }
 

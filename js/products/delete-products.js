@@ -1,6 +1,6 @@
 import {loadProducts} from "./products.js";
 import {baseUrl} from "../config.js";
-
+const token = localStorage.getItem('token')
 
 export function deleteProduct(productId) {
     const confirmation = confirm("Are you sure you want to delete this product?");
@@ -11,6 +11,10 @@ export function deleteProduct(productId) {
 
     fetch(`${baseUrl()}/products/${productId}/delete`, {
         method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
     })
         .then(response => {
             if (response.ok) {
